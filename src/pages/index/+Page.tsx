@@ -40,7 +40,53 @@ export default function HomePage() {
 
             <button
               class="rounded border border-blue-300 px-5 py-2 text-blue-500"
-              onClick={() => toast('🍞 Awesome!')}
+              onClick={() => {
+                const toasts = [
+                  () => toast('🍞 Awesome!'),
+                  () =>
+                    toast.promise(
+                      async () => {
+                        const random = Math.floor(Math.random() * 2);
+
+                        if (random === 0) await new Promise((resolve) => setTimeout(resolve, 2000));
+                        if (random === 1)
+                          await new Promise((resolve, reject) => setTimeout(reject, 2000));
+                      },
+                      {
+                        loading: '🍞 Cooking your toast...',
+                        success: '🍔 Toast cooked!',
+                        error: '☄️ Toast failed!'
+                      }
+                    ),
+                  async () => {
+                    toast.loading('🔪 Slicing your toast...', { id: 'loading-toast' });
+                    await new Promise((resolve) => setTimeout(resolve, 800));
+                    toast.loading('🤺 Slicing EVEN HARDER!!!', { id: 'loading-toast' });
+                    await new Promise((resolve) => setTimeout(resolve, 800));
+                    toast.loading("💣 It's GONNA BLOW!!!", { id: 'loading-toast' });
+
+                    toast.promise(
+                      async () => {
+                        const random = Math.floor(Math.random() * 2);
+
+                        if (random === 0) await new Promise((resolve) => setTimeout(resolve, 2000));
+                        if (random === 1)
+                          await new Promise((resolve, reject) => setTimeout(reject, 2000));
+                      },
+                      {
+                        loading: '👨‍🍳 Cooking EVEN HARDER!!!',
+                        success: '🍔 Toast cooked!',
+                        error: '☄️ Toast BURNT!',
+                        id: 'loading-toast'
+                      }
+                    );
+                  }
+                ];
+
+                const random = Math.floor(Math.random() * toasts.length);
+
+                toasts[random]();
+              }}
             >
               🍞 Show a Toast
             </button>
