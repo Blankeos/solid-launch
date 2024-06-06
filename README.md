@@ -15,7 +15,7 @@ This is handcrafted from my own research. This might not work for you, but it wo
 - [x] 💨 **Fast, efficient, fine-grained Reactivity** - thanks to Solid, it's possibly the most enjoyable framework I used that uses JSX. Has state management primitives out-of-the-box and keeps the experience a breeze.
 - [x] 🐍 **Extremely customizable** - you're not at the mercy of limited APIs and paradigms set by big frameworks or third-party services. Swap with your preferred JS backend framework/runtime if you want. Vike is just a middleware. Most of the tech I use here are open-source and roll-your-own type of thing. Hack it up! You're a dev aren't you?
 - [x] ☁️ **Selfhost-ready** - Crafted with simple hosting in mind that'll still probably scale to millions. Just spin up Docker container on a good'ol VPS without locking into serverless. DHH and Shayan influenced me on this. You can still host it on serverless tho. I think? lol
-- [x] **🔋 Batteries-included** - took care of the boring stuff for you. A well-thought-out folder structure from years of making projects: a design system, utilities, hooks, constants, an adequate backend DDD-inspired sliced architecture that isn't overkill, and most importantly---perfectly-crafted those nasty config files.
+- [x] **🔋 Batteries-included** - took care of the hard stuff for you. A well-thought-out folder structure from years of making projects: a design system, components, utilities, hooks, constants, an adequate backend DDD-inspired sliced architecture that isn't overkill, dockerizing your app, and most importantly---perfectly-crafted those pesky config files.
 
 ### Tech Stack
 
