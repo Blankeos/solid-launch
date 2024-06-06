@@ -1,33 +1,26 @@
-import { createSignal } from 'solid-js';
 import { IconSolid } from '@/assets/icons';
+import { createSignal, FlowProps } from 'solid-js';
 
 // CSS
 import '@/styles/app.css';
 import '@/styles/nprogress.css';
+import { QueryClientProvider } from '@tanstack/solid-query';
+import { QueryClient } from '@tanstack/query-core';
+import { SolidQueryDevtools } from '@tanstack/solid-query-devtools';
+import VerticalLayout from '@/components/layouts/vertical/vercel-layout';
+import { CounterContextProvider } from '@/stores/counter.context';
+import { Toaster } from 'solid-sonner';
 
-function App() {
-  const [count, setCount] = createSignal(0);
+const queryClient = new QueryClient();
 
+export default function App(props: FlowProps) {
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" class="logo" alt="Vite logo" />
-        </a>
-        <a href="https://solidjs.com" target="_blank">
-          <IconSolid width={40} height={40} />
-        </a>
-      </div>
-      <h1>Vite + Solid</h1>
-      <div class="card">
-        <button onClick={() => setCount((count) => count + 1)}>count is {count()}</button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p class="read-the-docs">Click on the Vite and Solid logos to learn more</p>
-    </>
+    <QueryClientProvider client={queryClient}>
+      <SolidQueryDevtools initialIsOpen={false} />
+      <CounterContextProvider>
+        <VerticalLayout>{props.children}</VerticalLayout>
+      </CounterContextProvider>
+      <Toaster />
+    </QueryClientProvider>
   );
 }
-
-export default App;
