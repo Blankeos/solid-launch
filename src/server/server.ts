@@ -57,8 +57,7 @@ app.onError((_, c) => {
   return c.json(
     {
       error: {
-        message: c.error?.message ?? 'Something went wrong.',
-        cause: c.error?.cause
+        message: c.error?.message ?? 'Something went wrong.'
       }
     },
     500

@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "bunx --bun vite --host",
     "build": "tsc && vite build",
-    "preview": "NODE_ENV=production bun run src/server/server.ts"
+    "preview": "NODE_ENV=production bun run src/server/server.ts",
+    "preview-static": "vite preview"
   },
   "dependencies": {
     "@hono/trpc-server": "^0.3.1",
