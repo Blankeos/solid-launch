@@ -1,0 +1,18 @@
+model User {
+  id       String    @id
+  username String
+  passwordHash String
+
+  createdTimestamp DateTime @default(now())
+  updatedTimestamp DateTime @updatedAt @default(now())
+
+  sessions Session[]
+}
+
+model Session {
+  id        String   @id
+  userId    String
+  expiresAt DateTime
+  user      User     @relation(references: [id], fields: [userId], onDelete: Cascade)
+}
+

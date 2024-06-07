@@ -7,6 +7,7 @@ import { Hono } from 'hono';
 import { serveStatic } from 'hono/bun';
 import { renderPage } from 'vike/server';
 import { appRouter } from './_app';
+import { createContext } from './context';
 
 const app = new Hono();
 
@@ -19,7 +20,10 @@ app.get('/up', async (c) => {
 app.use(
   '/api/*',
   trpcServer({
-    router: appRouter
+    router: appRouter,
+    createContext(opts, c) {
+      return createContext(c);
+    }
   })
 );
 

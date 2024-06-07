@@ -26,6 +26,7 @@
     },
 
     "types": [
+      "@types/bun",
       // https://www.npmjs.com/package/vite-plugin-solid-svg Should be first before vite/client.
       "vite-plugin-solid-svg/types-component-solid",
       // Make sure to not import this in a: /// <reference types="vite/client" /> anymore.

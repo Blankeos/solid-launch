@@ -1,0 +1,31 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// 1. Generate types for our main client.
+generator kysely {
+    provider = "prisma-kysely"
+
+    // Optionally provide a destination directory for the generated file
+    // and a filename of your choice
+    output = "../src/server/db"
+    fileName = "types.ts"
+    // Optionally generate runtime enums to a separate file
+    enumFileName = "enums.ts"
+    
+    //  prismaSchemaFolder: https://www.prisma.io/blog/organize-your-prisma-schema-with-multi-file-support
+    //  driverAdapters: https://www.prisma.io/blog/prisma-turso-ea-support-rXGd_Tmy3UXX
+    previewFeatures = ["prismaSchemaFolder", "driverAdapters"]
+}
+
+// 2. Generate types for our prisma client. (Used by Lucia).
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
