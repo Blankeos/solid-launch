@@ -24,6 +24,7 @@
     "dayjs": "^1.11.11",
     "hono": "^4.4.4",
     "kysely": "^0.27.3",
+    "kysely-bun-worker": "^0.6.1",
     "lucia": "^3.2.0",
     "prisma": "^5.15.0",
     "prisma-kysely": "^1.8.0",
