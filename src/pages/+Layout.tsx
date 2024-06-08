@@ -2,6 +2,7 @@ import { FlowProps } from 'solid-js';
 
 // CSS
 import VerticalLayout from '@/components/layouts/vertical/vertical-layout';
+import { AuthContextProvider } from '@/stores/auth.context';
 import { CounterContextProvider } from '@/stores/counter.context';
 import '@/styles/app.css';
 import '@/styles/nprogress.css';
@@ -14,12 +15,14 @@ const queryClient = new QueryClient();
 
 export default function App(props: FlowProps) {
   return (
-    <QueryClientProvider client={queryClient}>
-      <SolidQueryDevtools initialIsOpen={false} />
-      <CounterContextProvider>
-        <VerticalLayout>{props.children}</VerticalLayout>
-      </CounterContextProvider>
-      <Toaster />
-    </QueryClientProvider>
+    <AuthContextProvider>
+      <QueryClientProvider client={queryClient}>
+        <SolidQueryDevtools initialIsOpen={false} />
+        <CounterContextProvider>
+          <VerticalLayout>{props.children}</VerticalLayout>
+        </CounterContextProvider>
+        <Toaster />
+      </QueryClientProvider>
+    </AuthContextProvider>
   );
 }

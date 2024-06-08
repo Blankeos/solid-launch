@@ -13,6 +13,8 @@
     "db:migrate": "prisma migrate dev"
   },
   "dependencies": {
+    "@felte/solid": "^1.2.13",
+    "@felte/validator-zod": "^1.0.17",
     "@hono/trpc-server": "^0.3.1",
     "@libsql/kysely-libsql": "^0.3.0",
     "@lucia-auth/adapter-prisma": "^4.0.1",
