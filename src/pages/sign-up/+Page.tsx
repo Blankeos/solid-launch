@@ -1,8 +1,10 @@
+import { PageRoutes } from '@/constants/page-routes';
 import { useAuthContext } from '@/stores/auth.context';
 import { useCounterContext } from '@/stores/counter.context';
 import { createForm } from '@felte/solid';
 import { validator } from '@felte/validator-zod';
 import { toast } from 'solid-sonner';
+import { navigate } from 'vike/client/router';
 import { z } from 'zod';
 
 export default function SignUpPage() {
@@ -12,18 +14,27 @@ export default function SignUpPage() {
 
   const schema = z.object({
     username: z.string(),
-    password: z.string()
+    password: z.string(),
   });
 
   const { form, data } = createForm({
     extend: validator({ schema }),
     onSubmit: async (values: typeof schema._type) => {
-      toast.promise(register(values.username, values.password), {
-        error: 'Failed to register',
-        success: 'Registered!',
-        loading: 'Registering...'
-      });
-    }
+      toast.promise(
+        async () => {
+          const result = await register(values.username, values.password);
+
+          if (result) {
+            navigate(PageRoutes.Dashboard);
+          }
+        },
+        {
+          error: 'Failed to register',
+          success: 'Registered!',
+          loading: 'Registering...',
+        }
+      );
+    },
   });
 
   return (

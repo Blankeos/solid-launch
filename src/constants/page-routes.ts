@@ -4,5 +4,6 @@ export enum PageRoutes {
   About = '/about',
   NotFound = '/404',
   SignUp = '/sign-up',
-  SignIn = '/sign-in'
+  SignIn = '/sign-in',
+  Dashboard = '/dashboard',
 }

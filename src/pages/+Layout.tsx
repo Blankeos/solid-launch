@@ -15,14 +15,16 @@ const queryClient = new QueryClient();
 
 export default function App(props: FlowProps) {
   return (
-    <AuthContextProvider>
-      <QueryClientProvider client={queryClient}>
-        <SolidQueryDevtools initialIsOpen={false} />
-        <CounterContextProvider>
-          <VerticalLayout>{props.children}</VerticalLayout>
-        </CounterContextProvider>
-        <Toaster />
-      </QueryClientProvider>
-    </AuthContextProvider>
+    <>
+      <AuthContextProvider>
+        <QueryClientProvider client={queryClient}>
+          <SolidQueryDevtools initialIsOpen={false} />
+          <CounterContextProvider>
+            <VerticalLayout>{props.children}</VerticalLayout>
+          </CounterContextProvider>
+        </QueryClientProvider>
+      </AuthContextProvider>
+      <Toaster />
+    </>
   );
 }
