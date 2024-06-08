@@ -1,7 +1,7 @@
-import { createSignal } from 'solid-js';
 import { IconSolid } from '@/assets/icons';
-import { toast } from 'solid-sonner';
 import { useCounterContext } from '@/stores/counter.context';
+import { createSignal } from 'solid-js';
+import { toast } from 'solid-sonner';
 
 export default function HomePage() {
   const [count, setCount] = createSignal(0);
@@ -55,15 +55,21 @@ export default function HomePage() {
                       {
                         loading: '🍞 Cooking your toast...',
                         success: '🍔 Toast cooked!',
-                        error: '☄️ Toast failed!'
+                        error: '☄️ Toast failed!',
                       }
                     ),
                   async () => {
-                    toast.loading('🔪 Slicing your toast...', { id: 'loading-toast' });
+                    const toastIdAlphabet = 'abcdefghijklmnopqrstuvwxyz1234567890';
+                    const toastId = [...Array(5)].reduce(
+                      (acc, _) =>
+                        acc + toastIdAlphabet[Math.floor(Math.random() * toastIdAlphabet.length)],
+                      ''
+                    );
+                    toast.loading('🔪 Slicing your toast...', { id: toastId });
                     await new Promise((resolve) => setTimeout(resolve, 800));
-                    toast.loading('🤺 Slicing EVEN HARDER!!!', { id: 'loading-toast' });
+                    toast.loading('🤺 Slicing EVEN HARDER!!!', { id: toastId });
                     await new Promise((resolve) => setTimeout(resolve, 800));
-                    toast.loading("💣 It's GONNA BLOW!!!", { id: 'loading-toast' });
+                    toast.loading("💣 It's GONNA BLOW!!!", { id: toastId });
 
                     toast.promise(
                       async () => {
@@ -77,10 +83,10 @@ export default function HomePage() {
                         loading: '👨‍🍳 Cooking EVEN HARDER!!!',
                         success: '🍔 Toast cooked!',
                         error: '☄️ Toast BURNT!',
-                        id: 'loading-toast'
+                        id: 'loading-toast',
                       }
                     );
-                  }
+                  },
                 ];
 
                 const random = Math.floor(Math.random() * toasts.length);
