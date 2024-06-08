@@ -27,3 +27,7 @@ dist-ssr
 
 # Store docker-compose.local.yaml volumes here.
 /data
+
+# database
+local.db
+local.db-journal
