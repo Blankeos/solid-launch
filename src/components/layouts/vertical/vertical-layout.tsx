@@ -1,6 +1,6 @@
 import { FlowProps } from 'solid-js';
-import VerticalNav from './vertical-nav';
 import VerticalFooter from './vertical-footer';
+import VerticalNav from './vertical-nav';
 
 type VerticalLayoutProps = {};
 

@@ -111,15 +111,16 @@ export const AuthContextProvider: FlowComponent = (props) => {
       return;
     }
 
+    setLoading(true);
     const result = await trpcClient.currentUser.query();
-
     if (result.user) {
       setUser(result.user);
+      setLoading(false);
       return result.user;
     }
 
     setUser(null);
-    return null;
+    setLoading(false);
   });
 
   return (

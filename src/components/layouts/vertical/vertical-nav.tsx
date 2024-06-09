@@ -1,3 +1,11 @@
+import { IconLoading } from '@/assets/icons';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { PageRoutes } from '@/constants/page-routes';
 import { useAuthContext } from '@/stores/auth.context';
 import { createMemo, For, Show, VoidProps } from 'solid-js';
@@ -20,16 +28,6 @@ export default function VerticalNav(props: VoidProps<VerticalNavProps>) {
         href: PageRoutes.About,
         visible: true,
       },
-      {
-        name: 'Sign Up',
-        href: PageRoutes.SignUp,
-        visible: !!!user(),
-      },
-      {
-        name: 'Sign In',
-        href: PageRoutes.SignIn,
-        visible: !!!user(),
-      },
     ];
   });
 
@@ -50,26 +48,51 @@ export default function VerticalNav(props: VoidProps<VerticalNavProps>) {
             </Show>
           )}
         </For>
-        <Show when={user()}>
-          <button
-            onClick={() => {
-              logout();
-              toast.success('Logged out!');
-            }}
-          >
-            Logout
-          </button>
+
+        <Show when={loading()}>
+          <IconLoading />
         </Show>
 
-        <Show when={user()}>
-          <div
-            class="h-12 w-12 flex-shrink-0 rounded-full"
-            style={{
-              'background-position': 'center',
-              'background-size': 'cover',
-              'background-image': `url(https://thicc-uwu.mywaifulist.moe/waifus/satoru-gojo-sorcery-fight/bOnNB0cwHheCCRGzjHLSolqabo41HxX9Wv33kfW7.jpg?class=thumbnail)`,
-            }}
-          />
+        <Show when={!user() && !loading()}>
+          <li>
+            <a href={PageRoutes.SignIn}>Sign In</a>
+          </li>
+          <li>
+            <a href={PageRoutes.SignUp}>Sign Up</a>
+          </li>
+        </Show>
+
+        <Show when={user() && !loading()}>
+          <li>
+            <button
+              onClick={() => {
+                logout();
+                toast.success('Logged out!');
+              }}
+            >
+              Logout
+            </button>
+          </li>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <div
+                class="h-12 w-12 flex-shrink-0 rounded-full"
+                style={{
+                  'background-position': 'center',
+                  'background-size': 'cover',
+                  'background-image': `url(https://thicc-uwu.mywaifulist.moe/waifus/satoru-gojo-sorcery-fight/bOnNB0cwHheCCRGzjHLSolqabo41HxX9Wv33kfW7.jpg?class=thumbnail)`,
+                }}
+              />
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent>
+              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuItem as="a" href={PageRoutes.Dashboard}>
+                Dashboard
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </Show>
       </ul>
     </nav>
