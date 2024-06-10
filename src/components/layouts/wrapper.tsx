@@ -24,12 +24,12 @@ export default function Wrapper(props: FlowProps) {
         <QueryClientProvider client={queryClient}>
           <SolidQueryDevtools initialIsOpen={false} />
           <CounterContextProvider>
-            <button
+            {/* <button
               class="rounded bg-yellow-500 px-5 py-1"
               onClick={() => setCounter(counter() + 1)}
             >
               Root Wrapper Signal: {counter()} (If this resets to 0, the layout re-mounted)
-            </button>
+            </button> */}
             {props.children}
           </CounterContextProvider>
         </QueryClientProvider>

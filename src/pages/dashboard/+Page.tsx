@@ -12,7 +12,7 @@ export default function DashboardPage() {
 
   return (
     <ProtectedRoute>
-      <div class="flex flex-col gap-y-4">
+      <div class="flex flex-col gap-y-4 py-8">
         Dashboard: {user()?.username}
         <div>
           Window Size: {width()} x {height()}
