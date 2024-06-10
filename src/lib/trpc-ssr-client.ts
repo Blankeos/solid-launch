@@ -47,7 +47,10 @@ export const initTRPCSSRClient = (
 
           // This is where we proxy it back.
           for (const [key, value] of response.headers) {
-            responseHeaders.set(key, value);
+            // Don't set back the Content-Type header (Otherwise, content-type HTML would become a json).
+            if (key.toLowerCase() === 'content-type') continue;
+
+            responseHeaders?.set(key, value);
           }
 
           return response;

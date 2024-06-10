@@ -17,10 +17,12 @@ export default function DashboardPage() {
         <div>
           Window Size: {width()} x {height()}
         </div>
-        <div>
-          Client Size of this textarea: {textAreaWidth()} x {textAreaHeight()}
-        </div>
-        <textarea ref={textAreaRef} class="resize rounded-md border"></textarea>
+        <div>Client Size of this textarea:</div>
+        <textarea
+          ref={textAreaRef}
+          class="resize rounded-md border p-2"
+          value={`${textAreaWidth()} x ${textAreaHeight()}`}
+        ></textarea>
       </div>
     </ProtectedRoute>
   );
