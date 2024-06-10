@@ -12,8 +12,6 @@ export function useClientSize() {
   const handleClientResize = () => {
     if (!ref()) return;
 
-    console.log('moving.');
-
     const rect = ref()!.getBoundingClientRect();
 
     setWidth(() => rect.width);
