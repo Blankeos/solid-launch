@@ -8,6 +8,8 @@
     "build": "tsc && vite build",
     "preview": "NODE_ENV=production bun run src/server/server.ts",
     "preview-static": "vite preview",
+    "lint": "prettier --check . && eslint .",
+    "format": "prettier --write .",
     "db:generate": "bunx prisma generate",
     "db:migrate": "prisma migrate dev",
     "outdated": "bunx npm-check-updates"

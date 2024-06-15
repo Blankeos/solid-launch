@@ -13,6 +13,7 @@ type HorizontalSidebarProps = {};
 
 export default function HorizontalSidebar(props: VoidProps<HorizontalSidebarProps>) {
   const { user } = useAuthContext();
+
   return (
     <div class="flex h-full w-56 flex-shrink-0 flex-col border-r px-8 py-8">
       <div class="flex items-center gap-x-3">
