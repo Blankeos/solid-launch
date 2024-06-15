@@ -6,4 +6,5 @@ export enum PageRoutes {
   SignUp = '/sign-up',
   SignIn = '/sign-in',
   Dashboard = '/dashboard',
+  Settings = `${PageRoutes.Dashboard}/settings`,
 }

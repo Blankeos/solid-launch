@@ -34,7 +34,7 @@ export default function HorizontalSidebar(props: VoidProps<HorizontalSidebarProp
 
             <DropdownMenuContent>
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuItem as="a" href={PageRoutes.Dashboard}>
+              <DropdownMenuItem as="a" href={PageRoutes.Settings}>
                 Settings
               </DropdownMenuItem>
             </DropdownMenuContent>

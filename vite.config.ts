@@ -28,26 +28,26 @@ export default defineConfig({
         /^\/favicon\.ico$/,
         /.*\.(svg|png)($|\?)/,
         /^\/(public|assets|static)\/.+/,
-        /^\/node_modules\/.*/
+        /^\/node_modules\/.*/,
       ],
-      injectClientScript: false
+      injectClientScript: false,
     }),
     vike(),
     vikeSolid(),
     solidSvg(),
     Icons({
-      compiler: 'solid'
-    })
+      compiler: 'solid',
+    }),
   ],
   server: {
-    port: 3000
+    port: 3000,
   },
   preview: {
-    port: 3000
+    port: 3000,
   },
   resolve: {
     alias: {
-      '@': resolve(root, 'src')
-    }
-  }
+      '@': resolve(root, 'src'),
+    },
+  },
 });

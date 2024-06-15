@@ -49,10 +49,6 @@ export default function VerticalNav(props: VoidProps<VerticalNavProps>) {
           )}
         </For>
 
-        <Show when={loading()}>
-          <IconLoading />
-        </Show>
-
         <Show when={!user() && !loading()}>
           <li>
             <a href={PageRoutes.SignIn}>Sign In</a>
@@ -62,7 +58,14 @@ export default function VerticalNav(props: VoidProps<VerticalNavProps>) {
           </li>
         </Show>
 
-        <Show when={user() && !loading()}>
+        <Show
+          when={user() && !loading()}
+          fallback={
+            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-gray-200">
+              <IconLoading color="white" />
+            </div>
+          }
+        >
           <li>
             <button
               onClick={() => {
