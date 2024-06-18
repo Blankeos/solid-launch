@@ -2,17 +2,19 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { PageRoutes } from '@/constants/page-routes';
 import { useAuthContext } from '@/stores/auth.context';
 import { DropdownMenu } from '@kobalte/core/dropdown-menu';
 import { Show, VoidProps } from 'solid-js';
+import { toast } from 'solid-sonner';
 
 type HorizontalSidebarProps = {};
 
 export default function HorizontalSidebar(props: VoidProps<HorizontalSidebarProps>) {
-  const { user } = useAuthContext();
+  const { user, loading, logout } = useAuthContext();
 
   return (
     <div class="flex h-full w-56 flex-shrink-0 flex-col border-r px-8 py-8">
@@ -37,6 +39,15 @@ export default function HorizontalSidebar(props: VoidProps<HorizontalSidebarProp
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuItem as="a" href={PageRoutes.Settings}>
                 Settings
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => {
+                  logout();
+                  toast.success('Logged out!');
+                }}
+              >
+                Logout
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

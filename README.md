@@ -8,6 +8,11 @@
 
 This is handcrafted from my own research. This might not work for you, but it works for me. 🤓
 
+Alternatively:
+
+- [🐇 Solid Hop](https://github.com/blankeos/solid-hop) - Less-opinionated Vike Solid boilerplate. Like `npx create solid` but simpler.
+- [🧡 Svelte Launch](https://github.com/blankeos/svelte-launch) - Svelte, but same robust practices.
+
 ### Benefits
 
 - [x] 🐭 **Handcrafted and minimal** - picked and chose "do one thing, do it well" libraries that are just enough to get the job done. Just looks a bit bloated at a glance. (I kinda made my own NextJS from scatch here)
@@ -76,17 +81,97 @@ I'll assume you don't want to change anything with this setup after cloning so l
 
 I took care of the painstaking parts to help you develop easily on a SPA + SSR + backend paradigm. You can take take these practices to different projects as well.
 
-1. Make use of the `code-snippets` I added. It'll help!
-2. Check all typescript errors (`Cmd` + `Shift` + `B` > `tsc:watch tsconfig.json`).
-3. Authentication Practices - I have these out-of-the-box for you so you won't have to build it.
-   - Getting Current User `const { user } = useAuthContext()`
-   - Login, Logout, Register `const { register, login, logout } = useAuthContext()`
-   - Hydrating Current User `+data` + `initTRPCSSRClient`.
-   - Protecting Routes (Client-Side) `<ProtectedRoute />`
-   - Protecting Routes (SSR) `+guard`
-4. Dataloading Practices - Also have these out-of-the-box for most usecases since they're tricky to do if you're clueless:
-   - Tanstack Query (Client-only) - Use `trpc-client.ts`
-   - Hydrated Tanstack Query (SSR) - Use `create-dehydrated-state.ts` + `trpc-ssr-client.ts`
+1.  Make use of the `code-snippets` I added. It'll help!
+2.  Check all typescript errors (`Cmd` + `Shift` + `B` > `tsc:watch tsconfig.json`).
+3.  Authentication Practices - I have these out-of-the-box for you so you won't have to build it.
+
+    - Getting Current User
+
+      ```ts
+      import { useAuthContext } from '@/context/auth.context';
+
+      export default function MyComponent() {
+       const { user } = useAuthContext();
+      }
+      ```
+
+    - Login, Logout, Register
+
+      ```tsx
+      import { useAuthContext } from '@/context/auth.context';
+
+      export default function MyComponent() {
+      const { login, logout, register } = useAuthContext();
+      }
+      ```
+
+    - Hydrating Current User
+
+      ```tsx
+      // +data.ts
+      import { initTRPCSSRClient } from '@/lib/trpc-ssr-client';
+      import { PageContext } from 'vike/types';
+
+      export type Data = ReturnType<Awaited<typeof data>>;
+
+      export async function data(pageContext: PageContext) {
+         const { request, response } = pageContext;
+
+         const trpcClient = initTRPCSSRClient(request.header(), response.headers); // Pass the headers here.
+
+         const result = await trpcClient.currentUser.query();
+
+         return {
+            user: result.user ?? null,
+         };
+      }
+      ```
+
+    - Protecting Routes (Client-Side)
+
+      ```tsx
+      import ProtectedRoute from '@/components/common/protected-route';
+
+      export default MyComponent() {
+         return (
+            <ProtectedRoute>
+              On the server (hydration), this part will not be rendered if unauthenticated.
+
+              On the client, you will be redirected to a public route if unauthenticated.
+            </ProtectedRoute>
+         )
+      }
+      ```
+
+    - Protecting Routes (SSR)
+
+      ```ts
+      // +guard.ts (If you don't have +data.ts in the same route).
+      export async function guard(pageContext: PageContext) {
+         const { request, response } = pageContext;
+
+         const trpcClient = initTRPCSSRClient(request.header(), response.headers); // Pass the headers here.
+
+         const result = await trpcClient.currentUser.query();
+
+         if (!result.user) {
+            throw redirect("/") // Must be a public route.
+         }
+      }
+
+      // +guard.ts (If you already have a +data.ts that gets the user).
+      // ⚠️ I have not tested this. This depends on `+guard` being called after `+data` is resolved.
+      export async function guard(pageContext: PageContext) {
+
+         if (!pageContext.data?.user) {
+            throw redirect("/"); // Must be a public route.
+         }
+      }
+      ```
+
+4.  Dataloading Practices - Also have these out-of-the-box for most usecases since they're tricky to do if you're clueless:
+    - Tanstack Query (Client-only) - Use `trpc-client.ts`
+    - Hydrated Tanstack Query (SSR) - Use `create-dehydrated-state.ts` + `trpc-ssr-client.ts`
 
 ### Backend Architecture
 

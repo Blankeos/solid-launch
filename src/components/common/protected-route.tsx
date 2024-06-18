@@ -7,7 +7,7 @@ import { navigate } from 'vike/client/router';
 type ProtectedRouteProps = {
   /** Redirect when authenticated. */
   redirect?: string;
-  /** Fallback when not authed. @defaultValue /login */
+  /** Fallback when not authed. @defaultValue /sign-in */
   fallback?: string;
 };
 

@@ -4,6 +4,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { PageRoutes } from '@/constants/page-routes';
@@ -58,25 +59,13 @@ export default function VerticalNav(props: VoidProps<VerticalNavProps>) {
           </li>
         </Show>
 
-        <Show
-          when={user() && !loading()}
-          fallback={
-            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-gray-200">
-              <IconLoading color="white" />
-            </div>
-          }
-        >
-          <li>
-            <button
-              onClick={() => {
-                logout();
-                toast.success('Logged out!');
-              }}
-            >
-              Logout
-            </button>
-          </li>
+        <Show when={loading()}>
+          <div class="flex h-12 w-12 items-center justify-center rounded-full bg-gray-200">
+            <IconLoading color="white" />
+          </div>
+        </Show>
 
+        <Show when={user() && !loading()}>
           <DropdownMenu>
             <DropdownMenuTrigger>
               <div
@@ -93,6 +82,15 @@ export default function VerticalNav(props: VoidProps<VerticalNavProps>) {
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuItem as="a" href={PageRoutes.Dashboard}>
                 Dashboard
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => {
+                  logout();
+                  toast.success('Logged out!');
+                }}
+              >
+                Logout
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
