@@ -107,6 +107,8 @@ I took care of the painstaking parts to help you develop easily on a SPA + SSR +
 
     - Hydrating Current User
 
+      This will also automatically hydrate in your layouts. Anywhere you use `useAuthStore()`, it's magic. (Thanks to Vike's `useData()`. Fun fact: You actually can't do this in SolidStart because it's architecturally different to Vike).
+
       ```tsx
       // +data.ts
       import { initTRPCSSRClient } from '@/lib/trpc-ssr-client';
