@@ -52,7 +52,7 @@
     "typescript": "^5.5.2",
     "unplugin-icons": "^0.19.0",
     "vike": "^0.4.177",
-    "vike-solid": "^0.6.0",
+    "vike-solid": "^0.6.1",
     "vite": "^5.3.1",
     "vite-plugin-solid": "^2.10.2",
     "vite-plugin-solid-svg": "^0.8.1"
