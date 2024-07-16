@@ -19,12 +19,7 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "types": [
-      "@types/bun",
-      "unplugin-icons/types/solid",
-      "vite-plugin-solid-svg/types-component-solid",
-      "vite/client"
-    ]
+    "types": ["@types/bun", "vite-plugin-solid-svg/types-component-solid", "vite/client"]
   },
   "include": ["src"],
   "references": [

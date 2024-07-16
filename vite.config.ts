@@ -1,5 +1,4 @@
 // Icons
-import Icons from 'unplugin-icons/vite'; // Existing Icon Library (icones.js)
 import solidSvg from 'vite-plugin-solid-svg'; // Custom Icons (SVG)
 
 // Vike
@@ -35,9 +34,6 @@ export default defineConfig({
     vike(),
     vikeSolid(),
     solidSvg(),
-    Icons({
-      compiler: 'solid',
-    }),
   ],
   server: {
     port: 3000,

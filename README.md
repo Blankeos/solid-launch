@@ -8,7 +8,7 @@
 
 This is handcrafted from my own research. This might not work for you, but it works for me. 🤓
 
-Alternatively:
+You can also try my other starters:
 
 - [🐇 Solid Hop](https://github.com/blankeos/solid-hop) - Less-opinionated Vike Solid boilerplate. Like `npx create solid` but simpler.
 - [🧡 Svelte Launch](https://github.com/blankeos/svelte-launch) - Svelte, but same robust practices.
@@ -21,6 +21,12 @@ Alternatively:
 - [x] 🐍 **Extremely customizable** - you're not at the mercy of limited APIs and paradigms set by big frameworks or third-party services. Swap with your preferred JS backend framework/runtime if you want. Vike is just a middleware. Most of the tech I use here are open-source and roll-your-own type of thing. Hack it up! You're a dev aren't you?
 - [x] ☁️ **Selfhost-ready** - Crafted with simple hosting in mind that'll still probably scale to millions. Just spin up Docker container on a good'ol VPS without locking into serverless. DHH and Shayan influenced me on this. You can still host it on serverless tho. I think? lol
 - [x] **🔋 Batteries-included** - took care of the hard stuff for you. A well-thought-out folder structure from years of making projects: a design system, components, utilities, hooks, constants, an adequate backend DDD-inspired sliced architecture that isn't overkill, dockerizing your app, and most importantly---perfectly-crafted those pesky config files.
+- [x] 🔑 Authentication-Ready - One thing devs get stuck on. There's a practical auth implemented from scratch here that doesn't vendor-lock you into any auth provider.
+  - [x] Password
+  - [ ] Transactional Emails (Forgot Password, Email Verification)
+  - [ ] OAuth
+  - [ ] Magic Link
+  - [ ] User Management Dashboard
 
 ### Tech Stack
 
@@ -36,13 +42,7 @@ Alternatively:
 - [x] **Lucia** - Makes self-rolling auth easy.
 - [ ] **SES or MimePost** - Emails
 - [ ] **Backblaze** - Cheap blob object storage with an S3-compatible API.
-- [ ] **Stripe, Payrex, or Xendit** - Accept payments.
-
-> You can also easily swap the database if you want.
->
-> - [ ] **Postgres** - powerful relational DB. (TBD)
-> - [ ] **CockroachDB** - serverless database. (TBD)
-> - [ ] **MongoDB** - cheap easy to use database. (TBD)
+- [ ] **Paddle** - Accept payments and pay foreign taxes.
 
 ### QuickStart
 
@@ -213,6 +213,14 @@ Here are some guides on how to deploy.
 - [ ] Cloudflare (serverless + static)
 - [ ] Vercel (serverless + static)
 - [ ] Netlify (static)
+
+### Limitations
+
+- Websockets and Bun
+  - It works fine in Prod. But activating Vite HMR + Websockets is not possible in Bun.
+  - This is because Bun doesn't work with `Connect.Server` middlewares (which Vite uses). [[Source 1]](https://github.com/oven-sh/bun/issues/12212) [[Source 2]](https://github.com/honojs/vite-plugins/issues/140#issuecomment-2200134094)
+  - Bun Workaround: Having a separate process to run the Websocket server and your HTTP Server. Just make sure to use the same pubsub across these two processes (You can do this using Redis). Also make sure to combine them in a single process in production.
+  - Alternative recommendation: Use Node instead as it's possible to use `Connect.Server` middlewares in their `http` server: [PoC](https://github.com/Blankeos/realtime-user-status-node).
 
 ### Future Plans
 
