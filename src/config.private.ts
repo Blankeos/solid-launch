@@ -9,7 +9,18 @@ export const privateConfig = {
     /** The url of the database. */
     URL: process.env.DATABASE_URL! as string,
     /** Not needed in development. https://docs.turso.tech/local-development#sqlite */
-    AUTH_TOKEN: process.env.DATABASE_AUTH_TOKEN! as string
+    AUTH_TOKEN: process.env.DATABASE_AUTH_TOKEN! as string,
+  },
+  auth: {
+    github: {
+      CLIENT_ID: process.env.GITHUB_CLIENT_ID!,
+      CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET!,
+    },
+    google: {
+      CLIENT_ID: process.env.GOOGLE_OAUTH_CLIENT_ID!,
+      CLIENT_ID_SECRET: process.env.GOOGLE_OAUTH_CLIENT_SECRET!,
+      REDIRECT_URI: process.env.GOOGLE_OAUTH_REDIRECT_URI!,
+    },
   },
   /** S3Bucket-specific settings. */
   s3: {
@@ -22,6 +33,6 @@ export const privateConfig = {
     /** Region of the bucket. */
     REGION: process.env.S3_REGION! ?? ('us-east-1' as string),
     /** URL of the bucket. Important that this starts with http:// or https:// */
-    ENDPOINT: (process.env.S3_ENDPOINT! ?? 'http://127.0.0.1:9000') as string
-  }
+    ENDPOINT: (process.env.S3_ENDPOINT! ?? 'http://127.0.0.1:9000') as string,
+  },
 };
