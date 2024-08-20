@@ -121,7 +121,7 @@ I took care of the painstaking parts to help you develop easily on a SPA + SSR +
 
          const trpcClient = initTRPCSSRClient(request.header(), response.headers); // Pass the headers here.
 
-         const result = await trpcClient.currentUser.query();
+         const result = await trpcClient.auth.currentUser.query();
 
          return {
             user: result.user ?? null,
@@ -154,7 +154,7 @@ I took care of the painstaking parts to help you develop easily on a SPA + SSR +
 
          const trpcClient = initTRPCSSRClient(request.header(), response.headers); // Pass the headers here.
 
-         const result = await trpcClient.currentUser.query();
+         const result = await trpcClient.auth.currentUser.query();
 
          if (!result.user) {
             throw redirect("/") // Must be a public route.

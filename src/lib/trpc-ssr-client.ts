@@ -24,7 +24,7 @@ import { createTRPCClient, httpBatchLink } from '@trpc/client';
  *    // from the browser, and pass response headers back to the browser.
  *    const trpcClient = initTRPCSSRClient(request.header(), response.headers);
  *
- *    const result = await trpcClient.currentUser.query();
+ *    const result = await trpcClient.auth.currentUser.query();
  * }
  */
 export const initTRPCSSRClient = (

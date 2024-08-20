@@ -8,32 +8,32 @@ export const authRouter = router({
   currentUser: authedProcedure.query(async ({ ctx }) => {
     return {
       user: ctx.user,
-      session: ctx.session
+      session: ctx.session,
     };
   }),
   login: authedProcedure
     .input(
       z.object({
         username: z.string(),
-        password: z.string()
+        password: z.string(),
       })
     )
     .mutation(async ({ ctx, input }) => {
       const { userId, sessionCookie } = await login({
         username: input.username,
-        password: input.password
+        password: input.password,
       });
 
       // use `header()` instead of setCookie to avoid TS errors
       ctx.honoContext.header('Set-Cookie', sessionCookie.serialize(), {
-        append: true
+        append: true,
       });
 
       return {
         user: {
           id: userId,
-          username: input.username
-        }
+          username: input.username,
+        },
       };
     }),
   logout: authedProcedure.query(async ({ ctx, input }) => {
@@ -42,32 +42,32 @@ export const authRouter = router({
     }
 
     return {
-      success: true
+      success: true,
     };
   }),
   register: publicProcedure
     .input(
       z.object({
         username: z.string(),
-        password: z.string()
+        password: z.string(),
       })
     )
     .mutation(async ({ ctx, input }) => {
       const { userId, sessionCookie } = await register({
         username: input.username,
-        password: input.password
+        password: input.password,
       });
 
       // use `header()` instead of setCookie to avoid TS errors
       ctx.honoContext.header('Set-Cookie', sessionCookie.serialize(), {
-        append: true
+        append: true,
       });
 
       return {
         user: {
           id: userId,
-          username: input.username
-        }
+          username: input.username,
+        },
       };
-    })
+    }),
 });

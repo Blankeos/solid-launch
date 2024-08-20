@@ -8,7 +8,7 @@ export async function data(pageContext: PageContext) {
 
   const trpcClient = initTRPCSSRClient(request.header(), response.headers);
 
-  const result = await trpcClient.currentUser.query();
+  const result = await trpcClient.auth.currentUser.query();
 
   return {
     user: result.user ?? null,

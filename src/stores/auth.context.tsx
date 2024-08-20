@@ -66,7 +66,7 @@ export const AuthContextProvider: FlowComponent = (props) => {
   const [loading, setLoading] = createSignal<boolean>(false);
 
   async function register(username: string, password: string) {
-    const result = await trpcClient.register.mutate({
+    const result = await trpcClient.auth.register.mutate({
       username: username,
       password: password,
     });
@@ -80,7 +80,7 @@ export const AuthContextProvider: FlowComponent = (props) => {
   }
 
   async function login(username: string, password: string) {
-    const result = await trpcClient.login.mutate({
+    const result = await trpcClient.auth.login.mutate({
       username: username,
       password: password,
     });
@@ -94,7 +94,7 @@ export const AuthContextProvider: FlowComponent = (props) => {
   }
 
   async function logout() {
-    const result = await trpcClient.logout.query();
+    const result = await trpcClient.auth.logout.query();
     if (result.success) {
       setUser(null);
       return { success: true };
@@ -112,7 +112,7 @@ export const AuthContextProvider: FlowComponent = (props) => {
     }
 
     setLoading(true);
-    const result = await trpcClient.currentUser.query();
+    const result = await trpcClient.auth.currentUser.query();
     if (result.user) {
       setUser(result.user);
       setLoading(false);
