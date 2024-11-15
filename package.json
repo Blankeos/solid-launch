@@ -12,7 +12,7 @@
     "format": "prettier --write .",
     "db:generate": "bunx prisma generate",
     "db:migrate": "prisma migrate dev",
-    "outdated": "bunx npm-check-updates --interactive --format group"
+    "update": "bunx npm-check-updates --interactive --format group"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.696.0",
