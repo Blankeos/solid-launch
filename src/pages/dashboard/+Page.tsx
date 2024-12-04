@@ -2,8 +2,14 @@ import ProtectedRoute from '@/components/common/protected-route';
 import { useClientSize } from '@/hooks/use-client-size';
 import { useWindowSize } from '@/hooks/use-window-size';
 import { useAuthContext } from '@/stores/auth.context';
+import getTitle from '@/utils/get-title';
+import { useMetadata } from 'vike-metadata-solid';
 
 export default function DashboardPage() {
+  useMetadata({
+    title: getTitle('Dashboard'),
+  });
+
   const { user } = useAuthContext();
 
   const { height, width } = useWindowSize();
