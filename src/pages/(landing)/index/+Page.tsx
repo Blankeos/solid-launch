@@ -2,11 +2,14 @@ import { IconSolid } from '@/assets/icons';
 import { useCounterContext } from '@/stores/counter.context';
 import { createSignal } from 'solid-js';
 import { toast } from 'solid-sonner';
+import { useMetadata } from 'vike-metadata-solid';
 
 export default function HomePage() {
   const [count, setCount] = createSignal(0);
 
   const { count: globalCount, setCount: setGlobalCount } = useCounterContext();
+
+  useMetadata({});
 
   return (
     <div class="flex h-full flex-1 flex-col">

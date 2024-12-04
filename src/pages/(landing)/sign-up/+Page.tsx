@@ -1,13 +1,19 @@
 import { PageRoutes } from '@/constants/page-routes';
 import { useAuthContext } from '@/stores/auth.context';
 import { useCounterContext } from '@/stores/counter.context';
+import getTitle from '@/utils/get-title';
 import { createForm } from '@felte/solid';
 import { validator } from '@felte/validator-zod';
 import { toast } from 'solid-sonner';
+import { useMetadata } from 'vike-metadata-solid';
 import { navigate } from 'vike/client/router';
 import { z } from 'zod';
 
 export default function SignUpPage() {
+  useMetadata({
+    title: getTitle('Sign Up'),
+  });
+
   const { count: globalCount, setCount: setGlobalCount } = useCounterContext();
 
   const { register } = useAuthContext();
