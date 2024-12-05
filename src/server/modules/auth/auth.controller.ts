@@ -36,7 +36,7 @@ export const authRouter = router({
         },
       };
     }),
-  logout: authedProcedure.query(async ({ ctx, input }) => {
+  logout: authedProcedure.query(async ({ ctx }) => {
     if (ctx.session) {
       await lucia.invalidateSession(ctx.session.id);
     }

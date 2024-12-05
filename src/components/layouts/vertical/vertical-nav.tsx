@@ -14,7 +14,7 @@ import { toast } from 'solid-sonner';
 
 type VerticalNavProps = {};
 
-export default function VerticalNav(props: VoidProps<VerticalNavProps>) {
+export default function VerticalNav(_props: VoidProps<VerticalNavProps>) {
   const { user, loading, logout } = useAuthContext();
 
   const navLinks = createMemo<{ name: string; href: PageRoutes; visible: boolean }[]>(() => {

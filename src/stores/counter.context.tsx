@@ -4,7 +4,7 @@ import {
   FlowComponent,
   useContext,
   type Accessor,
-  type Setter
+  type Setter,
 } from 'solid-js';
 
 // ===========================================================================
@@ -12,7 +12,7 @@ import {
 // ===========================================================================
 export const CounterContext = createContext({
   count: 0 as unknown as Accessor<number>,
-  setCount: ((newCount: number) => {}) as Setter<number>
+  setCount: ((_newCount: number) => {}) as Setter<number>,
 });
 
 // ===========================================================================
@@ -32,7 +32,7 @@ export const CounterContextProvider: FlowComponent = (props) => {
     <CounterContext.Provider
       value={{
         count: count,
-        setCount: setCount
+        setCount: setCount,
       }}
     >
       {props.children}

@@ -18,17 +18,17 @@ const getDialect = () => {
     console.log('Found file local database. Using BunWorkerDialect.');
     // Can swap this with better-sqlite-3 if not Bun. (Node).
     return new BunWorkerDialect({
-      url: privateConfig.database.URL
+      url: privateConfig.database.URL,
     });
   }
 
   console.log('Found remote database. Using LibsqlDialect.');
   return new LibsqlDialect({
     authToken: privateConfig.database.AUTH_TOKEN,
-    url: privateConfig.database.URL
+    url: privateConfig.database.URL,
   });
 };
 
 export const db = new Kysely<DB>({
-  dialect: getDialect()
+  dialect: getDialect(),
 });

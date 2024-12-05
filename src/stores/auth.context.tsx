@@ -45,9 +45,9 @@ export type AuthContextValue = {
 const AuthContext = createContext({
   user: () => null,
   loading: () => false,
-  login: async (username: string, password: string) => null,
+  login: async (_username: string, _password: string) => null,
   logout: async () => ({ success: false }),
-  register: async (username: string, password: string) => null,
+  register: async (_username: string, _password: string) => null,
 } as AuthContextValue);
 
 // ===========================================================================

@@ -13,7 +13,7 @@ import { toast } from 'solid-sonner';
 
 type HorizontalSidebarProps = {};
 
-export default function HorizontalSidebar(props: VoidProps<HorizontalSidebarProps>) {
+export default function HorizontalSidebar(_props: VoidProps<HorizontalSidebarProps>) {
   const { user, loading, logout } = useAuthContext();
 
   return (
@@ -22,7 +22,7 @@ export default function HorizontalSidebar(props: VoidProps<HorizontalSidebarProp
         <a href={PageRoutes.Home} class="text-4xl text-gray-500">
           {'<'}
         </a>
-        <Show when={user()}>
+        <Show when={!loading() && user()}>
           <DropdownMenu>
             <DropdownMenuTrigger>
               <div
