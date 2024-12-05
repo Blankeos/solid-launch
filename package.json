@@ -23,7 +23,7 @@
     "@kobalte/core": "^0.13.7",
     "@libsql/kysely-libsql": "^0.4.1",
     "@lucia-auth/adapter-prisma": "^4.0.1",
-    "@node-rs/argon2": "^2.0.0",
+    "@node-rs/argon2": "^2.0.2",
     "@prisma/client": "^6.0.1",
     "@tanstack/solid-query": "^5.62.2",
     "@trpc/client": "^11.0.0-rc.390",
