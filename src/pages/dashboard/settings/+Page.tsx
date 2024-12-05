@@ -1,12 +1,9 @@
 import ProtectedRoute from '@/components/common/protected-route';
 import { useAuthContext } from '@/stores/auth.context';
 import getTitle from '@/utils/get-title';
-import { VoidProps } from 'solid-js';
 import { useMetadata } from 'vike-metadata-solid';
 
-type SettingsPageProps = {};
-
-export default function SettingsPage(props: VoidProps<SettingsPageProps>) {
+export default function SettingsPage() {
   useMetadata({
     title: getTitle('Settings'),
   });

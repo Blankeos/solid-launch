@@ -30,6 +30,6 @@ export const authDAO = {
         .execute();
 
       return { userId };
-    }
-  }
+    },
+  },
 };

@@ -1,4 +1,4 @@
-import { createSignal, FlowProps } from 'solid-js';
+import { FlowProps } from 'solid-js';
 
 // CSS
 import '@/styles/app.css';
@@ -38,8 +38,6 @@ useMetadata.setGlobalDefaults({
 });
 
 export default function Wrapper(props: FlowProps) {
-  const [counter, setCounter] = createSignal(0);
-
   return (
     <>
       <AuthContextProvider>

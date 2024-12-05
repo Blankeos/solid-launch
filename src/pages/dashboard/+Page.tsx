@@ -28,7 +28,7 @@ export default function DashboardPage() {
           ref={textAreaRef}
           class="resize rounded-md border p-2"
           value={`${textAreaWidth()} x ${textAreaHeight()}`}
-        ></textarea>
+        />
       </div>
     </ProtectedRoute>
   );

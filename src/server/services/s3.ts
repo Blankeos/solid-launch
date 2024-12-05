@@ -76,9 +76,6 @@ export async function transferFileFromTempToPermanent(uniqueId: string) {
 }
 
 export async function getImageUrlFromImageObjKey(imageObjKey: string) {
-  const key = `permanent/${imageObjKey}`;
-
-  // Create a presigned URL.
   try {
     // Create the command.
     const command = new GetObjectCommand({
