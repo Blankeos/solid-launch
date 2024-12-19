@@ -23,7 +23,7 @@ app.use(
     router: appRouter,
     createContext(opts, c) {
       return createContext(c);
-    }
+    },
   })
 );
 
@@ -31,7 +31,7 @@ if (privateConfig.NODE_ENV === 'production') {
   app.use(
     '/*',
     serveStatic({
-      root: `./dist/client/`
+      root: `./dist/client/`,
     })
   );
 }
@@ -41,7 +41,7 @@ app.get('*', async (c, next) => {
   const pageContextInit = {
     urlOriginal: c.req.url,
     request: c.req,
-    response: c.res
+    response: c.res,
   };
   const pageContext = await renderPage(pageContextInit);
   const { httpResponse } = pageContext;
@@ -57,14 +57,26 @@ app.get('*', async (c, next) => {
 });
 
 // Returning errors.
-app.onError((_, c) => {
+app.onError((error, c) => {
+  // Sentry.captureException(error); // Add sentry here or any monitoring service.
+
+  console.error({
+    cause: error.cause,
+    message: error.message,
+    stack: error.stack,
+  });
+
   return c.json(
     {
       error: {
-        message: c.error?.message ?? 'Something went wrong.'
-      }
+        cause: error.cause,
+        message: c.error?.message ?? 'Something went wrong.',
+        stack: privateConfig.NODE_ENV === 'production' ? undefined : error.stack,
+      },
     },
-    500
+    {
+      status: (error.cause as number) ?? 500,
+    }
   );
 });
 
@@ -72,5 +84,5 @@ console.log('Running at http://localhost:' + privateConfig.PORT);
 
 export default {
   port: privateConfig.PORT,
-  fetch: app.fetch
+  fetch: app.fetch,
 };

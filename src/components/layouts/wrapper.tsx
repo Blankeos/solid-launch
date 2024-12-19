@@ -12,7 +12,6 @@ import { CounterContextProvider } from '@/stores/counter.context';
 import { QueryClient } from '@tanstack/query-core';
 import { QueryClientProvider } from '@tanstack/solid-query';
 import { SolidQueryDevtools } from '@tanstack/solid-query-devtools';
-
 import { useMetadata } from 'vike-metadata-solid';
 
 const queryClient = new QueryClient();
