@@ -16,8 +16,8 @@
     "update": "bunx npm-check-updates --interactive --format group"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.715.0",
-    "@aws-sdk/s3-request-presigner": "^3.715.0",
+    "@aws-sdk/client-s3": "^3.716.0",
+    "@aws-sdk/s3-request-presigner": "^3.716.0",
     "@felte/solid": "^1.2.14",
     "@felte/validator-zod": "^1.0.18",
     "@hono/trpc-server": "^0.3.4",
