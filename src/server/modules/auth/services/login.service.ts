@@ -1,5 +1,4 @@
 import { authDAO } from '@/server/dao/auth.dao';
-import { lucia } from '@/server/lucia';
 import { verify } from '@node-rs/argon2';
 import { TRPCError } from '@trpc/server';
 
@@ -30,7 +29,7 @@ export async function login(params: LoginParams) {
     memoryCost: 19456,
     timeCost: 2,
     outputLen: 32,
-    parallelism: 1
+    parallelism: 1,
   });
 
   if (!validPassword) {
@@ -38,13 +37,16 @@ export async function login(params: LoginParams) {
     throw new TRPCError({ code: 'BAD_REQUEST', message: 'Incorrect username or password.' });
   }
 
-  const session = await lucia.createSession(existingUser.id, {});
-
-  const sessionCookie = lucia.createSessionCookie(session.id);
+  const session = await authDAO.session.createSession(existingUser.id);
+  if (!session) {
+    throw new TRPCError({
+      code: 'INTERNAL_SERVER_ERROR',
+      message: 'Something went wrong, no session was created. Try refreshing or logging in again.',
+    });
+  }
 
   return {
     userId: existingUser.id,
-    sessionId: session.id,
-    sessionCookie: sessionCookie
+    session: session,
   };
 }

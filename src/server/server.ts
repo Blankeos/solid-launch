@@ -1,4 +1,3 @@
-//
 // How to serve Vike (SSR middleware) via a Hono server.
 // https://github.com/phonzammi/vike-hono-example/blob/main/server/index.ts
 import { privateConfig } from '@/config.private';
@@ -74,9 +73,7 @@ app.onError((error, c) => {
         stack: privateConfig.NODE_ENV === 'production' ? undefined : error.stack,
       },
     },
-    {
-      status: (error.cause as number) ?? 500,
-    }
+    error.cause ?? 500
   );
 });
 

@@ -1,8 +1,9 @@
 import { initTRPC, TRPCError } from '@trpc/server';
 import { getCookie } from 'hono/cookie';
 import { createContext } from './context';
-import { lucia } from './lucia';
-import { validateSession } from './utils/validateSession';
+import { authDAO } from './dao/auth.dao';
+import { Session, User } from './db/types';
+import { deleteSessionTokenCookie, setSessionTokenCookie } from './modules/auth/auth.utilities';
 
 // ===========================================================================
 // Basic TRPC Setup
@@ -36,20 +37,20 @@ export const publicProcedure = t.procedure;
  */
 export const authedProcedure = t.procedure.use(async function isAuthed(opts) {
   // 1. Check cookie.session.
-  const sessionId = getCookie(opts.ctx.honoContext, lucia.sessionCookieName) ?? null;
+  const sessionId = getCookie(opts.ctx.honoContext, 'session') ?? null;
 
-  // 2. Validate session. (This is what I personally think Lucia's validateSession should be doing).
-  const { user, session, sessionCookie } = await validateSession(sessionId);
+  // 2. Validate session.
+  const { user, session } = await authDAO.session.validateSession(sessionId);
 
-  // use `header()` instead of setCookie to avoid TS errors
-  if (sessionCookie) {
-    opts.ctx.honoContext.header('Set-Cookie', sessionCookie.serialize(), {
-      append: true
-    });
+  // 3. Set session
+  if (session) {
+    setSessionTokenCookie(opts.ctx.honoContext, session.id, session.expiresAt);
+  } else {
+    deleteSessionTokenCookie(opts.ctx.honoContext);
   }
 
-  opts.ctx.user = user;
-  opts.ctx.session = session;
+  opts.ctx.user = user ?? null;
+  opts.ctx.session = session ?? null;
 
   return opts.next();
 });
@@ -57,12 +58,14 @@ export const authedProcedure = t.procedure.use(async function isAuthed(opts) {
 /**
  * A protected procedure prevents unauthorized users from performing a procedure.
  */
-export const protectedProcedure = authedProcedure.use(async function isRequired(opts) {
-  if (!opts.ctx.user?.id) {
-    throw new TRPCError({
-      code: 'UNAUTHORIZED'
-    });
-  }
+export const protectedProcedure = authedProcedure.use<{ user: User; session: Session }>(
+  async function isRequired(opts) {
+    if (!opts.ctx.user?.id) {
+      throw new TRPCError({
+        code: 'UNAUTHORIZED',
+      });
+    }
 
-  return opts.next();
-});
+    return opts.next();
+  }
+);

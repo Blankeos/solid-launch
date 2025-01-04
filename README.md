@@ -39,7 +39,7 @@ You can also try my other starters:
 - [x] **Prisma** - Great _migrations_ workflow, but I want to maximize perf.
 - [x] **Kysely** - Great typesafe _query builder_ for SQL, minimally wraps around db connection.
 - [x] **SQLite/LibSQL (Turso)** - Cheapest database, easy to use.
-- [x] **Lucia** - Makes self-rolling auth easy.
+- [x] **Lucia Book + Arctic** - Makes self-rolling auth easy, and not dependent on any third-party. (You may learn a thing or two with this low-level implementation as well!)
 - [ ] **SES or MimePost** - Emails
 - [ ] **Backblaze** - Cheap blob object storage with an S3-compatible API.
 - [ ] **Paddle** - Accept payments and pay foreign taxes.
@@ -91,7 +91,7 @@ I took care of the painstaking parts to help you develop easily on a SPA + SSR +
       import { useAuthContext } from '@/context/auth.context';
 
       export default function MyComponent() {
-       const { user } = useAuthContext();
+        const { user } = useAuthContext();
       }
       ```
 
@@ -101,7 +101,7 @@ I took care of the painstaking parts to help you develop easily on a SPA + SSR +
       import { useAuthContext } from '@/context/auth.context';
 
       export default function MyComponent() {
-      const { login, logout, register } = useAuthContext();
+        const { login, logout, register } = useAuthContext();
       }
       ```
 
@@ -117,15 +117,15 @@ I took care of the painstaking parts to help you develop easily on a SPA + SSR +
       export type Data = ReturnType<Awaited<typeof data>>;
 
       export async function data(pageContext: PageContext) {
-         const { request, response } = pageContext;
+        const { request, response } = pageContext;
 
-         const trpcClient = initTRPCSSRClient(request.header(), response.headers); // Pass the headers here.
+        const trpcClient = initTRPCSSRClient(request.header(), response.headers); // Pass the headers here.
 
-         const result = await trpcClient.auth.currentUser.query();
+        const result = await trpcClient.auth.currentUser.query();
 
-         return {
-            user: result.user ?? null,
-         };
+        return {
+          user: result.user ?? null,
+        };
       }
       ```
 
@@ -150,24 +150,23 @@ I took care of the painstaking parts to help you develop easily on a SPA + SSR +
       ```ts
       // +guard.ts (If you don't have +data.ts in the same route).
       export async function guard(pageContext: PageContext) {
-         const { request, response } = pageContext;
+        const { request, response } = pageContext;
 
-         const trpcClient = initTRPCSSRClient(request.header(), response.headers); // Pass the headers here.
+        const trpcClient = initTRPCSSRClient(request.header(), response.headers); // Pass the headers here.
 
-         const result = await trpcClient.auth.currentUser.query();
+        const result = await trpcClient.auth.currentUser.query();
 
-         if (!result.user) {
-            throw redirect("/") // Must be a public route.
-         }
+        if (!result.user) {
+          throw redirect('/'); // Must be a public route.
+        }
       }
 
       // +guard.ts (If you already have a +data.ts that gets the user).
       // ⚠️ I have not tested this. This depends on `+guard` being called after `+data` is resolved.
       export async function guard(pageContext: PageContext) {
-
-         if (!pageContext.data?.user) {
-            throw redirect("/"); // Must be a public route.
-         }
+        if (!pageContext.data?.user) {
+          throw redirect('/'); // Must be a public route.
+        }
       }
       ```
 

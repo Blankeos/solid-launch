@@ -1,5 +1,4 @@
 import { authDAO } from '@/server/dao/auth.dao';
-import { lucia } from '@/server/lucia';
 import { hash } from '@node-rs/argon2';
 import { TRPCError } from '@trpc/server';
 
@@ -24,7 +23,7 @@ export async function register(params: RegisterParams) {
   if (existingUsername) {
     throw new TRPCError({
       code: 'BAD_REQUEST',
-      message: `Username ${username} already exists.`
+      message: `Username ${username} already exists.`,
     });
   }
 
@@ -33,18 +32,21 @@ export async function register(params: RegisterParams) {
     memoryCost: 19456,
     timeCost: 2,
     outputLen: 32,
-    parallelism: 1
+    parallelism: 1,
   });
 
   const { userId } = await authDAO.user.createFromUsernameAndPassword(username, passwordHash);
 
-  const session = await lucia.createSession(userId, {});
-
-  const sessionCookie = lucia.createSessionCookie(session.id);
+  const session = await authDAO.session.createSession(userId);
+  if (!session) {
+    throw new TRPCError({
+      code: 'INTERNAL_SERVER_ERROR',
+      message: 'Something went wrong, no session was created. Try refreshing or logging in again.',
+    });
+  }
 
   return {
     userId,
-    sessionId: session.id,
-    sessionCookie: sessionCookie
+    session,
   };
 }

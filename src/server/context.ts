@@ -1,5 +1,5 @@
 import { Context } from 'hono';
-import { Session, User } from 'lucia';
+import { Session, User } from './db/types';
 
 export const createContext = async (c: Context) => {
   return {

@@ -1,6 +1,7 @@
-import { lucia } from '@/server/lucia';
+import { authDAO } from '@/server/dao/auth.dao';
 import { authedProcedure, publicProcedure, router } from '@/server/trpc';
 import { z } from 'zod';
+import { setSessionTokenCookie } from './auth.utilities';
 import { login } from './services/login.service';
 import { register } from './services/register.service';
 
@@ -19,15 +20,12 @@ export const authRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { userId, sessionCookie } = await login({
+      const { userId, session } = await login({
         username: input.username,
         password: input.password,
       });
 
-      // use `header()` instead of setCookie to avoid TS errors
-      ctx.honoContext.header('Set-Cookie', sessionCookie.serialize(), {
-        append: true,
-      });
+      setSessionTokenCookie(ctx.honoContext, session.id, session.expiresAt);
 
       return {
         user: {
@@ -38,7 +36,7 @@ export const authRouter = router({
     }),
   logout: authedProcedure.query(async ({ ctx }) => {
     if (ctx.session) {
-      await lucia.invalidateSession(ctx.session.id);
+      await authDAO.session.invalidateSession(ctx.session.id);
     }
 
     return {
@@ -53,15 +51,12 @@ export const authRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { userId, sessionCookie } = await register({
+      const { userId, session } = await register({
         username: input.username,
         password: input.password,
       });
 
-      // use `header()` instead of setCookie to avoid TS errors
-      ctx.honoContext.header('Set-Cookie', sessionCookie.serialize(), {
-        append: true,
-      });
+      setSessionTokenCookie(ctx.honoContext, session.id, session.expiresAt);
 
       return {
         user: {
