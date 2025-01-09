@@ -9,25 +9,39 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { PageRoutes } from '@/constants/page-routes';
 import { useAuthContext } from '@/stores/auth.context';
+import { cn } from '@/utils/cn';
+import { isLinkActive } from '@/utils/is-link-active';
 import { createMemo, For, Show, VoidProps } from 'solid-js';
 import { toast } from 'solid-sonner';
+import { usePageContext } from 'vike-solid/usePageContext';
 
 type VerticalNavProps = {};
 
 export default function VerticalNav(_props: VoidProps<VerticalNavProps>) {
   const { user, loading, logout } = useAuthContext();
+  const pageContext = usePageContext();
 
-  const navLinks = createMemo<{ name: string; href: PageRoutes; visible: boolean }[]>(() => {
+  const navLinks = createMemo<{ name: string; href: PageRoutes; visible: () => boolean }[]>(() => {
     return [
       {
         name: 'Home',
         href: PageRoutes.Home,
-        visible: true,
+        visible: () => true,
       },
       {
         name: 'About',
         href: PageRoutes.About,
-        visible: true,
+        visible: () => true,
+      },
+      {
+        name: 'Sign In',
+        href: PageRoutes.SignIn,
+        visible: () => !user() && !loading(),
+      },
+      {
+        name: 'Sign Up',
+        href: PageRoutes.SignUp,
+        visible: () => !user() && !loading(),
       },
     ];
   });
@@ -42,22 +56,18 @@ export default function VerticalNav(_props: VoidProps<VerticalNavProps>) {
       <ul class="flex items-center gap-x-5">
         <For each={navLinks()}>
           {({ name, href, visible }) => (
-            <Show when={visible}>
+            <Show when={visible()}>
               <li>
-                <a href={href}>{name}</a>
+                <a
+                  href={href}
+                  class={cn(isLinkActive(href, pageContext.urlPathname) && 'text-blue-500')}
+                >
+                  {name}
+                </a>
               </li>
             </Show>
           )}
         </For>
-
-        <Show when={!user() && !loading()}>
-          <li>
-            <a href={PageRoutes.SignIn}>Sign In</a>
-          </li>
-          <li>
-            <a href={PageRoutes.SignUp}>Sign Up</a>
-          </li>
-        </Show>
 
         <Show when={loading()}>
           <div class="flex h-12 w-12 items-center justify-center rounded-full bg-gray-200">
