@@ -29,6 +29,7 @@ export default [
         1,
         {
           argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
         },
       ],
     },
