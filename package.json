@@ -17,8 +17,8 @@
     "update": "bunx npm-check-updates --interactive --format group"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.731.1",
-    "@aws-sdk/s3-request-presigner": "^3.731.1",
+    "@aws-sdk/client-s3": "^3.732.0",
+    "@aws-sdk/s3-request-presigner": "^3.732.0",
     "@felte/solid": "^1.2.14",
     "@felte/validator-zod": "^1.0.18",
     "@hono/trpc-server": "^0.3.4",
@@ -59,7 +59,7 @@
     "prettier-plugin-tailwindcss": "^0.6.10",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.7.3",
-    "vite": "^6.0.10",
+    "vite": "^6.0.11",
     "vite-plugin-solid": "^2.11.0",
     "vite-plugin-solid-svg": "^0.8.1"
   }
