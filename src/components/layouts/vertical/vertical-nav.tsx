@@ -79,7 +79,7 @@ export default function VerticalNav(_props: VoidProps<VerticalNavProps>) {
           <DropdownMenu>
             <DropdownMenuTrigger>
               <div
-                class="h-12 w-12 flex-shrink-0 rounded-full"
+                class="h-12 w-12 shrink-0 rounded-full"
                 style={{
                   'background-position': 'center',
                   'background-size': 'cover',

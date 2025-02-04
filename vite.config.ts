@@ -16,6 +16,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const root = resolve(__dirname, '.');
 
+// Tailwind
+import tailwindcss from '@tailwindcss/vite';
+
 export default defineConfig({
   plugins: [
     devServer({
@@ -31,6 +34,7 @@ export default defineConfig({
       ],
       injectClientScript: false,
     }),
+    tailwindcss(),
     vike(),
     vikeSolid(),
     solidSvg(),
