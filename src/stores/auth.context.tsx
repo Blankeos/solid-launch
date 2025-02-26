@@ -7,6 +7,7 @@ import {
   useContext,
   type Accessor,
 } from 'solid-js';
+import { toast } from 'solid-sonner';
 
 import { useData } from 'vike-solid/useData';
 
@@ -63,7 +64,7 @@ export const AuthContextProvider: FlowComponent = (props) => {
   const data = useData<{ user: { id: string; username: string } }>();
 
   const [user, setUser] = createSignal<ReturnType<AuthContextValue['user']>>(data?.user ?? null);
-  const [loading, setLoading] = createSignal<boolean>(false);
+  const [loading, setLoading] = createSignal<boolean>(true);
 
   async function register(username: string, password: string) {
     const result = await trpcClient.auth.register.mutate({
@@ -105,22 +106,28 @@ export const AuthContextProvider: FlowComponent = (props) => {
 
   // Gets the current user at the start of the app.
   onMount(async () => {
-    // If already hydrated, don't refetch the current user..
+    // If already hydrated, don't refetch the current user.
     if (user()) {
       setLoading(false);
       return;
     }
-
     setLoading(true);
-    const result = await trpcClient.auth.currentUser.query();
-    if (result.user) {
-      setUser(result.user);
-      setLoading(false);
-      return result.user;
-    }
+    try {
+      const result = await trpcClient.auth.currentUser.query();
 
-    setUser(null);
-    setLoading(false);
+      if (result.user) {
+        setUser(result.user as any);
+        setLoading(false);
+      } else {
+        setUser(null);
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error('Could not fetch the user.');
+      }
+    } finally {
+      setLoading(false);
+    }
   });
 
   return (
