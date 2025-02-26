@@ -103,7 +103,7 @@ export const authDAO = {
       const user = await db
         .selectFrom('User')
         .selectAll()
-        .where('User.username', '=', userId)
+        .where('User.id', '=', userId)
         .executeTakeFirst();
 
       return user;
