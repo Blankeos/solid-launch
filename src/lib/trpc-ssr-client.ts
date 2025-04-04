@@ -49,6 +49,7 @@ export const initTRPCSSRClient = (
           for (const [key, value] of response.headers) {
             // Don't set back the Content-Type header (Otherwise, content-type HTML would become a json).
             if (key.toLowerCase() === 'content-type') continue;
+            if (key.toLowerCase() === 'content-length') continue; // Don't set back the content-length, otherwise the browser will cut off the HTML response trpc11 adds this somehow.
 
             responseHeaders?.set(key, value);
           }
