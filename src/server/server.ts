@@ -23,6 +23,9 @@ app.use(
     createContext(opts, c) {
       return createContext(c);
     },
+    onError({ error }) {
+      throw error;
+    },
   })
 );
 
