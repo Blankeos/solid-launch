@@ -19,7 +19,7 @@ export default function Page() {
 
   return (
     // Full-page container, centers content, applies base styling
-    <div class="flex min-h-screen flex-col items-center justify-center bg-neutral-50 p-4 font-sans text-neutral-800 antialiased">
+    <div class="flex min-h-screen flex-col items-center justify-center bg-neutral-50 p-4 text-neutral-800 antialiased">
       <Show
         when={is404}
         fallback={

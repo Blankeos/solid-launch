@@ -7,7 +7,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { PageRoutes } from '@/constants/page-routes';
+import { getRoute } from '@/route-tree.gen';
 import { useAuthContext } from '@/stores/auth.context';
 import { cn } from '@/utils/cn';
 import { isLinkActive } from '@/utils/is-link-active';
@@ -21,26 +21,26 @@ export default function VerticalNav(_props: VoidProps<VerticalNavProps>) {
   const { user, loading, logout } = useAuthContext();
   const pageContext = usePageContext();
 
-  const navLinks = createMemo<{ name: string; href: PageRoutes; visible: () => boolean }[]>(() => {
+  const navLinks = createMemo<{ name: string; href: string; visible: () => boolean }[]>(() => {
     return [
       {
         name: 'Home',
-        href: PageRoutes.Home,
+        href: getRoute('/'),
         visible: () => true,
       },
       {
         name: 'About',
-        href: PageRoutes.About,
+        href: getRoute('/about'),
         visible: () => true,
       },
       {
         name: 'Sign In',
-        href: PageRoutes.SignIn,
+        href: getRoute('/sign-in'),
         visible: () => !user() && !loading(),
       },
       {
         name: 'Sign Up',
-        href: PageRoutes.SignUp,
+        href: getRoute('/sign-up'),
         visible: () => !user() && !loading(),
       },
     ];
@@ -48,7 +48,7 @@ export default function VerticalNav(_props: VoidProps<VerticalNavProps>) {
 
   return (
     <nav class="flex h-20 items-center justify-between gap-x-5 px-8">
-      <a class="flex items-center gap-x-2" href={PageRoutes.Home}>
+      <a class="flex items-center gap-x-2" href={getRoute('/')}>
         <img class="h-16 w-16" src="/icon-logo.svg" />
         <span>Solid Launch</span>
       </a>
@@ -90,7 +90,7 @@ export default function VerticalNav(_props: VoidProps<VerticalNavProps>) {
 
             <DropdownMenuContent>
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuItem as="a" href={PageRoutes.Dashboard}>
+              <DropdownMenuItem as="a" href={getRoute('/dashboard')}>
                 Dashboard
               </DropdownMenuItem>
               <DropdownMenuSeparator />

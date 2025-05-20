@@ -16,6 +16,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const root = resolve(__dirname, '.');
 
+// Routegen
+import vikeRoutegen from '@blankeos/vike-routegen';
+
 // Tailwind
 import tailwindcss from '@tailwindcss/vite';
 
@@ -37,6 +40,7 @@ export default defineConfig({
     tailwindcss(),
     vike(),
     vikeSolid(),
+    vikeRoutegen(),
     solidSvg(),
   ],
   server: {

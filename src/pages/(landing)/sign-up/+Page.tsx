@@ -1,4 +1,4 @@
-import { PageRoutes } from '@/constants/page-routes';
+import { getRoute } from '@/route-tree.gen';
 import { useAuthContext } from '@/stores/auth.context';
 import { useCounterContext } from '@/stores/counter.context';
 import getTitle from '@/utils/get-title';
@@ -31,7 +31,7 @@ export default function SignUpPage() {
           const result = await register(values.username, values.password);
 
           if (result) {
-            navigate(PageRoutes.Dashboard);
+            navigate(getRoute('/dashboard'));
           }
         },
         {

@@ -49,6 +49,7 @@
     "zod": "^3.25.7"
   },
   "devDependencies": {
+    "@blankeos/vike-routegen": "^0.0.2",
     "@hono/vite-dev-server": "^0.19.0",
     "@tailwindcss/postcss": "^4.1.7",
     "@tanstack/solid-query-devtools": "^5.76.0",
