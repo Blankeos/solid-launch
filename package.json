@@ -40,7 +40,7 @@
     "prisma": "^6.8.2",
     "prisma-kysely": "^1.8.0",
     "solid-js": "^1.9.7",
-    "solid-sonner": "npm:@blankeos/solid-sonner",
+    "solid-sonner": "^0.2.8",
     "tailwind-merge": "^3.3.0",
     "tailwindcss-animate": "^1.0.7",
     "vike": "^0.4.229",
