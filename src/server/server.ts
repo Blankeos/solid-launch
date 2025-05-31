@@ -63,7 +63,5 @@ app.onError((error, c) => {
   );
 });
 
-console.log('Running at http://localhost:' + privateConfig.PORT);
-
 // No need to export default (especially Bun).
 serve(app, { port: privateConfig.PORT });

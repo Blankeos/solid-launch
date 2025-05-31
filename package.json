@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "bunx --bun vike dev",
-    "build": "vike build",
+    "build": "bunx --bun vike build",
     "preview": "NODE_ENV=production bun run dist/server/index.js",
     "preview-static": "vite preview",
     "check": "tsc --noemit",
