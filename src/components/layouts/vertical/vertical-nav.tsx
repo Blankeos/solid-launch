@@ -48,7 +48,7 @@ export default function VerticalNav(_props: VoidProps<VerticalNavProps>) {
 
   return (
     <nav class="flex h-20 items-center justify-between gap-x-5 px-8">
-      <a class="flex items-center gap-x-2" href={getRoute('/')}>
+      <a class="flex items-center gap-x-2" href={'/'}>
         <img class="h-16 w-16" src="/icon-logo.svg" />
         <span>Solid Launch</span>
       </a>
@@ -90,7 +90,7 @@ export default function VerticalNav(_props: VoidProps<VerticalNavProps>) {
 
             <DropdownMenuContent>
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuItem as="a" href={getRoute('/dashboard')}>
+              <DropdownMenuItem as="a" href={'/dashboard'}>
                 Dashboard
               </DropdownMenuItem>
               <DropdownMenuSeparator />

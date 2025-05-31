@@ -5,9 +5,6 @@ import solidSvg from 'vite-plugin-solid-svg'; // Custom Icons (SVG)
 import vikeSolid from 'vike-solid/vite';
 import vike from 'vike/plugin';
 
-// Hono
-import devServer from '@hono/vite-dev-server';
-
 // Vite
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -17,32 +14,13 @@ const __dirname = dirname(__filename);
 const root = resolve(__dirname, '.');
 
 // Routegen
-import vikeRoutegen from '@blankeos/vike-routegen';
+import vikeRoutegen from '@blankeos/vike-routegen/';
 
 // Tailwind
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
-  plugins: [
-    devServer({
-      entry: './src/server/server.ts',
-      exclude: [
-        /^\/@.+$/,
-        /.*\.(ts|tsx|vue)($|\?)/,
-        /.*\.(s?css|less)($|\?)/,
-        /^\/favicon\.ico$/,
-        /.*\.(svg|png)($|\?)/,
-        /^\/(public|assets|static)\/.+/,
-        /^\/node_modules\/.*/,
-      ],
-      injectClientScript: false,
-    }),
-    tailwindcss(),
-    vike(),
-    vikeSolid(),
-    vikeRoutegen(),
-    solidSvg(),
-  ],
+  plugins: [vike(), vikeSolid(), vikeRoutegen(), solidSvg(), tailwindcss()],
   server: {
     port: 3000,
   },
