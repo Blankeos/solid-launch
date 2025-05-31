@@ -1,4 +1,4 @@
-import { getRoute } from '@/route-tree.gen';
+// import { getRoute } from '@/route-tree.gen';
 import { useAuthContext } from '@/stores/auth.context';
 import { useCounterContext } from '@/stores/counter.context';
 import getTitle from '@/utils/get-title';
@@ -30,7 +30,7 @@ export default function SignInPage() {
         async () => {
           const result = await login(values.username, values.password);
 
-          if (result) navigate(getRoute('/dashboard'));
+          if (result) navigate('/dashboard');
         },
         {
           error: 'Failed to login',

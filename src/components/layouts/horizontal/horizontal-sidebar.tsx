@@ -5,7 +5,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { getRoute } from '@/route-tree.gen';
+// import { getRoute } from '@/route-tree.gen';
 import { useAuthContext } from '@/stores/auth.context';
 import { DropdownMenu } from '@kobalte/core/dropdown-menu';
 import { Show, VoidProps } from 'solid-js';
@@ -19,7 +19,7 @@ export default function HorizontalSidebar(_props: VoidProps<HorizontalSidebarPro
   return (
     <div class="flex h-full w-56 shrink-0 flex-col border-r px-8 py-8">
       <div class="flex items-center gap-x-3">
-        <a href={getRoute('/')} class="text-4xl text-gray-500">
+        <a href={'/'} class="text-4xl text-gray-500">
           {'<'}
         </a>
         <Show when={!loading() && user()}>
@@ -37,7 +37,7 @@ export default function HorizontalSidebar(_props: VoidProps<HorizontalSidebarPro
 
             <DropdownMenuContent>
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuItem as="a" href={getRoute('/dashboard/settings')}>
+              <DropdownMenuItem as="a" href={'/dashboard/settings'}>
                 Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />

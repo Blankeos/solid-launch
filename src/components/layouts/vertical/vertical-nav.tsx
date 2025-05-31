@@ -7,7 +7,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { getRoute } from '@/route-tree.gen';
+// import { getRoute } from '@/route-tree.gen';
 import { useAuthContext } from '@/stores/auth.context';
 import { cn } from '@/utils/cn';
 import { isLinkActive } from '@/utils/is-link-active';
@@ -25,22 +25,22 @@ export default function VerticalNav(_props: VoidProps<VerticalNavProps>) {
     return [
       {
         name: 'Home',
-        href: getRoute('/'),
+        href: '/',
         visible: () => true,
       },
       {
         name: 'About',
-        href: getRoute('/about'),
+        href: '/about',
         visible: () => true,
       },
       {
         name: 'Sign In',
-        href: getRoute('/sign-in'),
+        href: '/sign-in',
         visible: () => !user() && !loading(),
       },
       {
         name: 'Sign Up',
-        href: getRoute('/sign-up'),
+        href: '/sign-up',
         visible: () => !user() && !loading(),
       },
     ];
@@ -48,7 +48,7 @@ export default function VerticalNav(_props: VoidProps<VerticalNavProps>) {
 
   return (
     <nav class="flex h-20 items-center justify-between gap-x-5 px-8">
-      <a class="flex items-center gap-x-2" href={getRoute('/')}>
+      <a class="flex items-center gap-x-2" href={'/'}>
         <img class="h-16 w-16" src="/icon-logo.svg" />
         <span>Solid Launch</span>
       </a>
@@ -90,7 +90,7 @@ export default function VerticalNav(_props: VoidProps<VerticalNavProps>) {
 
             <DropdownMenuContent>
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuItem as="a" href={getRoute('/dashboard')}>
+              <DropdownMenuItem as="a" href={'/dashboard'}>
                 Dashboard
               </DropdownMenuItem>
               <DropdownMenuSeparator />
