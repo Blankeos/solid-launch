@@ -43,11 +43,18 @@ You can also try my other starters:
 - [x] **Lucia Book + Arctic** - Makes self-rolling auth easy, and not dependent on any third-party. (You may learn a thing or two with this low-level implementation as well!)
 - [ ] **SES or MimePost** - Emails
 - [ ] **Backblaze** - Cheap blob object storage with an S3-compatible API.
-- [ ] **Paddle** - Accept payments and pay foreign taxes.
+- [ ] **LemonSqueezy** - Accept payments and pay foreign taxes.
 
 ### QuickStart
 
 I'll assume you don't want to change anything with this setup after cloning so let's get to work!
+
+1. Get template
+
+```sh
+npx degit https://github.com/blankeos/solid-launch <your-app-name>
+cd <your-app-name>
+```
 
 1. Copy the environment variables
 
@@ -55,7 +62,7 @@ I'll assume you don't want to change anything with this setup after cloning so l
    cp .env.example .env
    ```
 
-2. Replace the `<absolute_url>` in the local database with:
+1. Replace the `<absolute_url>` in the local database with:
 
    ```sh
    pwd # If it outputs: /User/Projects/solid-launch
@@ -64,14 +71,14 @@ I'll assume you don't want to change anything with this setup after cloning so l
    DATABASE_URL="file:/User/Projects/solid-launch/local.db"
    ```
 
-3. Generate
+1. Generate
 
    ```sh
    bun db:generate # generates Kysely and Prisma client types.
    bun db:migrate # migrates your database.
    ```
 
-4. Install deps and run dev
+1. Install deps and run dev
 
    ```sh
    bun install
