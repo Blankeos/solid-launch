@@ -7,7 +7,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-// import { getRoute } from '@/route-tree.gen';
+import { getRoute } from '@/route-tree.gen';
 import { useAuthContext } from '@/stores/auth.context';
 import { cn } from '@/utils/cn';
 import { isLinkActive } from '@/utils/is-link-active';
@@ -25,22 +25,22 @@ export default function VerticalNav(_props: VoidProps<VerticalNavProps>) {
     return [
       {
         name: 'Home',
-        href: '/',
+        href: getRoute('/'),
         visible: () => true,
       },
       {
         name: 'About',
-        href: '/about',
+        href: getRoute('/about'),
         visible: () => true,
       },
       {
         name: 'Sign In',
-        href: '/sign-in',
+        href: getRoute('/sign-in'),
         visible: () => !user() && !loading(),
       },
       {
         name: 'Sign Up',
-        href: '/sign-up',
+        href: getRoute('/sign-up'),
         visible: () => !user() && !loading(),
       },
     ];

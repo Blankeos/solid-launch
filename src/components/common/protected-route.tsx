@@ -1,5 +1,5 @@
 import { IconLoading } from '@/assets/icons';
-// import { getRoute } from '@/route-tree.gen';
+import { getRoute } from '@/route-tree.gen';
 import { useAuthContext } from '@/stores/auth.context';
 import { createEffect, createSignal, FlowProps, Match, mergeProps, Show, Switch } from 'solid-js';
 import { navigate } from 'vike/client/router';
@@ -14,7 +14,7 @@ type ProtectedRouteProps = {
 export default function ProtectedRoute(props: FlowProps<ProtectedRouteProps>) {
   const { user, loading } = useAuthContext();
 
-  const defaultProps = mergeProps({ fallback: 'sign-in' }, props);
+  const defaultProps = mergeProps({ fallback: getRoute('/sign-in') }, props);
 
   const [showProtector, setShowProtector] = createSignal(!user());
 

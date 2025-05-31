@@ -14,12 +14,13 @@ const __dirname = dirname(__filename);
 const root = resolve(__dirname, '.');
 
 // Routegen
+import vikeRoutegen from '@blankeos/vike-routegen/';
 
 // Tailwind
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
-  plugins: [vike(), vikeSolid(), solidSvg(), tailwindcss()],
+  plugins: [vike(), vikeSolid(), vikeRoutegen(), solidSvg(), tailwindcss()],
   server: {
     port: 3000,
   },

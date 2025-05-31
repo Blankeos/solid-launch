@@ -50,6 +50,7 @@
     "zod": "^3.25.42"
   },
   "devDependencies": {
+    "@blankeos/vike-routegen": "^0.0.2",
     "@tailwindcss/postcss": "^4.1.8",
     "@tanstack/solid-query-devtools": "^5.79.0",
     "@types/bun": "^1.2.15",
