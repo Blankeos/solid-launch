@@ -34,7 +34,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.13",
-    "hono": "^4.7.10",
+    "hono": "^4.7.11",
     "kysely": "^0.28.2",
     "kysely-bun-worker": "^1.2.1",
     "prisma": "^6.8.2",
