@@ -19,8 +19,8 @@
     "update": "bunx npm-check-updates --interactive --format group"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.825.0",
-    "@aws-sdk/s3-request-presigner": "^3.825.0",
+    "@aws-sdk/client-s3": "^3.826.0",
+    "@aws-sdk/s3-request-presigner": "^3.826.0",
     "@felte/solid": "^1.2.14",
     "@felte/validator-zod": "^1.0.18",
     "@hono/trpc-server": "^0.3.4",
@@ -45,17 +45,17 @@
     "tailwindcss-animate": "^1.0.7",
     "vike": "^0.4.231",
     "vike-metadata-solid": "^1.0.4",
-    "vike-server": "^1.0.18",
+    "vike-server": "^1.0.19",
     "vike-solid": "^0.7.11",
-    "zod": "^3.25.55"
+    "zod": "^3.25.57"
   },
   "devDependencies": {
     "@blankeos/vike-routegen": "^0.0.2",
     "@tailwindcss/postcss": "^4.1.8",
     "@tanstack/solid-query-devtools": "^5.80.6",
     "@types/bun": "^1.2.15",
-    "@typescript-eslint/eslint-plugin": "^8.33.1",
-    "@typescript-eslint/parser": "^8.33.1",
+    "@typescript-eslint/eslint-plugin": "^8.34.0",
+    "@typescript-eslint/parser": "^8.34.0",
     "eslint": "^9.28.0",
     "eslint-plugin-solid": "^0.14.5",
     "postcss": "^8.5.4",
