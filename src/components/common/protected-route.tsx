@@ -16,7 +16,7 @@ export default function ProtectedRoute(props: FlowProps<ProtectedRouteProps>) {
 
   const defaultProps = mergeProps({ fallback: getRoute('/sign-in') }, props);
 
-  const [showProtector, setShowProtector] = createSignal(!user());
+  const [showProtector, setShowProtector] = createSignal(!Boolean(user()));
 
   createEffect(() => {
     if (loading()) return; // Still fetching. Don't do anything.

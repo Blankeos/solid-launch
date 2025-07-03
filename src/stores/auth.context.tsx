@@ -64,7 +64,7 @@ export const AuthContextProvider: FlowComponent = (props) => {
   const data = useData<{ user: { id: string; username: string } }>();
 
   const [user, setUser] = createSignal<ReturnType<AuthContextValue['user']>>(data?.user ?? null);
-  const [loading, setLoading] = createSignal<boolean>(true);
+  const [loading, setLoading] = createSignal<boolean>(data?.user ? false : true);
 
   async function register(username: string, password: string) {
     const result = await trpcClient.auth.register.mutate({
