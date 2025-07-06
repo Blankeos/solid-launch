@@ -1,15 +1,9 @@
-import {
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { DropdownMenuComp } from '@/components/ui/dropdown-menu';
 import { getRoute } from '@/route-tree.gen';
 import { useAuthContext } from '@/stores/auth.context';
-import { DropdownMenu } from '@kobalte/core/dropdown-menu';
 import { Show, VoidProps } from 'solid-js';
 import { toast } from 'solid-sonner';
+import { navigate } from 'vike/client/router';
 
 type HorizontalSidebarProps = {};
 
@@ -23,34 +17,39 @@ export default function HorizontalSidebar(_props: VoidProps<HorizontalSidebarPro
           {'<'}
         </a>
         <Show when={!loading() && user()}>
-          <DropdownMenu>
-            <DropdownMenuTrigger>
-              <div
-                class="h-12 w-12 shrink-0 rounded-full"
-                style={{
-                  'background-position': 'center',
-                  'background-size': 'cover',
-                  'background-image': `url(https://thicc-uwu.mywaifulist.moe/waifus/satoru-gojo-sorcery-fight/bOnNB0cwHheCCRGzjHLSolqabo41HxX9Wv33kfW7.jpg?class=thumbnail)`,
-                }}
-              />
-            </DropdownMenuTrigger>
-
-            <DropdownMenuContent>
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuItem as="a" href={getRoute('/dashboard/settings')}>
-                Settings
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => {
+          <DropdownMenuComp
+            options={[
+              { label: 'My Account' },
+              {
+                itemId: 'dashboard',
+                itemDisplay: 'Dashboard',
+                itemOnSelect: () => navigate(getRoute('/dashboard')),
+              },
+              {
+                itemId: 'settings',
+                itemDisplay: 'Settings',
+                itemOnSelect: () => navigate(getRoute('/dashboard/settings')),
+              },
+              { separator: true },
+              {
+                itemId: 'logout',
+                itemDisplay: 'Logout',
+                itemOnSelect: () => {
                   logout();
                   toast.success('Logged out!');
-                }}
-              >
-                Logout
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                },
+              },
+            ]}
+          >
+            <div
+              class="h-12 w-12 shrink-0 rounded-full"
+              style={{
+                'background-position': 'center',
+                'background-size': 'cover',
+                'background-image': `url(https://thicc-uwu.mywaifulist.moe/waifus/satoru-gojo-sorcery-fight/bOnNB0cwHheCCRGzjHLSolqabo41HxX9Wv33kfW7.jpg?class=thumbnail)`,
+              }}
+            />
+          </DropdownMenuComp>
         </Show>
       </div>
     </div>
