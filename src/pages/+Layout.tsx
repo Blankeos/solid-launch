@@ -2,7 +2,7 @@ import { FlowProps } from 'solid-js';
 
 // CSS
 import '@/styles/app.css';
-import '@/styles/nprogress.css';
+import '@/styles/bprogress.css';
 
 import Wrapper from '@/components/layouts/wrapper';
 

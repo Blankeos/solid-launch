@@ -1,9 +1,5 @@
 import { FlowProps } from 'solid-js';
 
-// CSS
-import '@/styles/app.css';
-import '@/styles/nprogress.css';
-
 import { Toaster } from 'solid-sonner';
 
 import { AuthContextProvider } from '@/stores/auth.context';
