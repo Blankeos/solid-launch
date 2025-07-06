@@ -1,4 +1,4 @@
-import { privateConfig } from '@/config.private';
+import { privateEnv } from '@/env.private';
 import { trpcServer } from '@hono/trpc-server';
 import { Hono } from 'hono';
 import { appRouter } from './_app';
@@ -56,7 +56,7 @@ app.onError((error, c) => {
       error: {
         cause: error.cause,
         message: c.error?.message ?? 'Something went wrong.',
-        stack: privateConfig.NODE_ENV === 'production' ? undefined : error.stack,
+        stack: privateEnv.NODE_ENV === 'production' ? undefined : error.stack,
       },
     },
     error.cause ?? 500
@@ -64,4 +64,4 @@ app.onError((error, c) => {
 });
 
 // No need to export default (especially Bun).
-serve(app, { port: privateConfig.PORT });
+serve(app, { port: privateEnv.PORT });

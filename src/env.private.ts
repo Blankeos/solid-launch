@@ -1,38 +1,43 @@
-/** Only place private configurations here. */
-export const privateConfig = {
-  /** Port of the app (in dev). */
-  PORT: (process.env.PORT || 3000) as number,
-  /** Development or Production. */
-  NODE_ENV: (process.env.NODE_ENV ?? 'development') as 'development' | 'production',
-  /** DB-specific settings. */
-  database: {
-    /** The url of the database. */
-    URL: process.env.DATABASE_URL! as string,
-    /** Not needed in development. https://docs.turso.tech/local-development#sqlite */
-    AUTH_TOKEN: process.env.DATABASE_AUTH_TOKEN! as string,
+import { createEnv } from '@t3-oss/env-core';
+import z from 'zod';
+
+export const privateEnv = createEnv({
+  runtimeEnv: process.env,
+  server: {
+    /** Development|Prod. Port of the app. */
+    PORT: z.number().default(3000),
+    /** Development|Prod. */
+    NODE_ENV: z.enum(['development', 'production']).default('development'),
+
+    // Databasej
+    /** Development|Prod. Url of the database. */
+    DATABASE_URL: z.string(),
+    /** Development(Optional)|Prod. https://docs.turso.tech/local-development#sqlite. */
+    DATABASE_AUTH_TOKEN: z
+      .string()
+      .optional()
+      .refine((val) => (process.env.NODE_ENV !== 'development' ? !!val : true)),
+
+    // Auth
+    /** Development|Prod. GitHub OAuth client ID. */
+    GITHUB_CLIENT_ID: z.string(),
+    /** Development|Prod. GitHub OAuth client secret. */
+    GITHUB_CLIENT_SECRET: z.string(),
+    /** Development|Prod. Google OAuth client ID. */
+    GOOGLE_OAUTH_CLIENT_ID: z.string(),
+    /** Development|Prod. Google OAuth client secret. */
+    GOOGLE_OAUTH_CLIENT_SECRET: z.string(),
+
+    // S3
+    /** Development|Prod. S3 access key ID. */
+    S3_ACCESS_KEY_ID: z.string(),
+    /** Development|Prod. S3 secret access key. */
+    S3_SECRET_ACCESS_KEY: z.string(),
+    /** Development|Prod. S3 bucket name. */
+    S3_BUCKET_NAME: z.string().default('solid-launch'),
+    /** Development|Prod. S3 region. */
+    S3_REGION: z.string().default('us-east-1'),
+    /** Development|Prod. S3 endpoint. Important that this starts with http:// or https:// */
+    S3_ENDPOINT: z.string().default('http://127.0.0.1:9000'),
   },
-  auth: {
-    github: {
-      CLIENT_ID: process.env.GITHUB_CLIENT_ID!,
-      CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET!,
-    },
-    google: {
-      CLIENT_ID: process.env.GOOGLE_OAUTH_CLIENT_ID!,
-      CLIENT_ID_SECRET: process.env.GOOGLE_OAUTH_CLIENT_SECRET!,
-      REDIRECT_URI: process.env.GOOGLE_OAUTH_REDIRECT_URI!,
-    },
-  },
-  /** S3Bucket-specific settings. */
-  s3: {
-    /** Application Key ID in B2 (accessKeyId in S3) */
-    ACCESS_KEY_ID: process.env.S3_ACCESS_KEY_ID! as string,
-    /** Application Key in B2 (secretAccessKey in S3) */
-    SECRET_ACCESS_KEY: process.env.S3_SECRET_ACCESS_KEY! as string,
-    /** Name of the bucket. */
-    BUCKET_NAME: (process.env.S3_BUCKET_NAME! ?? 'solid-launch') as string,
-    /** Region of the bucket. */
-    REGION: process.env.S3_REGION! ?? ('us-east-1' as string),
-    /** URL of the bucket. Important that this starts with http:// or https:// */
-    ENDPOINT: (process.env.S3_ENDPOINT! ?? 'http://127.0.0.1:9000') as string,
-  },
-};
+});

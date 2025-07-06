@@ -1,8 +1,8 @@
-import { privateConfig } from '@/config.private';
+import { privateEnv } from '@/env.private';
 import { Context } from 'hono';
 
 export function setSessionTokenCookie(context: Context, token: string, expiresAt: string): void {
-  if (privateConfig.NODE_ENV === 'production') {
+  if (privateEnv.NODE_ENV === 'production') {
     context.header(
       'Set-Cookie',
       `session=${token}; HttpOnly; SameSite=Lax; Expires=${new Date(expiresAt).toUTCString()}; Path=/; Secure;`,
@@ -18,7 +18,7 @@ export function setSessionTokenCookie(context: Context, token: string, expiresAt
 }
 
 export function deleteSessionTokenCookie(context: Context): void {
-  if (privateConfig.NODE_ENV === 'production') {
+  if (privateEnv.NODE_ENV === 'production') {
     context.header('Set-Cookie', 'session=; HttpOnly; SameSite=Lax; Max-Age=0; Path=/; Secure;');
   } else {
     context.header('Set-Cookie', 'session=; HttpOnly; SameSite=Lax; Max-Age=0; Path=/');

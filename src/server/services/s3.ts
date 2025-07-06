@@ -1,4 +1,4 @@
-import { privateConfig } from '@/config.private';
+import { privateEnv } from '@/env.private';
 import {
   CopyObjectCommand,
   DeleteObjectCommand,
@@ -14,11 +14,11 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 /** The new AWS-SDK V3 JavaScript SDK */
 export const s3Client = new S3Client({
-  endpoint: privateConfig.s3.ENDPOINT,
-  region: privateConfig.s3.REGION,
+  endpoint: privateEnv.S3_ENDPOINT,
+  region: privateEnv.S3_REGION,
   credentials: {
-    accessKeyId: privateConfig.s3.ACCESS_KEY_ID,
-    secretAccessKey: privateConfig.s3.SECRET_ACCESS_KEY,
+    accessKeyId: privateEnv.S3_ACCESS_KEY_ID,
+    secretAccessKey: privateEnv.S3_SECRET_ACCESS_KEY,
   },
 });
 
@@ -34,7 +34,7 @@ export const s3Client = new S3Client({
 export async function generateUploadUrl(uniqueId: string) {
   //  Been having issues with Put:
   const command = new PutObjectCommand({
-    Bucket: privateConfig.s3.BUCKET_NAME,
+    Bucket: privateEnv.S3_BUCKET_NAME,
     Key: `temp/${uniqueId}`,
   });
 
@@ -59,8 +59,8 @@ export async function transferFileFromTempToPermanent(uniqueId: string) {
   // Copy the object to the new location.
   await s3Client.send(
     new CopyObjectCommand({
-      Bucket: privateConfig.s3.BUCKET_NAME,
-      CopySource: `${privateConfig.s3.BUCKET_NAME}/${oldKey}`,
+      Bucket: privateEnv.S3_BUCKET_NAME,
+      CopySource: `${privateEnv.S3_BUCKET_NAME}/${oldKey}`,
       Key: newKey,
     })
   );
@@ -69,7 +69,7 @@ export async function transferFileFromTempToPermanent(uniqueId: string) {
   // Delete from old location.
   await s3Client.send(
     new DeleteObjectCommand({
-      Bucket: privateConfig.s3.BUCKET_NAME,
+      Bucket: privateEnv.S3_BUCKET_NAME,
       Key: oldKey,
     })
   );
@@ -79,7 +79,7 @@ export async function getImageUrlFromImageObjKey(imageObjKey: string) {
   try {
     // Create the command.
     const command = new GetObjectCommand({
-      Bucket: privateConfig.s3.BUCKET_NAME,
+      Bucket: privateEnv.S3_BUCKET_NAME,
       /** Assumes that this image is already permanent. */
       Key: `permanent/${imageObjKey}`,
     });

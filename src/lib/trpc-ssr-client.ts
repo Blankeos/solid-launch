@@ -1,4 +1,3 @@
-import { publicConfig } from '@/config.public';
 import { AppRouter } from '@/server/_app';
 import { createTRPCClient, httpBatchLink } from '@trpc/client';
 
@@ -22,24 +21,25 @@ import { createTRPCClient, httpBatchLink } from '@trpc/client';
  *
  *    // Every trpc request using this client will now include request headers
  *    // from the browser, and pass response headers back to the browser.
- *    const trpcClient = initTRPCSSRClient(request.header(), response.headers);
+ *    const trpcClient = initTRPCSSRClient({ baseUrl: '...', requestHeaders: request.header(), responseHeaders: response.headers});
  *
  *    const result = await trpcClient.auth.currentUser.query();
  * }
  */
-export const initTRPCSSRClient = (
+export const initTRPCSSRClient = (params: {
+  baseUrl: string;
   /** Pass the request headers sent by the browser here. */
-  requestHeaders: Record<string, string>,
+  requestHeaders: Record<string, string>;
   /** Pass the response headers to be sent back to the browser here. */
-  responseHeaders: Headers
-) => {
+  responseHeaders: Headers;
+}) => {
   return createTRPCClient<AppRouter>({
     links: [
       httpBatchLink({
-        url: `${publicConfig.BASE_ORIGIN}/api`,
+        url: `${params.baseUrl}/api`,
 
         // Proxy the Request headers from the browser -> server.
-        headers: () => requestHeaders ?? {},
+        headers: () => params.requestHeaders ?? {},
 
         // Proxy the Response headers from the server -> browser.
         fetch: async (url, options) => {
@@ -51,7 +51,7 @@ export const initTRPCSSRClient = (
             if (key.toLowerCase() === 'content-type') continue;
             if (key.toLowerCase() === 'content-length') continue; // Don't set back the content-length, otherwise the browser will cut off the HTML response trpc11 adds this somehow.
 
-            responseHeaders?.set(key, value);
+            params.responseHeaders?.set(key, value);
           }
 
           return response;

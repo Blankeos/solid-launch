@@ -4,9 +4,13 @@ import { PageContext } from 'vike/types';
 export type Data = ReturnType<Awaited<typeof data>>;
 
 export async function data(pageContext: PageContext) {
-  const { request, response } = pageContext;
+  const { urlParsed, request, response } = pageContext;
 
-  const trpcClient = initTRPCSSRClient(request.header(), response.headers);
+  const trpcClient = initTRPCSSRClient({
+    baseUrl: urlParsed.origin!,
+    requestHeaders: request.header(),
+    responseHeaders: response.headers,
+  });
 
   const result = await trpcClient.auth.currentUser.query();
 

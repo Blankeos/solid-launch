@@ -1,4 +1,3 @@
-import { publicConfig } from '@/config.public';
 import type { AppRouter } from '@/server/_app';
 import { createTRPCClient, httpBatchLink } from '@trpc/client';
 
@@ -16,7 +15,7 @@ export const trpcClient = createTRPCClient<AppRouter>({
 
     // With batching:
     httpBatchLink({
-      url: `${publicConfig.BASE_ORIGIN}/api`,
+      url: `/api`,
     }),
   ],
 });
