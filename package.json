@@ -26,6 +26,7 @@
     "@felte/validator-zod": "^1.0.18",
     "@hono/trpc-server": "^0.4.0",
     "@kobalte/core": "^0.13.10",
+    "@lemonsqueezy/lemonsqueezy.js": "^4.0.0",
     "@libsql/kysely-libsql": "^0.4.1",
     "@node-rs/argon2": "^2.0.2",
     "@t3-oss/env-core": "^0.13.8",

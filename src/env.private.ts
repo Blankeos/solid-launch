@@ -9,7 +9,7 @@ export const privateEnv = createEnv({
     /** Development|Prod. */
     NODE_ENV: z.enum(['development', 'production']).default('development'),
 
-    // Databasej
+    // Database
     /** Development|Prod. Url of the database. */
     DATABASE_URL: z.string(),
     /** Development(Optional)|Prod. https://docs.turso.tech/local-development#sqlite. */
@@ -39,5 +39,9 @@ export const privateEnv = createEnv({
     S3_REGION: z.string().default('us-east-1'),
     /** Development|Prod. S3 endpoint. Important that this starts with http:// or https:// */
     S3_ENDPOINT: z.string().default('http://127.0.0.1:9000'),
+
+    // Payments
+    /** Development|Prod. For payments. */
+    LEMONSQUEEZY_API_KEY: z.string(),
   },
 });
