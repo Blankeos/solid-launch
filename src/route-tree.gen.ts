@@ -120,8 +120,11 @@ return result;
 }
 
 import { usePageContext } from 'vike-solid/usePageContext'
-function useParams<T extends PageRoute>(params: { from: T }): UseParamsResult<T> {
+import { createMemo } from 'solid-js'
+function useParams<T extends PageRoute>(params: { from: T }): () => UseParamsResult<T> {
 const pageContext = usePageContext();
+
+return createMemo(() => {
 const routeParams = pageContext.routeParams as Record<string, string>;
 
 // Check if this is a catch-all route
@@ -152,4 +155,5 @@ return {
 
 // Handle regular dynamic routes without catch-all
 return routeParams as UseParamsResult<T>;
+});
 }
