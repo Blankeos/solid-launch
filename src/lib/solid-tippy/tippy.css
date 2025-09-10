@@ -1,0 +1,8 @@
+/* Main Tippy styles */
+@import 'tippy.js/dist/tippy.css';
+
+/**
+* For animations
+* Must be imported: https://atomiks.github.io/tippyjs/v6/animations/#included-animations
+*/
+@import 'tippy.js/animations/scale-subtle.css';
