@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button';
 import { getRoute } from '@/route-tree.gen';
 import { useAuthContext } from '@/stores/auth.context';
 import { useCounterContext } from '@/stores/counter.context';
@@ -47,12 +48,9 @@ export default function SignUpPage() {
     <div class="flex h-full flex-1 flex-col">
       <div class="mx-auto flex w-full max-w-5xl flex-col items-center gap-y-5">
         <h1 class="text-3xl font-medium">Sign Up</h1>
-        <button
-          class="rounded border border-blue-300 bg-blue-500 px-5 py-2 text-white"
-          onClick={() => setGlobalCount((count) => count + 1)}
-        >
+        <Button class="rounded border border-blue-300 bg-blue-500 px-5 py-2 text-white">
           🌎 global count is {globalCount()}
-        </button>
+        </Button>
 
         <form use:form={form} class="flex flex-col gap-y-3">
           <div class="flex flex-col">

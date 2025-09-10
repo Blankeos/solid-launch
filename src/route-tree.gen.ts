@@ -13,6 +13,7 @@ export type { PageRoute, UseParamsResult };
 
 const pageRoutes = [
   "/",
+  "/_components",
   "/about",
   "/dashboard",
   "/dashboard/settings",

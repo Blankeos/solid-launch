@@ -1,4 +1,6 @@
 import { IconSolid } from '@/assets/icons';
+import { Button } from '@/components/ui/button';
+import { getRoute } from '@/route-tree.gen';
 import { useCounterContext } from '@/stores/counter.context';
 import { createSignal } from 'solid-js';
 import { toast } from 'solid-sonner';
@@ -26,23 +28,15 @@ export default function HomePage() {
         <h1 class="text-3xl font-medium">Vite + Solid</h1>
 
         <div class="flex flex-col items-center justify-center gap-x-2 gap-y-2">
-          <div class="flex gap-x-2">
-            <button
-              class="rounded border border-blue-300 bg-blue-500 px-5 py-2 text-white"
-              onClick={() => setCount((count) => count + 1)}
-            >
-              ☝️ count is {count()}
-            </button>
+          <div class="flex flex-wrap justify-center gap-2">
+            <Button onClick={() => setCount((count) => count + 1)}>☝️ count is {count()}</Button>
 
-            <button
-              class="rounded border border-blue-300 bg-blue-500 px-5 py-2 text-white"
-              onClick={() => setGlobalCount((count) => count + 1)}
-            >
+            <Button variant="secondary" onClick={() => setGlobalCount((count) => count + 1)}>
               🌎 global count is {globalCount()}
-            </button>
+            </Button>
 
-            <button
-              class="rounded border border-blue-300 px-5 py-2 text-blue-500"
+            <Button
+              variant="outline"
               onClick={() => {
                 const toasts = [
                   () => toast('🍞 Awesome!'),
@@ -99,7 +93,10 @@ export default function HomePage() {
               }}
             >
               🍞 Show a Toast
-            </button>
+            </Button>
+            <Button variant="outline" as="a" href={getRoute('/_components')}>
+              Browse Components
+            </Button>
           </div>
 
           <p>

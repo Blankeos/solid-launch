@@ -1,5 +1,6 @@
 import { IconLoading } from '@/assets/icons';
 import { DropdownMenuComp } from '@/components/ui/dropdown-menu';
+import { useThemeContext } from '@/contexts/theme.context';
 import { getRoute } from '@/route-tree.gen';
 import { useAuthContext } from '@/stores/auth.context';
 import { cn } from '@/utils/cn';
@@ -14,6 +15,7 @@ type VerticalNavProps = {};
 export default function VerticalNav(_props: VoidProps<VerticalNavProps>) {
   const { user, loading, logout } = useAuthContext();
   const pageContext = usePageContext();
+  const { toggleTheme, theme } = useThemeContext();
 
   const navLinks = createMemo<{ name: string; href: string; visible: () => boolean }[]>(() => {
     return [
@@ -84,6 +86,13 @@ export default function VerticalNav(_props: VoidProps<VerticalNavProps>) {
                 itemOnSelect: () => navigate(getRoute('/dashboard/settings')),
               },
               { separator: true },
+              {
+                itemId: 'theme',
+                itemDisplay: `Theme: ${theme()}`,
+                itemOnSelect: () => {
+                  toggleTheme();
+                },
+              },
               {
                 itemId: 'logout',
                 itemDisplay: 'Logout',
