@@ -2,9 +2,10 @@ import { AlertComp } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { BreadcrumbComp } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
+import { ContextMenuComp } from '@/components/ui/context-menu';
 import { DialogComp } from '@/components/ui/dialog';
 import { DropdownMenuComp } from '@/components/ui/dropdown-menu';
-import { SelectComp } from '@/components/ui/select';
+import { SelectComp, SelectOption } from '@/components/ui/select';
 import { SwitchComp } from '@/components/ui/switch';
 import { Tippy } from '@/lib/solid-tippy';
 import { cn } from '@/utils/cn';
@@ -47,18 +48,68 @@ export default function ComponentsPage() {
       </ComponentCard>
 
       <ComponentCard label="Switch">
-        <SwitchComp label="Carlo" />
+        <SwitchComp label="Enable" />
       </ComponentCard>
 
-      <ComponentCard label="Select">
+      <ComponentCard label="Select" class="w-96">
+        <span class="text-xs">Basic</span>
         <SelectComp
           options={[
-            { value: 'apple', label: 'Apple' },
-            { value: 'orange', label: 'Orange' },
-            { value: 'grape', label: 'Grape' },
+            { value: 'apple', label: '🍎 Apple' },
+            { value: 'orange', label: '🍊 Orange' },
+            { value: 'grape', label: '🍇 Grape' },
           ]}
         />
-        <SelectComp loading options={[]} />
+        <span class="text-xs">Multiple</span>
+        <SelectComp
+          multiple
+          options={[
+            { value: 'apple', label: '🍎 Apple' },
+            { value: 'orange', label: '🍊 Orange' },
+            { value: 'grape', label: '🍇 Grape' },
+          ]}
+        />
+        <SelectComp loading options={[]} placeholder="Loading" />
+        <SelectComp disabled options={[]} placeholder="Disabled" />
+        <span class="text-xs">Basic (Controlled)</span>
+        {(() => {
+          const [value, setValue] = createSignal<string | null>('apple');
+          const options: SelectOption[] = [
+            { value: 'apple', label: '🍎 Apple' },
+            { value: 'orange', label: '🍊 Orange' },
+            { value: 'grape', label: '🍇 Grape' },
+          ];
+
+          return (
+            <SelectComp
+              options={options}
+              value={options.find((_opt) => _opt.value === value())}
+              onChange={(newValue) => {
+                setValue(newValue?.value ?? null);
+              }}
+            />
+          );
+        })()}
+        <span class="text-xs">Multiple (Controlled)</span>
+        {(() => {
+          const [value, setValue] = createSignal(['apple', 'orange']);
+          const options: SelectOption[] = [
+            { value: 'apple', label: '🍎 Apple' },
+            { value: 'orange', label: '🍊 Orange' },
+            { value: 'grape', label: '🍇 Grape' },
+          ];
+
+          return (
+            <SelectComp
+              multiple
+              options={options}
+              value={options.filter((_opt) => value().includes(_opt.value))}
+              onChange={(newValue) => {
+                setValue(newValue.map((_opt) => _opt.value));
+              }}
+            />
+          );
+        })()}
       </ComponentCard>
 
       <ComponentCard label="Badge">
@@ -199,7 +250,10 @@ export default function ComponentsPage() {
           content={
             <div class="flex flex-col items-center gap-2">
               Content of tooltip
-              <div class="h-10 w-10 rounded-full bg-white" />
+              <img
+                src="https://cdn.myanimelist.net/r/200x268/images/characters/16/586614.jpg?s=449698e15fb4c6cdb353d71a267c7d04"
+                class="h-10 w-10 rounded-full bg-white object-cover object-center"
+              />
             </div>
           }
         >
@@ -244,6 +298,31 @@ export default function ComponentsPage() {
           );
         })()}
       </ComponentCard>
+      <ComponentCard label="Context Menu">
+        <ContextMenuComp
+          options={[
+            {
+              itemId: '1',
+              itemDisplay: 'Wow',
+            },
+            { separator: true },
+            {
+              itemId: '2',
+              itemDisplay: 'Test 1',
+              itemTip: 'Cmd + 1',
+            },
+            {
+              itemId: '3',
+              itemDisplay: 'Test 2',
+            },
+          ]}
+        >
+          <div class="flex h-32 w-32 items-center justify-center rounded-lg border border-dashed text-xs">
+            Right click here
+          </div>
+        </ContextMenuComp>
+      </ComponentCard>
+
       <ComponentCard label="Popover">1</ComponentCard>
 
       <ComponentCard label="Sheet">1</ComponentCard>

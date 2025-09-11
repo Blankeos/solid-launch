@@ -188,12 +188,9 @@ export type SelectOption = {
   label?: JSX.Element;
 };
 
-type SelectCompProps = ComponentProps<typeof Select> & {
+type SelectCompProps = ComponentProps<typeof Select<SelectOption>> & {
   triggerProps?: ComponentProps<typeof SelectTrigger>;
   contentProps?: ComponentProps<typeof SelectContent>;
-  value?: string;
-  options?: SelectOption[];
-  onValueChange?: (value: string) => void;
   loading?: boolean;
   placeholder?: string;
 };
@@ -202,9 +199,7 @@ export function SelectComp(props: SelectCompProps) {
   const [local, rest] = splitProps(props, [
     'triggerProps',
     'contentProps',
-    'value',
     'options',
-    'onValueChange',
     'loading',
     'placeholder',
   ]);
@@ -233,31 +228,43 @@ export function SelectComp(props: SelectCompProps) {
     );
   }
 
+  // const normalizedValue = createMemo(() => {
+  //   if (!local.value) return undefined;
+  //   if (typeof local.value === 'string') {
+  //     return local.options?.find((opt: SelectOption) => opt.value === local.value);
+  //   }
+  //   return local.value;
+  // });
+
   return (
     <Select
       {...rest}
       disabled={local.loading}
       options={local.options}
+      placeholder={placeholderText()}
       optionValue={(opt: any) => opt.value}
       optionTextValue={(opt: any) => opt.label}
       itemComponent={(props) => (
         <SelectItem item={props.item}>{renderItemLabel(props.item.rawValue as any)}</SelectItem>
-        // <SelectItem item={props.item}>{JSON.stringify(props.item)}</SelectItem>
       )}
     >
-      <SelectTrigger {...local.triggerProps}>
-        <Show
-          when={local.loading}
-          fallback={
-            <>
-              {local.value && labelsMap()[local.value]
-                ? labelsMap()[local.value]
-                : placeholderText()}
-            </>
-          }
-        >
-          <IconLoading class="size-4" />
-        </Show>
+      <SelectTrigger
+        {...local.triggerProps}
+        class={cn('', local.loading && 'disabled:cursor-progress')}
+      >
+        <span class="flex items-center gap-2">
+          <Show when={local.loading}>
+            <IconLoading class="size-4" />
+          </Show>
+          <SelectValue<SelectOption>>
+            {(state) =>
+              state
+                .selectedOptions()
+                ?.map((_option) => _option.label)
+                ?.join(', ')
+            }
+          </SelectValue>
+        </span>
       </SelectTrigger>
       <SelectContent {...local.contentProps} />
     </Select>
