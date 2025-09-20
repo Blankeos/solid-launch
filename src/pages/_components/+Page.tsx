@@ -2,6 +2,7 @@ import { AlertComp } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { BreadcrumbComp } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
+import { CheckboxComp } from '@/components/ui/checkbox';
 import { ContextMenuComp } from '@/components/ui/context-menu';
 import { DialogComp } from '@/components/ui/dialog';
 import { DropdownMenuComp } from '@/components/ui/dropdown-menu';
@@ -20,8 +21,8 @@ export default function ComponentsPage() {
     <div class="flex flex-wrap gap-4 p-4">
       <ComponentCard label="Button">
         <Button>Info</Button>
-        <Button variant="secondary">Second</Button>
-        <Button variant="destructive">Destruct</Button>
+        <Button variant="secondary">Secondary</Button>
+        <Button variant="destructive">Destructive</Button>
         <Button variant="ghost">Ghost</Button>
         <Button disabled>Disabled</Button>
         <Button loading>Loading...</Button>
@@ -323,16 +324,29 @@ export default function ComponentsPage() {
         </ContextMenuComp>
       </ComponentCard>
 
-      <ComponentCard label="Popover">1</ComponentCard>
+      <ComponentCard label="Popover">
+        <Button>Open</Button>
+      </ComponentCard>
 
-      <ComponentCard label="Sheet">1</ComponentCard>
       <_DialogExample />
-      <ComponentCard label="Drawer">1</ComponentCard>
+
+      <ComponentCard label="Sheet">
+        <Button>Open</Button>
+      </ComponentCard>
+
+      <ComponentCard label="Drawer">
+        <Button>Open</Button>
+      </ComponentCard>
 
       <ComponentCard label="Tabs">1</ComponentCard>
       <ComponentCard label="Accordion">1</ComponentCard>
 
-      <ComponentCard label="Checkbox">1</ComponentCard>
+      <ComponentCard label="Checkbox">
+        <CheckboxComp
+          label="Accept terms and conditions"
+          description="You agree to our Terms of Service and Privacy Policy."
+        />
+      </ComponentCard>
       <ComponentCard label="Radio Group">1</ComponentCard>
 
       <ComponentCard label="Calendar">1</ComponentCard>
