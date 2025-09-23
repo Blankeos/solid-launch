@@ -8,6 +8,7 @@ import { Collapsible } from '@/components/ui/collapsible';
 import { ContextMenuComp } from '@/components/ui/context-menu';
 import { DialogComp } from '@/components/ui/dialog';
 import { DropdownMenuComp } from '@/components/ui/dropdown-menu';
+import { PopoverComp } from '@/components/ui/popover';
 import { SelectComp, SelectOption } from '@/components/ui/select';
 import { SwitchComp } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -392,7 +393,26 @@ export default function ComponentsPage() {
       </ComponentCard>
 
       <ComponentCard label="Popover">
-        <Button>Open</Button>
+        <PopoverComp
+          content={
+            <div class="grid gap-4">
+              <div class="space-y-2">
+                <h4 class="leading-none font-medium">Dimensions</h4>
+                <p class="text-muted-foreground text-sm">Set the dimensions for the layer.</p>
+              </div>
+              <div class="grid gap-2">
+                <div class="grid grid-cols-3 items-center gap-4">
+                  <label for="width" class="text-sm">
+                    Width
+                  </label>
+                  <input id="width" class="col-span-2 h-8 rounded border px-2 text-sm" />
+                </div>
+              </div>
+            </div>
+          }
+        >
+          <Button>Open</Button>
+        </PopoverComp>
       </ComponentCard>
 
       <_DialogExample />
