@@ -23,6 +23,21 @@ import { followCursor } from 'tippy.js';
 export default function ComponentsPage() {
   return (
     <div class="flex flex-wrap gap-4 p-4">
+      <header class="w-full">
+        <h1 class="text-sm">Components</h1>
+        <div class="text-foreground/50 text-xs">
+          <p class="mb-1">
+            Here, you will find my polished and preferred best practices for components usage with
+            solid-ui. I took the flexibility from Shadcn + the concise data-driven dev ergonomics
+            from Antd.
+          </p>
+          <p>
+            The core drivers here are solid-ui, kobalte, bagon-hooks, css animations, and just plain
+            old solid primitives. Simple and easy to read/write. Seriously!
+          </p>
+        </div>
+      </header>
+
       <ComponentCard label="Button">
         <Button>Info</Button>
         <Button variant="outline">Outline</Button>
@@ -405,13 +420,13 @@ export default function ComponentsPage() {
                   type="text"
                   placeholder="Full name"
                   class="w-full rounded border px-3 py-2 text-sm font-medium"
-                  value="Pedro Duarte"
+                  value="Carlo Taleon"
                 />
                 <input
                   type="text"
                   placeholder="Username"
                   class="text-muted-foreground w-full rounded border px-3 py-2 text-sm"
-                  value="@peduarte"
+                  value="@carlo_taleon"
                 />
               </div>
               <Button>Save changes</Button>

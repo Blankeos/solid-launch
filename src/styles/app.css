@@ -210,8 +210,8 @@ body {
   --easings-emphasized-in: cubic-bezier(0.05, 0.7, 0.1, 1);
   --easings-emphasized-out: cubic-bezier(0.3, 0, 0.8, 0.15);
 
-  --animate-accordion-down: accordion-down 300ms ease-out forwards;
-  --animate-accordion-up: accordion-up 300ms ease-in-out forwards;
+  --animate-accordion-down: accordion-down 200ms ease-out forwards;
+  --animate-accordion-up: accordion-up 200ms ease-in-out forwards;
 
   @keyframes accordion-down {
     from {

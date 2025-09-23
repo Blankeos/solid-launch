@@ -25,7 +25,8 @@
 //   cannot read/traverse it.  (aria-expanded=false already implies
 //   invisibility for SR users; aria-hidden just makes it official.)
 //   When open we drop aria-hidden so the region is discoverable again.
-// ---------------------------------------------------------------
+// - External trigger a11y docs - added.
+// ----------------------------------------------------------------
 
 import { cn } from '@/utils/cn';
 import { type JSX, children, createSignal, onCleanup, onMount, splitProps } from 'solid-js';
@@ -49,6 +50,24 @@ export interface CollapsibleProps extends JSX.HTMLAttributes<HTMLDivElement> {
  * a changing style.height that the utility class animates.
  * Works exactly like an Accordion panel but without any trigger
  * baggage; state is 100% parent-controlled via open={bool}.
+ *
+ * A11y Notes for external triggers (Just a minor trade-off from not using an Accordion component).
+ * If an external button/link controls this panel you should:
+ *   1. Pass a unique `id` to Collapsible (e.g. id="faq-panel-3").
+ *   2. On the trigger element, add:
+ *        aria-expanded={open}
+ *        aria-controls="faq-panel-3"
+ *      where `open` is the same boolean you pass to Collapsible.
+ *   3. Optionally set the `role="region"` prop on Collapsible so
+ *      screen-reader users hear "region" when entering the panel.
+ *   4. If you want a visible label, add `aria-labelledby`
+ *      to the trigger button (not Collapsible) pointing
+ *      to the ID of the heading that names the panel.
+ *      Example:
+ *        <h3 id="faq-title">Shipping options</h3>
+ *        <button aria-expanded={open} aria-controls="faq-panel-3" aria-labelledby="faq-title">
+ *          …
+ *        </button>
  */
 export function Collapsible(props: CollapsibleProps) {
   let innerRef: HTMLDivElement | undefined;

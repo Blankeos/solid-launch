@@ -42,7 +42,7 @@ export default function HorizontalSidebar(_props: VoidProps<HorizontalSidebarPro
             ]}
           >
             <div
-              class="h-12 w-12 shrink-0 rounded-full"
+              class="h-12 w-12 shrink-0 rounded-full transition active:scale-95"
               style={{
                 'background-position': 'center',
                 'background-size': 'cover',
