@@ -273,33 +273,59 @@ type OptionSeparator = { separator: true };
 
 type OptionLabel = { label: JSX.Element };
 
+type OptionSub = {
+  subTrigger: JSX.Element;
+  subOptions: DropdownMenuOption[];
+};
+
+export type DropdownMenuOption = OptionItem | OptionSeparator | OptionLabel | OptionSub;
+
+const _DropdownMenuSubComp: Component<{ options: DropdownMenuOption[] }> = (props) => {
+  return (
+    <For each={props.options}>
+      {(option) => {
+        if ('separator' in option && option.separator === true) {
+          return <DropdownMenuSeparator />;
+        } else if ('label' in option) {
+          return <DropdownMenuLabel>{option.label}</DropdownMenuLabel>;
+        } else if ('subTrigger' in option && 'subOptions' in option) {
+          const sub = option as OptionSub;
+          return (
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>{sub.subTrigger}</DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent>
+                  <_DropdownMenuSubComp options={sub.subOptions} />
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
+          );
+        } else {
+          const item = option as OptionItem;
+          if (item.hide) return null;
+          return (
+            <DropdownMenuItem onSelect={() => item.itemOnSelect?.(item.itemId)}>
+              {item.itemDisplay}
+              {item.itemTip && <div>{item.itemTip}</div>}
+            </DropdownMenuItem>
+          );
+        }
+      }}
+    </For>
+  );
+};
+
 export const DropdownMenuComp: Component<
   ComponentProps<typeof DropdownMenu> & {
-    options: (OptionItem | OptionSeparator | OptionLabel)[];
+    options: DropdownMenuOption[];
   }
 > = (props) => {
+  const [, rest] = splitProps(props, ['options', 'children']);
   return (
-    <DropdownMenu {...props}>
+    <DropdownMenu {...rest}>
       <DropdownMenuTrigger>{props.children}</DropdownMenuTrigger>
       <DropdownMenuContent>
-        <For each={props.options}>
-          {(option) => {
-            if ('separator' in option && option.separator === true) {
-              return <DropdownMenuSeparator />;
-            } else if ('label' in option) {
-              return <DropdownMenuLabel>{option.label}</DropdownMenuLabel>;
-            } else {
-              const item = option as OptionItem;
-              if (item.hide) return null;
-              return (
-                <DropdownMenuItem onSelect={() => item.itemOnSelect?.(item.itemId)}>
-                  {item.itemDisplay}
-                  {item.itemTip && <div>{item.itemTip}</div>}
-                </DropdownMenuItem>
-              );
-            }
-          }}
-        </For>
+        <_DropdownMenuSubComp options={props.options} />
       </DropdownMenuContent>
     </DropdownMenu>
   );

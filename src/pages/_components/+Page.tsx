@@ -8,6 +8,7 @@ import { DialogComp } from '@/components/ui/dialog';
 import { DropdownMenuComp } from '@/components/ui/dropdown-menu';
 import { SelectComp, SelectOption } from '@/components/ui/select';
 import { SwitchComp } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tippy } from '@/lib/solid-tippy';
 import { cn } from '@/utils/cn';
 import { useDisclosure, useToggle } from 'bagon-hooks';
@@ -42,9 +43,28 @@ export default function ComponentsPage() {
               itemId: 'item-2',
               itemDisplay: 'Item 2',
             },
+            { separator: true },
+            {
+              subTrigger: 'Invite Users',
+              subOptions: [
+                {
+                  itemId: 'invite-item-1',
+                  itemDisplay: 'Email message',
+                },
+                {
+                  itemId: 'invite-item-2',
+                  itemDisplay: 'Message via social',
+                },
+                { separator: true },
+                {
+                  itemId: 'invite-item-3',
+                  itemDisplay: 'More...',
+                },
+              ],
+            },
           ]}
         >
-          <Button as="div">Open Options</Button>
+          <Button as="div">Open options</Button>
         </DropdownMenuComp>
       </ComponentCard>
 
@@ -338,7 +358,57 @@ export default function ComponentsPage() {
         <Button>Open</Button>
       </ComponentCard>
 
-      <ComponentCard label="Tabs">1</ComponentCard>
+      <ComponentCard label="Tabs">
+        <Tabs defaultValue="account" class="w-[400px]">
+          <TabsList>
+            <TabsTrigger value="account">Account</TabsTrigger>
+            <TabsTrigger value="password">Password</TabsTrigger>
+          </TabsList>
+          <TabsContent value="account">
+            <div class="space-y-4 rounded-lg border p-4">
+              <h2 class="text-lg font-semibold">Account</h2>
+              <p class="text-sm">Make changes to your account here. Click save when you're done.</p>
+              <div class="space-y-2">
+                <input
+                  type="text"
+                  placeholder="Full name"
+                  class="w-full rounded border px-3 py-2 text-sm font-medium"
+                  value="Pedro Duarte"
+                />
+                <input
+                  type="text"
+                  placeholder="Username"
+                  class="text-muted-foreground w-full rounded border px-3 py-2 text-sm"
+                  value="@peduarte"
+                />
+              </div>
+              <Button>Save changes</Button>
+            </div>
+          </TabsContent>
+          <TabsContent value="password">
+            <div class="space-y-4 rounded-lg border p-4">
+              <h2 class="text-lg font-semibold">Password</h2>
+              <p class="text-sm">Change your password here. After saving, you'll be logged out.</p>
+              <input
+                type="password"
+                placeholder="Current password"
+                class="w-full rounded border px-3 py-2 text-sm"
+              />
+              <input
+                type="password"
+                placeholder="New password"
+                class="w-full rounded border px-3 py-2 text-sm"
+              />
+              <input
+                type="password"
+                placeholder="Confirm new password"
+                class="w-full rounded border px-3 py-2 text-sm"
+              />
+              <Button>Save password</Button>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </ComponentCard>
       <ComponentCard label="Accordion">1</ComponentCard>
 
       <ComponentCard label="Checkbox">
