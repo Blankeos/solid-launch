@@ -63,6 +63,16 @@ const ContextMenuShortcut: Component<ComponentProps<'span'>> = (props) => {
   return <span class={cn('ml-auto text-xs tracking-widest opacity-60', local.class)} {...others} />;
 };
 
+const ContextMenuLabel: Component<ComponentProps<'div'> & { inset?: boolean }> = (props) => {
+  const [, rest] = splitProps(props, ['class', 'inset']);
+  return (
+    <div
+      class={cn('px-2 py-1.5 text-sm font-semibold', props.inset && 'pl-8', props.class)}
+      {...rest}
+    />
+  );
+};
+
 type ContextMenuSeparatorProps<T extends ValidComponent = 'hr'> =
   ContextMenuPrimitive.ContextMenuSeparatorProps<T> & {
     class?: string | undefined;
@@ -93,7 +103,7 @@ const ContextMenuSubTrigger = <T extends ValidComponent = 'div'>(
   return (
     <ContextMenuPrimitive.SubTrigger
       class={cn(
-        'focus:bg-accent data-[state=open]:bg-accent flex cursor-default items-center rounded-sm px-2 py-1.5 text-sm outline-none select-none',
+        'focus:bg-accent data-[state=open]:bg-accent focus:text-accent-foreground flex cursor-default items-center rounded-sm px-2 py-1.5 text-sm outline-none select-none',
         local.class
       )}
       {...others}
@@ -250,7 +260,7 @@ export {
 
 // ---
 
-type ContextMenuOptionItem = {
+type OptionItem = {
   itemId: string;
   itemDisplay?: JSX.Element;
   itemOnSelect?: (id: string) => void;
@@ -258,37 +268,63 @@ type ContextMenuOptionItem = {
   hide?: boolean;
 };
 
-type ContextMenuOptionSeparator = { separator: true };
+type OptionSeparator = { separator: true };
 
-type ContextMenuOptionLabel = { label: JSX.Element };
+type OptionLabel = { label: JSX.Element };
+
+type OptionSub = {
+  subTrigger: JSX.Element;
+  subOptions: ContextMenuOption[];
+};
+
+export type ContextMenuOption = OptionItem | OptionSeparator | OptionLabel | OptionSub;
+
+const _ContextMenuSubComp: Component<{ options: ContextMenuOption[] }> = (props) => {
+  return (
+    <For each={props.options}>
+      {(option) => {
+        if ('separator' in option && option.separator === true) {
+          return <ContextMenuSeparator />;
+        } else if ('label' in option) {
+          return <ContextMenuLabel>{option.label}</ContextMenuLabel>;
+        } else if ('subTrigger' in option && 'subOptions' in option) {
+          const sub = option as OptionSub;
+          return (
+            <ContextMenuSub>
+              <ContextMenuSubTrigger>{sub.subTrigger}</ContextMenuSubTrigger>
+              <ContextMenuPortal>
+                <ContextMenuSubContent>
+                  <_ContextMenuSubComp options={sub.subOptions} />
+                </ContextMenuSubContent>
+              </ContextMenuPortal>
+            </ContextMenuSub>
+          );
+        } else {
+          const item = option as OptionItem;
+          if (item.hide) return null;
+          return (
+            <ContextMenuItem onSelect={() => item.itemOnSelect?.(item.itemId)}>
+              {item.itemDisplay}
+              {item.itemTip && <ContextMenuShortcut>{item.itemTip}</ContextMenuShortcut>}
+            </ContextMenuItem>
+          );
+        }
+      }}
+    </For>
+  );
+};
 
 export const ContextMenuComp: Component<
   ComponentProps<typeof ContextMenu> & {
-    options: (ContextMenuOptionItem | ContextMenuOptionSeparator | ContextMenuOptionLabel)[];
+    options: ContextMenuOption[];
   }
 > = (props) => {
+  const [, rest] = splitProps(props, ['options', 'children']);
   return (
-    <ContextMenu {...props}>
+    <ContextMenu {...rest}>
       <ContextMenuTrigger>{props.children}</ContextMenuTrigger>
       <ContextMenuContent>
-        <For each={props.options}>
-          {(option) => {
-            if ('separator' in option && option.separator === true) {
-              return <ContextMenuSeparator />;
-            } else if ('label' in option) {
-              return <ContextMenuGroupLabel>{option.label}</ContextMenuGroupLabel>;
-            } else {
-              const item = option as ContextMenuOptionItem;
-              if (item.hide) return null;
-              return (
-                <ContextMenuItem onSelect={() => item.itemOnSelect?.(item.itemId)}>
-                  {item.itemDisplay}
-                  {item.itemTip && <ContextMenuShortcut>{item.itemTip}</ContextMenuShortcut>}
-                </ContextMenuItem>
-              );
-            }
-          }}
-        </For>
+        <_ContextMenuSubComp options={props.options} />
       </ContextMenuContent>
     </ContextMenu>
   );

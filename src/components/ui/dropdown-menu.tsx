@@ -103,7 +103,7 @@ const DropdownMenuSubTrigger = <T extends ValidComponent = 'div'>(
   return (
     <DropdownMenuPrimitive.SubTrigger
       class={cn(
-        'focus:bg-accent data-[state=open]:bg-accent flex cursor-default items-center rounded-sm px-2 py-1.5 text-sm outline-hidden select-none',
+        'focus:bg-accent data-[state=open]:bg-accent focus:text-accent-foreground flex cursor-default items-center rounded-sm px-2 py-1.5 text-sm outline-hidden select-none',
         props.class
       )}
       {...rest}
@@ -306,7 +306,9 @@ const _DropdownMenuSubComp: Component<{ options: DropdownMenuOption[] }> = (prop
           return (
             <DropdownMenuItem onSelect={() => item.itemOnSelect?.(item.itemId)}>
               {item.itemDisplay}
-              {item.itemTip && <div>{item.itemTip}</div>}
+              {item.itemTip && (
+                <DropdownMenuShortcut class="pl-2">{item.itemTip}</DropdownMenuShortcut>
+              )}
             </DropdownMenuItem>
           );
         }

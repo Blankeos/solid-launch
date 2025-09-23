@@ -1,3 +1,4 @@
+import { AccordionComp } from '@/components/ui/accordion';
 import { AlertComp } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { BreadcrumbComp } from '@/components/ui/breadcrumb';
@@ -9,6 +10,7 @@ import { DropdownMenuComp } from '@/components/ui/dropdown-menu';
 import { SelectComp, SelectOption } from '@/components/ui/select';
 import { SwitchComp } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useThemeContext } from '@/contexts/theme.context';
 import { Tippy } from '@/lib/solid-tippy';
 import { cn } from '@/utils/cn';
 import { useDisclosure, useToggle } from 'bagon-hooks';
@@ -22,6 +24,7 @@ export default function ComponentsPage() {
     <div class="flex flex-wrap gap-4 p-4">
       <ComponentCard label="Button">
         <Button>Info</Button>
+        <Button variant="outline">Outline</Button>
         <Button variant="secondary">Secondary</Button>
         <Button variant="destructive">Destructive</Button>
         <Button variant="ghost">Ghost</Button>
@@ -33,43 +36,56 @@ export default function ComponentsPage() {
         <DropdownMenuComp
           options={[
             {
-              label: 'Label',
+              itemId: 'commit',
+              itemDisplay: 'Commit',
+              itemTip: '⌘+K',
             },
             {
-              itemId: 'item-1',
-              itemDisplay: 'Item 1',
+              itemId: 'push',
+              itemDisplay: 'Push',
+              itemTip: '⇧+⌘+K',
             },
             {
-              itemId: 'item-2',
-              itemDisplay: 'Item 2',
+              itemId: 'update',
+              itemDisplay: 'Update Project',
+              itemTip: '⌘+T',
             },
-            { separator: true },
             {
-              subTrigger: 'Invite Users',
+              subTrigger: 'GitHub',
               subOptions: [
                 {
-                  itemId: 'invite-item-1',
-                  itemDisplay: 'Email message',
+                  itemId: 'create-pr',
+                  itemDisplay: 'Create Pull Request…',
                 },
                 {
-                  itemId: 'invite-item-2',
-                  itemDisplay: 'Message via social',
+                  itemId: 'view-pr',
+                  itemDisplay: 'View Pull Requests',
+                },
+                {
+                  itemId: 'sync-fork',
+                  itemDisplay: 'Sync Fork',
                 },
                 { separator: true },
                 {
-                  itemId: 'invite-item-3',
-                  itemDisplay: 'More...',
+                  itemId: 'open-github',
+                  itemDisplay: 'Open on GitHub',
                 },
               ],
             },
+            { separator: true },
           ]}
         >
           <Button as="div">Open options</Button>
         </DropdownMenuComp>
       </ComponentCard>
 
-      <ComponentCard label="Switch">
+      <ComponentCard label="Switch" class="gap-y-5">
         <SwitchComp label="Enable" />
+        {(() => {
+          const { theme, toggleTheme } = useThemeContext();
+
+          return <SwitchComp label={theme() === 'light' ? '☀️' : '🌜'} onChange={toggleTheme} />;
+        })()}
       </ComponentCard>
 
       <ComponentCard label="Select" class="w-96">
@@ -322,10 +338,7 @@ export default function ComponentsPage() {
       <ComponentCard label="Context Menu">
         <ContextMenuComp
           options={[
-            {
-              itemId: '1',
-              itemDisplay: 'Wow',
-            },
+            { label: 'Nice' },
             { separator: true },
             {
               itemId: '2',
@@ -335,6 +348,24 @@ export default function ComponentsPage() {
             {
               itemId: '3',
               itemDisplay: 'Test 2',
+            },
+            {
+              subTrigger: 'Invite users',
+              subOptions: [
+                {
+                  itemId: 'invite-item-1',
+                  itemDisplay: 'Email message',
+                },
+                {
+                  itemId: 'invite-item-2',
+                  itemDisplay: 'Message via social',
+                },
+                { separator: true },
+                {
+                  itemId: 'invite-item-3',
+                  itemDisplay: 'More...',
+                },
+              ],
             },
           ]}
         >
@@ -365,7 +396,7 @@ export default function ComponentsPage() {
             <TabsTrigger value="password">Password</TabsTrigger>
           </TabsList>
           <TabsContent value="account">
-            <div class="space-y-4 rounded-lg border p-4">
+            <div class="border-border space-y-4 rounded-lg border p-4">
               <h2 class="text-lg font-semibold">Account</h2>
               <p class="text-sm">Make changes to your account here. Click save when you're done.</p>
               <div class="space-y-2">
@@ -409,7 +440,25 @@ export default function ComponentsPage() {
           </TabsContent>
         </Tabs>
       </ComponentCard>
-      <ComponentCard label="Accordion">1</ComponentCard>
+      <ComponentCard label="Accordion" class="w-[432px]">
+        <AccordionComp
+          multiple
+          items={[
+            {
+              trigger: 'Is it accessible?',
+              content: 'Yes. It adheres to the WAI-ARIA design pattern.',
+            },
+            {
+              trigger: 'Is it styled?',
+              content: 'Yes. It comes with default styles that matches the other components.',
+            },
+            {
+              trigger: 'Is it animated?',
+              content: "Yes. It's animated by default, but you can disable it if you prefer.",
+            },
+          ]}
+        />
+      </ComponentCard>
 
       <ComponentCard label="Checkbox">
         <CheckboxComp
@@ -435,7 +484,7 @@ export function ComponentCard(
   return (
     <div
       class={cn(
-        'bg-card text-card-foreground flex flex-col gap-1 rounded-lg border p-4 shadow-sm',
+        'text-card-foreground border-border flex flex-col gap-1 rounded-lg border p-4 shadow-sm',
         props.class
       )}
     >

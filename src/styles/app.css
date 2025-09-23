@@ -9,7 +9,8 @@ body {
   color: var(--foreground);
 }
 
-/* Tailwind Defaults */
+/* -- Tailwind Defaults (Removed in V4, so manually set) -- */
+
 @layer base {
   button:not(:disabled),
   [role='button']:not(:disabled) {
@@ -23,7 +24,7 @@ body {
   ::before,
   ::backdrop,
   ::file-selector-button {
-    border-color: var(--color-gray-200, currentColor);
+    border-color: var(--border, currentColor);
   }
 }
 
@@ -93,13 +94,13 @@ body {
     --secondary-foreground: oklch(0.92 0 0);
     --muted: oklch(0.27 0 0);
     --muted-foreground: oklch(0.72 0 0);
-    --accent: oklch(0.47 0.12 46.2);
-    --accent-foreground: oklch(0.92 0.12 95.75);
+    --accent: oklch(95% 0.05 259.815);
+    --accent-foreground: var(--primary);
     --destructive: oklch(0.64 0.21 25.33);
     --destructive-foreground: oklch(1 0 0);
     --border: oklch(0.37 0 0);
     --input: oklch(0.37 0 0);
-    --ring: oklch(0.77 0.16 70.08);
+    --ring: var(--primary);
     --chart-1: oklch(0.84 0.16 84.43);
     --chart-2: oklch(0.67 0.16 58.32);
     --chart-3: oklch(0.47 0.12 46.2);
@@ -191,6 +192,7 @@ body {
   --shadow-xl: var(--shadow-xl);
   --shadow-2xl: var(--shadow-2xl);
 
+  /* --- Animations --- */
   --animate-fadeIn: fadeIn 200ms ease-out forwards;
   --animate-fadeOut: fadeOut 200ms ease-in forwards;
   --animate-flyUp: flyUp 200ms ease-out forwards;
@@ -205,9 +207,29 @@ body {
   --animate-flyLeft: flyLeft 200ms ease-out forwards;
   --animate-flyLeftExit: flyLeftExit 200ms ease-in forwards;
 
-  /* --- Animations --- */
   --easings-emphasized-in: cubic-bezier(0.05, 0.7, 0.1, 1);
   --easings-emphasized-out: cubic-bezier(0.3, 0, 0.8, 0.15);
+
+  --animate-accordion-down: accordion-down 300ms ease-out forwards;
+  --animate-accordion-up: accordion-up 300ms ease-in-out forwards;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--kb-accordion-content-height);
+    }
+  }
+
+  @keyframes accordion-up {
+    from {
+      height: var(--kb-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
 
   @keyframes fadeIn {
     from {
