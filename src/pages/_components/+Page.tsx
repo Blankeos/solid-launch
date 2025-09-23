@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { BreadcrumbComp } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { CheckboxComp } from '@/components/ui/checkbox';
+import { Collapsible } from '@/components/ui/collapsible';
 import { ContextMenuComp } from '@/components/ui/context-menu';
 import { DialogComp } from '@/components/ui/dialog';
 import { DropdownMenuComp } from '@/components/ui/dropdown-menu';
@@ -458,6 +459,38 @@ export default function ComponentsPage() {
             },
           ]}
         />
+      </ComponentCard>
+
+      <ComponentCard label="Collapsible" class="w-96">
+        <p class="text-foreground/50 mb-2 text-xs">
+          Made by Carlo. Kind of like Accordion but for more flexible cases since it can be
+          controlled by an external trigger. Also more fluid because of css transitions and never
+          dismounts the dom.
+        </p>
+
+        {(() => {
+          const [open1, actions1] = useDisclosure();
+          const [open2, actions2] = useDisclosure();
+          const [open3, actions3] = useDisclosure();
+
+          return (
+            <div class="text-foreground/60 contents">
+              <Button onClick={actions1.toggle}>{open1() ? 'Close 1' : 'Open 1'}</Button>
+              <Collapsible open={open1()} class="flex flex-col">
+                <span>Collapsible 1</span>
+                <span>Collapsible 1</span>
+                <span>Collapsible 1</span>
+                <span>Collapsible 1</span>
+              </Collapsible>
+
+              <Button onClick={actions2.toggle}>{open2() ? 'Close 2' : 'Open 2'}</Button>
+              <Collapsible open={open2()}>Collapsible 2</Collapsible>
+
+              <Button onClick={actions3.toggle}>{open3() ? 'Close 3' : 'Open 3'}</Button>
+              <Collapsible open={open3()}>Collapsible 3</Collapsible>
+            </div>
+          );
+        })()}
       </ComponentCard>
 
       <ComponentCard label="Checkbox">
