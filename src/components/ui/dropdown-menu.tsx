@@ -29,7 +29,7 @@ const DropdownMenuContent = <T extends ValidComponent = 'div'>(
     <DropdownMenuPrimitive.Portal>
       <DropdownMenuPrimitive.Content
         class={cn(
-          'animate-flyUpAndScaleExit bg-popover text-popover-foreground data-expanded:animate-flyUpAndScale z-50 min-w-32 origin-[var(--kb-menu-content-transform-origin)] overflow-hidden rounded-md border p-1 shadow-md',
+          'animate-flyUpAndScaleExit bg-popover text-popover-foreground data-expanded:animate-flyUpAndScale z-50 min-w-32 origin-[var(--kb-menu-content-transform-origin)] overflow-hidden rounded-md border p-1 shadow-md outline-none',
           props.class
         )}
         {...rest}
@@ -137,7 +137,7 @@ const DropdownMenuSubContent = <T extends ValidComponent = 'div'>(
   return (
     <DropdownMenuPrimitive.SubContent
       class={cn(
-        'bg-popover text-popover-foreground animate-flyUpAndScale z-50 min-w-32 origin-[var(--kb-menu-content-transform-origin)] overflow-hidden rounded-md border p-1 shadow-md',
+        'bg-popover text-popover-foreground animate-flyUpAndScaleExit data-expanded:animate-flyUpAndScale z-50 min-w-32 origin-[var(--kb-menu-content-transform-origin)] overflow-hidden rounded-md border p-1 shadow-md outline-none',
         props.class
       )}
       {...rest}

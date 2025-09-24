@@ -29,7 +29,7 @@ const ContextMenuContent = <T extends ValidComponent = 'div'>(
     <ContextMenuPrimitive.Portal>
       <ContextMenuPrimitive.Content
         class={cn(
-          'bg-popover text-popover-foreground animate-in z-50 min-w-32 origin-[var(--kb-menu-content-transform-origin)] overflow-hidden rounded-md border p-1 shadow-md',
+          'bg-popover text-popover-foreground data-expanded:animate-fadeIn animate-fadeOut z-50 min-w-32 origin-[var(--kb-menu-content-transform-origin)] overflow-hidden rounded-md border p-1 shadow-md outline-none [animation-duration:80ms]',
           local.class
         )}
         {...others}
@@ -137,7 +137,7 @@ const ContextMenuSubContent = <T extends ValidComponent = 'div'>(
   return (
     <ContextMenuPrimitive.SubContent
       class={cn(
-        'bg-popover text-popover-foreground animate-in z-50 min-w-32 origin-[var(--kb-menu-content-transform-origin)] overflow-hidden rounded-md border p-1 shadow-md',
+        'bg-popover text-popover-foreground animate-flyUpAndScaleExit data-expanded:animate-flyUpAndScale z-50 min-w-32 origin-[var(--kb-menu-content-transform-origin)] overflow-hidden rounded-md border p-1 shadow-md outline-none',
         local.class
       )}
       {...others}

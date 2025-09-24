@@ -270,10 +270,3 @@ export function SelectComp(props: SelectCompProps) {
     </Select>
   );
 }
-// <SelectValue>
-//   {() =>
-//     local.value && labelsMap()[local.value]
-//       ? labelsMap()[local.value]
-//       : placeholderText()
-//   }
-// </SelectValue>

@@ -9,6 +9,7 @@ import { ContextMenuComp } from '@/components/ui/context-menu';
 import { DialogComp } from '@/components/ui/dialog';
 import { DropdownMenuComp } from '@/components/ui/dropdown-menu';
 import { PopoverComp } from '@/components/ui/popover';
+import { RadioGroupComp } from '@/components/ui/radio-group';
 import { SelectComp, SelectOption } from '@/components/ui/select';
 import { SwitchComp } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -534,7 +535,24 @@ export default function ComponentsPage() {
           description="You agree to our Terms of Service and Privacy Policy."
         />
       </ComponentCard>
-      <ComponentCard label="Radio Group">1</ComponentCard>
+      <ComponentCard label="Radio Group">
+        <RadioGroupComp
+          options={[
+            {
+              value: 'apple',
+              label: '🍎 Apple',
+            },
+            {
+              value: 'orange',
+              label: '🍊 Orange',
+            },
+            {
+              value: 'grape',
+              label: '🍇 Grape',
+            },
+          ]}
+        />
+      </ComponentCard>
 
       <ComponentCard label="Calendar">1</ComponentCard>
       <ComponentCard label="Data Table">1</ComponentCard>
