@@ -96,7 +96,7 @@ const SwitchComp = (props: SwitchCompProps) => {
         <SwitchThumb {...local.thumbProps} />
       </SwitchControl>
       <Show when={label()}>
-        <SwitchLabel {...local.labelProps}>{local.label}</SwitchLabel>
+        <SwitchLabel {...local.labelProps}>{label()}</SwitchLabel>
       </Show>
     </SwitchPrimitive.Root>
   );

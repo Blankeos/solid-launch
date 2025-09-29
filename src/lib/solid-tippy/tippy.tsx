@@ -190,13 +190,14 @@ export function useTippyHeadless<T extends Element>(
 type CustomTippyOptions = {
   disabled?: boolean;
   hidden?: boolean;
+  open?: boolean;
   content?: string | JSX.Element;
   props?: Omit<Partial<Props>, 'content'>;
 };
 
 export function Tippy(props: CustomTippyOptions & { children: JSX.Element }) {
   // Separate component-specific props from those passed to Tippy.js.
-  const [local, tippyProps] = splitProps(props, ['children', 'content']);
+  const [local, tippyProps] = splitProps(props, ['children', 'content', 'open']);
 
   const resolvedChildren = children(() => local.children);
   const [trigger, setTrigger] = createSignal<HTMLElement>();
@@ -219,16 +220,22 @@ export function Tippy(props: CustomTippyOptions & { children: JSX.Element }) {
       return tippyProps.disabled;
     },
     get hidden() {
+      if (local.open !== undefined) {
+        return !local.open;
+      }
       return tippyProps.hidden ?? true;
     },
     get props() {
       return {
         animation: 'scale-subtle',
+        theme: 'custom',
         ...tippyProps.props,
         // The `content` is a reactive getter that returns the container element
         // once it's rendered.
         content: contentContainer(),
-      };
+        // When open is explicitly provided, disable trigger events
+        ...(local.open !== undefined && { trigger: 'manual', hideOnClick: false }),
+      } satisfies TippyOptions['props'];
     },
   });
 

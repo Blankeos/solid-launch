@@ -1,8 +1,38 @@
 /* Main Tippy styles */
 @import 'tippy.js/dist/tippy.css';
-
 /**
 * For animations
 * Must be imported: https://atomiks.github.io/tippyjs/v6/animations/#included-animations
 */
 @import 'tippy.js/animations/scale-subtle.css';
+
+/* CUSTOMIZE */
+
+/* Custom theme using app.css variables */
+.tippy-box[data-theme~='custom'] {
+  background-color: var(--color-foreground);
+  color: var(--color-card);
+  border: 0px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+}
+
+/* Arrow styling for custom theme */
+.tippy-box[data-theme~='custom'][data-placement^='top'] > .tippy-arrow::before {
+  border-top-color: var(--color-foreground);
+}
+.tippy-box[data-theme~='custom'][data-placement^='bottom'] > .tippy-arrow::before {
+  border-bottom-color: var(--color-foreground);
+}
+.tippy-box[data-theme~='custom'][data-placement^='left'] > .tippy-arrow::before {
+  border-left-color: var(--color-foreground);
+}
+.tippy-box[data-theme~='custom'][data-placement^='right'] > .tippy-arrow::before {
+  border-right-color: var(--color-foreground);
+}
+
+/* Content styling */
+.tippy-box[data-theme~='custom'] .tippy-content {
+  color: var(--color-card);
+  font-size: 12px;
+}

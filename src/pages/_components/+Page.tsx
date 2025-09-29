@@ -1,3 +1,4 @@
+import { IconMoonDuo, IconSunDuo } from '@/assets/icons';
 import { AccordionComp } from '@/components/ui/accordion';
 import { AlertComp } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -6,16 +7,22 @@ import { Button } from '@/components/ui/button';
 import { CheckboxComp } from '@/components/ui/checkbox';
 import { Collapsible } from '@/components/ui/collapsible';
 import { ContextMenuComp } from '@/components/ui/context-menu';
-import { DialogComp } from '@/components/ui/dialog';
+import { DataTable } from '@/components/ui/data-table/data-table';
+import { CalendarComp, CalendarRangeComp } from '@/components/ui/date-picker/calendar-comp';
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { DropdownMenuComp } from '@/components/ui/dropdown-menu';
+import { PaginationComp } from '@/components/ui/pagination';
 import { PopoverComp } from '@/components/ui/popover';
 import { RadioGroupComp } from '@/components/ui/radio-group';
 import { SelectComp, SelectOption } from '@/components/ui/select';
+import { SliderComp } from '@/components/ui/slider';
 import { SwitchComp } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Timeline } from '@/components/ui/timeline';
 import { useThemeContext } from '@/contexts/theme.context';
 import { Tippy } from '@/lib/solid-tippy';
 import { cn } from '@/utils/cn';
+import { ColumnDef } from '@tanstack/solid-table';
 import { useDisclosure, useToggle } from 'bagon-hooks';
 import { createEffect, createSignal, FlowProps } from 'solid-js';
 import { JSX } from 'solid-js/jsx-runtime';
@@ -39,7 +46,6 @@ export default function ComponentsPage() {
           </p>
         </div>
       </header>
-
       <ComponentCard label="Button">
         <Button>Info</Button>
         <Button variant="outline">Outline</Button>
@@ -49,7 +55,6 @@ export default function ComponentsPage() {
         <Button disabled>Disabled</Button>
         <Button loading>Loading...</Button>
       </ComponentCard>
-
       <ComponentCard label="Dropdown">
         <DropdownMenuComp
           options={[
@@ -96,16 +101,25 @@ export default function ComponentsPage() {
           <Button as="div">Open options</Button>
         </DropdownMenuComp>
       </ComponentCard>
-
       <ComponentCard label="Switch" class="gap-y-5">
         <SwitchComp label="Enable" />
         {(() => {
           const { theme, toggleTheme } = useThemeContext();
 
-          return <SwitchComp label={theme() === 'light' ? '☀️' : '🌜'} onChange={toggleTheme} />;
+          return (
+            <SwitchComp
+              label={
+                theme() === 'light' ? (
+                  <IconMoonDuo class="h-5 w-5" />
+                ) : (
+                  <IconSunDuo class="h-5 w-5" />
+                )
+              }
+              onChange={toggleTheme}
+            />
+          );
         })()}
       </ComponentCard>
-
       <ComponentCard label="Select" class="w-96">
         <span class="text-xs">Basic</span>
         <SelectComp
@@ -126,7 +140,6 @@ export default function ComponentsPage() {
         />
         <SelectComp loading options={[]} placeholder="Loading" />
         <SelectComp disabled options={[]} placeholder="Disabled" />
-        <span class="text-xs">Basic (Controlled)</span>
         {(() => {
           const [value, setValue] = createSignal<string | null>('apple');
           const options: SelectOption[] = [
@@ -136,16 +149,20 @@ export default function ComponentsPage() {
           ];
 
           return (
-            <SelectComp
-              options={options}
-              value={options.find((_opt) => _opt.value === value())}
-              onChange={(newValue) => {
-                setValue(newValue?.value ?? null);
-              }}
-            />
+            <>
+              <span class="text-xs">
+                Basic (Controlled {value() ? `- ${JSON.stringify(value())}` : null})
+              </span>
+              <SelectComp
+                options={options}
+                value={options.find((_opt) => _opt.value === value())}
+                onChange={(newValue) => {
+                  setValue(newValue?.value ?? null);
+                }}
+              />
+            </>
           );
         })()}
-        <span class="text-xs">Multiple (Controlled)</span>
         {(() => {
           const [value, setValue] = createSignal(['apple', 'orange']);
           const options: SelectOption[] = [
@@ -155,28 +172,45 @@ export default function ComponentsPage() {
           ];
 
           return (
-            <SelectComp
-              multiple
-              options={options}
-              value={options.filter((_opt) => value().includes(_opt.value))}
-              onChange={(newValue) => {
-                setValue(newValue.map((_opt) => _opt.value));
-              }}
-            />
+            <>
+              <span class="text-xs">
+                Multiple (Controlled {value() ? `- ${JSON.stringify(value())}` : null})
+              </span>
+
+              <SelectComp
+                multiple
+                options={options}
+                value={options.filter((_opt) => value().includes(_opt.value))}
+                onChange={(newValue) => {
+                  setValue(newValue.map((_opt) => _opt.value));
+                }}
+              />
+            </>
           );
         })()}
       </ComponentCard>
-
+      <ComponentCard label="Slider" class="gap-5">
+        <SliderComp
+          label="Money"
+          defaultValue={[25, 75]}
+          getValueLabel={(params) => `P${params.values[0]} - P${params.values[1]}`}
+        />
+        <SliderComp
+          label="Percent"
+          getValueLabel={(params) => `${params.values}%`}
+          thumbTip={(value) => `${value}%`}
+        />
+      </ComponentCard>
       <ComponentCard label="Badge">
         <Badge variant="default">Default</Badge>
         <Badge variant="secondary">Secondary</Badge>
         <Badge variant="outline">Outline</Badge>
         {/*<Badge variant="info">Info</Badge>*/}
+        <Badge variant="info">Info</Badge>
         <Badge variant="success">Success</Badge>
         <Badge variant="error">Destructive</Badge>
         <Badge variant="warning">Warning</Badge>
       </ComponentCard>
-
       <ComponentCard label="Alert">
         <AlertComp
           icon={<div>🦀</div>}
@@ -189,7 +223,6 @@ export default function ComponentsPage() {
           description="You can add components to your app using the cli."
         />
       </ComponentCard>
-
       <ComponentCard label="Breadcrumbs">
         <BreadcrumbComp
           path={[
@@ -260,7 +293,6 @@ export default function ComponentsPage() {
           Show a Toast
         </Button>
       </ComponentCard>
-
       {/*<ComponentCard label="Tooltip">
         <TooltipComp content="Content of tooltip" triggerProps={{ class: 'w-max self-center' }}>
           <Button variant="outline" as="div">
@@ -318,7 +350,7 @@ export default function ComponentsPage() {
         </Tippy>
         <Tippy
           content="I am following your cursor"
-          props={{ followCursor: true, plugins: [followCursor] }}
+          props={{ followCursor: true, plugins: [followCursor], hideOnClick: false }}
         >
           <Button variant="outline" as="div" class="h-20">
             Follow Cursor
@@ -392,7 +424,6 @@ export default function ComponentsPage() {
           </div>
         </ContextMenuComp>
       </ComponentCard>
-
       <ComponentCard label="Popover">
         <PopoverComp
           content={
@@ -412,20 +443,16 @@ export default function ComponentsPage() {
             </div>
           }
         >
-          <Button>Open</Button>
+          <Button as="div">Open</Button>
         </PopoverComp>
       </ComponentCard>
-
       <_DialogExample />
-
       <ComponentCard label="Sheet">
         <Button>Open</Button>
       </ComponentCard>
-
       <ComponentCard label="Drawer">
         <Button>Open</Button>
       </ComponentCard>
-
       <ComponentCard label="Tabs">
         <Tabs defaultValue="account" class="w-[400px]">
           <TabsList>
@@ -496,7 +523,6 @@ export default function ComponentsPage() {
           ]}
         />
       </ComponentCard>
-
       <ComponentCard label="Collapsible" class="w-96">
         <p class="text-foreground/50 mb-2 text-xs">
           Made by Carlo. Kind of like Accordion but for more flexible cases since it can be
@@ -528,7 +554,6 @@ export default function ComponentsPage() {
           );
         })()}
       </ComponentCard>
-
       <ComponentCard label="Checkbox">
         <CheckboxComp
           label="Accept terms and conditions"
@@ -553,15 +578,163 @@ export default function ComponentsPage() {
           ]}
         />
       </ComponentCard>
+      <ComponentCard label="Date Picker" class="items-center gap-4">
+        <span class="text-xs">Basic</span>
+        <CalendarComp />
 
-      <ComponentCard label="Calendar">1</ComponentCard>
-      <ComponentCard label="Data Table">1</ComponentCard>
-      <ComponentCard label="Timeline">1</ComponentCard>
+        <span class="text-xs">Basic w/ controls</span>
+        <CalendarComp withControls />
+
+        <span class="text-xs">Range</span>
+        <CalendarRangeComp />
+
+        <span class="text-xs">Range w/ controls</span>
+        <CalendarRangeComp withPicker />
+      </ComponentCard>
+      <ComponentCard label="Data Table">
+        {(() => {
+          const data = [
+            { id: 'm5gr84i9', status: 'success', email: 'ken99@yahoo.com', amount: 316 },
+            { id: '3u1reuv4', status: 'success', email: 'Abe45@gmail.com', amount: 242 },
+            { id: 'derv1ws0', status: 'processing', email: 'Monserrat44@gmail.com', amount: 837 },
+            { id: '5kma53ae', status: 'success', email: 'silas22@gmail.com', amount: 874 },
+            { id: 'bhqecj4p', status: 'failed', email: 'carmella@hotmail.com', amount: 721 },
+            { id: 'hqkxm3n2', status: 'failed', email: 'marlon@outlook.com', amount: 143 },
+            { id: '8xvfpq7w', status: 'processing', email: 'opal88@hotmail.com', amount: 992 },
+            { id: 'jkl4mno9', status: 'success', email: 'dexter12@gmail.com', amount: 654 },
+            { id: 'qwe5rty1', status: 'success', email: 'luna54@yahoo.com', amount: 320 },
+            { id: 'zxc6vbn2', status: 'failed', email: 'enzo77@gmail.com', amount: 467 },
+            { id: 'asd7fgh3', status: 'processing', email: 'iris23@outlook.com', amount: 589 },
+            { id: 'mnb8uio4', status: 'success', email: 'finn99@hotmail.com', amount: 812 },
+          ];
+
+          const columns: ColumnDef<(typeof data)[number]>[] = [
+            {
+              id: 'select',
+              header: (props) => (
+                <CheckboxComp
+                  checked={props.table.getIsAllPageRowsSelected()}
+                  indeterminate={props.table.getIsSomePageRowsSelected()}
+                  onChange={(value) => props.table.toggleAllPageRowsSelected(!!value)}
+                  aria-label="Select all"
+                />
+              ),
+              cell: (props) => (
+                <CheckboxComp
+                  checked={props.row.getIsSelected()}
+                  onChange={(value) => props.row.toggleSelected(!!value)}
+                  aria-label="Select row"
+                />
+              ),
+              enableSorting: false,
+              enableHiding: false,
+            },
+            {
+              accessorKey: 'status',
+              header: 'Status',
+              cell: (props) => (
+                <Badge
+                  variant={
+                    props.row.getValue('status') === 'success'
+                      ? 'success'
+                      : props.row.getValue('status') === 'failed'
+                        ? 'error'
+                        : 'info'
+                  }
+                  class="capitalize"
+                >
+                  {props.row.getValue('status') as string}
+                </Badge>
+              ),
+            },
+            {
+              accessorKey: 'email',
+              header: 'Email',
+            },
+            {
+              accessorKey: 'amount',
+              header: () => <div class="text-right">Amount</div>,
+              cell: (props) => {
+                // eslint-disable-next-line solid/reactivity
+                const amount = parseFloat(props.row.getValue('amount'));
+                const formatted = new Intl.NumberFormat('en-US', {
+                  style: 'currency',
+                  currency: 'USD',
+                }).format(amount);
+                return <div class="text-right font-medium">{formatted}</div>;
+              },
+            },
+          ];
+
+          const statusFilterOptions = [
+            { value: 'success', label: 'Success', checked: true },
+            { value: 'failed', label: 'Failed', checked: false },
+            { value: 'processing', label: 'Processing', checked: false },
+          ];
+
+          return (
+            <DataTable
+              columns={columns}
+              data={data}
+              toolbar={{
+                searchable: {
+                  columns: 'email',
+                  placeholder: 'Search for email',
+                },
+                filterables: [
+                  {
+                    column: 'status',
+                    title: 'Status',
+                    options: statusFilterOptions,
+                  },
+                ],
+              }}
+            />
+          );
+        })()}
+      </ComponentCard>
+      <ComponentCard label="Timeline">
+        <Timeline
+          items={[
+            {
+              title: 'Event #1',
+              description: 'This is the first event of the timeline.',
+            },
+            {
+              title: 'Event #2',
+              description: 'This is the second event of the timeline.',
+            },
+            {
+              title: 'Event #3',
+              description: 'This is the third event of the timeline.',
+            },
+          ]}
+          activeItem={1}
+        />
+      </ComponentCard>
+
+      <ComponentCard label="Pagination">
+        {(() => {
+          const [currentPage, setCurrentPage] = createSignal(1);
+
+          return (
+            <>
+              <div class="mb-2">You are now in page: {currentPage()}</div>
+              <PaginationComp
+                count={10}
+                onPageChange={(newPage) => {
+                  setCurrentPage(newPage);
+                }}
+              />
+            </>
+          );
+        })()}
+      </ComponentCard>
     </div>
   );
 }
 
-export function ComponentCard(
+function ComponentCard(
   props: FlowProps<{
     label?: JSX.Element;
     class?: string;
@@ -585,12 +758,43 @@ export function ComponentCard(
 // -----------------------------------------------------------------------------
 function _DialogExample() {
   const [dialogOpen, dialogActions] = useDisclosure();
+
   return (
-    <ComponentCard label="Dialog">
-      <Button onClick={dialogActions.toggle}>Open</Button>
-      <DialogComp open={dialogOpen()} onOpenChange={dialogActions.set}>
-        <Button>Carlo</Button>
-      </DialogComp>
+    <ComponentCard label="Dialog" class="gap-5">
+      <span class="text-xs">Simple (w/ automatic accessibility, simple usecases)</span>
+      <Dialog>
+        <DialogTrigger class="contents">
+          <Button as="span">Open</Button>
+        </DialogTrigger>
+
+        <DialogContent>
+          <DialogTitle>Title</DialogTitle>
+          <Button>Submit</Button>
+        </DialogContent>
+      </Dialog>
+
+      <span class="text-xs">Controlled (manual accessibility, complex usecases)</span>
+      {/*
+        Accessibility Documentation:
+        - aria-haspopup="dialog": Announces to assistive tech that the button opens a dialog.
+        - aria-expanded={dialogOpen()}: Reflects dialog state (true when open, false when closed).
+        - aria-controls="controlled-dialog" (recommended): Associate button with dialog;
+          requires id="controlled-dialog" on DialogContent to announce which element is controlled.
+      */}
+      <Button
+        onClick={dialogActions.toggle}
+        aria-haspopup="dialog"
+        aria-expanded={dialogOpen()}
+        aria-controls="controlled-dialog"
+      >
+        Open Controlled Dialog
+      </Button>
+      <Dialog open={dialogOpen()} onOpenChange={dialogActions.set}>
+        <DialogContent id="controlled-dialog" aria-labelledby="controlled-dialog-title">
+          <DialogTitle id="controlled-dialog-title">Controlled Dialog Title</DialogTitle>
+          <Button onClick={dialogActions.toggle}>Close</Button>
+        </DialogContent>
+      </Dialog>
     </ComponentCard>
   );
 }

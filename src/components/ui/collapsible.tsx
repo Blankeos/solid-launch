@@ -102,7 +102,7 @@ export function Collapsible(props: CollapsibleProps) {
   return (
     <div
       style={{ height: heightStyle() }}
-      class={cn(local.containerClass, 'overflow-hidden transition-[width,height] duration-400')}
+      class={cn('overflow-hidden transition-[width,height] duration-400', local.containerClass)}
       aria-hidden={!local.open}
       {...others}
     >

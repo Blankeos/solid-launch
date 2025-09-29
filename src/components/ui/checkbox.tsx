@@ -1,5 +1,5 @@
 import type { ValidComponent } from 'solid-js';
-import { createMemo, Match, splitProps, Switch } from 'solid-js';
+import { children, createMemo, Match, Show, splitProps, Switch } from 'solid-js';
 
 import * as CheckboxPrimitive from '@kobalte/core/checkbox';
 import type { PolymorphicProps } from '@kobalte/core/polymorphic';
@@ -65,7 +65,7 @@ export { Checkbox };
 // ---
 
 type CheckboxCompProps<T extends ValidComponent = 'div'> = {
-  label: JSX.Element;
+  label?: JSX.Element;
   description?: JSX.Element;
   id?: string;
   labelProps?: JSX.HTMLAttributes<HTMLLabelElement>;
@@ -84,14 +84,24 @@ export const CheckboxComp = <T extends ValidComponent = 'div'>(
   ]);
   const id = createMemo(() => local.id || `checkbox-${Math.random().toString(36).slice(2)}`);
 
+  const label = children(() => local.label);
+
   return (
     <div class="flex items-start space-x-2">
       {/* @ts-expect-error This is fine :) */}
       <Checkbox id={id()} {...others} />
       <div class="grid gap-1.5 leading-none">
-        <Label for={`${id()}-input`} class="text-sm leading-4 font-medium" {...local.labelProps}>
-          {local.label}
-        </Label>
+        <Show when={label()}>
+          {(_label) => (
+            <Label
+              for={`${id()}-input`}
+              class="text-sm leading-4 font-medium"
+              {...local.labelProps}
+            >
+              {_label()}
+            </Label>
+          )}
+        </Show>
         {local.description && (
           <p class="text-muted-foreground text-sm" {...local.descriptionProps}>
             {local.description}
