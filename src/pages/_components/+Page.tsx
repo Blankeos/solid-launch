@@ -1,4 +1,5 @@
 import { IconMoonDuo, IconSunDuo } from '@/assets/icons';
+import DragAndDropList from '@/components/drag-and-drop/drag-and-drop';
 import { AccordionComp } from '@/components/ui/accordion';
 import { AlertComp } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +12,14 @@ import { ContextMenuComp } from '@/components/ui/context-menu';
 import { DataTable } from '@/components/ui/data-table/data-table';
 import { CalendarComp, CalendarRangeComp } from '@/components/ui/date-picker/calendar-comp';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@/components/ui/drawer';
 import { DropdownMenuComp } from '@/components/ui/dropdown-menu';
 import { PaginationComp } from '@/components/ui/pagination';
 import { PopoverComp } from '@/components/ui/popover';
@@ -25,8 +34,9 @@ import { Tippy } from '@/lib/solid-tippy';
 import { cn } from '@/utils/cn';
 import { ColumnDef } from '@tanstack/solid-table';
 import { useDisclosure, useToggle } from 'bagon-hooks';
-import { createEffect, createSignal, FlowProps } from 'solid-js';
+import { createEffect, createSignal, FlowProps, For } from 'solid-js';
 import { JSX } from 'solid-js/jsx-runtime';
+import { createStore } from 'solid-js/store';
 import { toast } from 'solid-sonner';
 import { followCursor } from 'tippy.js';
 
@@ -346,40 +356,6 @@ export default function ComponentsPage() {
           Error Toast
         </Button>
       </ComponentCard>
-      {/*<ComponentCard label="Tooltip">
-        <TooltipComp content="Content of tooltip" triggerProps={{ class: 'w-max self-center' }}>
-          <Button variant="outline" as="div">
-            Hover
-          </Button>
-        </TooltipComp>
-        <TooltipComp
-          content="Content of tooltip + following 🦋!"
-          followCursor
-          contentProps={{ class: 'pointer-events-none' }}
-        >
-          <Button variant="outline" as="div" class="h-52 w-52">
-            Hover with Follow
-          </Button>
-        </TooltipComp>
-        <TooltipComp
-          content="Content of tooltip + following 🦋!"
-          followCursor="horizontal"
-          contentProps={{ class: 'pointer-events-none' }}
-        >
-          <Button variant="outline" as="div" class="h-52 w-52">
-            Hover with Follow
-          </Button>
-        </TooltipComp>
-        <TooltipComp
-          content="Content of tooltip + following 🦋!"
-          followCursor="vertical"
-          contentProps={{ class: 'pointer-events-none' }}
-        >
-          <Button variant="outline" as="div" class="h-52 w-52">
-            Hover with Follow
-          </Button>
-        </TooltipComp>
-      </ComponentCard>*/}
       <ComponentCard label="Tooltip">
         <Tippy content="Content of tooltip">
           <Button variant="outline" as="div">
@@ -500,11 +476,88 @@ export default function ComponentsPage() {
         </PopoverComp>
       </ComponentCard>
       <_DialogExample />
-      <ComponentCard label="Sheet">
-        <Button>Open</Button>
-      </ComponentCard>
-      <ComponentCard label="Drawer">
-        <Button>Open</Button>
+      <ComponentCard label="Drawer" class="gap-5">
+        <span class="text-xs">Simple (w/ automatic accessibility, simple usecases)</span>
+        <Drawer>
+          <DrawerTrigger class="contents">
+            <Button as="span">Open</Button>
+          </DrawerTrigger>
+          <DrawerContent>
+            <DrawerHeader>
+              <DrawerTitle>Title</DrawerTitle>
+              <DrawerDescription>This is a simple drawer example.</DrawerDescription>
+            </DrawerHeader>
+            <div class="p-4">
+              <Button>Submit</Button>
+            </div>
+          </DrawerContent>
+        </Drawer>
+
+        <span class="text-xs">Controlled (manual accessibility, complex usecases)</span>
+        {(() => {
+          const [drawerOpen, drawerActions] = useDisclosure();
+
+          return (
+            <>
+              <Button
+                onClick={drawerActions.toggle}
+                aria-haspopup="dialog"
+                aria-expanded={drawerOpen()}
+                aria-controls="controlled-drawer"
+              >
+                Open Controlled Drawer
+              </Button>
+              <Drawer open={drawerOpen()} onOpenChange={drawerActions.set}>
+                <DrawerContent id="controlled-drawer" aria-labelledby="controlled-drawer-title">
+                  <DrawerHeader>
+                    <DrawerTitle id="controlled-drawer-title">Controlled Drawer Title</DrawerTitle>
+                    <DrawerDescription>This is a controlled drawer example.</DrawerDescription>
+                  </DrawerHeader>
+                  <div class="p-4">
+                    <Button onClick={drawerActions.toggle}>Close</Button>
+                  </div>
+                </DrawerContent>
+              </Drawer>
+            </>
+          );
+        })()}
+
+        <span class="text-xs">Directions</span>
+        <div class="flex gap-1">
+          {(() => {
+            const directions = ['bottom', 'top', 'left', 'right'] as const;
+            const labels = [
+              {
+                bottom: 'Drawer from bottom',
+                top: 'Drawer from top',
+                left: 'Drawer from left',
+                right: 'Drawer from right',
+              },
+            ];
+            return (
+              <For each={directions}>
+                {(dir) => (
+                  <Drawer side={dir}>
+                    <DrawerTrigger class="contents">
+                      <Button as="span">{labels[0][dir]}</Button>
+                    </DrawerTrigger>
+                    <DrawerContent>
+                      <DrawerHeader>
+                        <DrawerTitle>{labels[0][dir]}</DrawerTitle>
+                        <DrawerDescription>Opening from the {dir} direction.</DrawerDescription>
+                      </DrawerHeader>
+                      <div class="p-4">
+                        <Button>Submit</Button>
+                      </div>
+                    </DrawerContent>
+                  </Drawer>
+                )}
+              </For>
+            );
+
+            //....
+          })()}
+        </div>
       </ComponentCard>
       <ComponentCard label="Tabs">
         <Tabs defaultValue="account" class="w-[400px]">
@@ -780,6 +833,99 @@ export default function ComponentsPage() {
                 }}
               />
             </>
+          );
+        })()}
+      </ComponentCard>
+      <ComponentCard label="Drag and Drop Lists" class="gap-3">
+        <span class="text-xs">List</span>
+        {(() => {
+          const [list, setList] = createStore([
+            {
+              id: '001',
+              name: 'Bulbasaur',
+              img: 'https://oyster.ignimgs.com/mediawiki/apis.ign.com/pokemon-quest/9/9b/001pq.jpg',
+            },
+            {
+              id: '004',
+              name: 'Charmander',
+              img: 'https://img.rankedboost.com/wp-content/uploads/2018/08/Pokemon-Quest-Charmander.png',
+            },
+            {
+              id: '007',
+              name: 'Squirtle',
+              img: 'https://img.rankedboost.com/wp-content/uploads/2018/08/Pokemon-Quest-Squirtle.png',
+            },
+          ]);
+
+          return (
+            <div class="flex flex-col gap-y-2">
+              <DragAndDropList items={list} setItems={setList} itemIdAccessor={(item) => item.id}>
+                {(_item) => (
+                  <div
+                    ref={_item.ref}
+                    class="bg-card flex cursor-grab items-center gap-3 rounded-lg border p-3 shadow-sm transition-all active:cursor-grabbing"
+                  >
+                    <img
+                      src={_item.item.img}
+                      class="h-10 w-10 rounded-full bg-white object-cover object-center"
+                      alt={_item.item.name}
+                    />
+                    <div class="flex-1">
+                      <h4 class="text-foreground font-medium">{_item.item.name}</h4>
+                      <p class="text-muted-foreground text-xs">ID: {_item.item.id}</p>
+                    </div>
+                    <div
+                      class={`text-xs font-medium ${_item.state() === 'dragging' ? 'text-destructive' : _item.state() === 'over' ? 'text-primary' : 'text-muted-foreground'}`}
+                    >
+                      {_item.state()}
+                    </div>
+                  </div>
+                )}
+              </DragAndDropList>
+            </div>
+          );
+        })()}
+
+        <span class="text-xs">Grid</span>
+        {(() => {
+          const [grid, setGrid] = createStore([
+            { id: '🍎', name: 'Apple' },
+            { id: '🍊', name: 'Orange' },
+            { id: '🍇', name: 'Grape' },
+            { id: '🍌', name: 'Banana' },
+            { id: '🍓', name: 'Strawberry' },
+            { id: '🥝', name: 'Kiwi' },
+          ]);
+
+          return (
+            <div class="flex flex-col gap-y-2">
+              <div class="grid grid-cols-3 gap-2">
+                <DragAndDropList items={grid} setItems={setGrid} itemIdAccessor={(item) => item.id}>
+                  {(_props) => (
+                    <div
+                      ref={_props.ref}
+                      class={cn(
+                        'bg-card flex cursor-grab flex-col items-center gap-2 rounded-lg border p-3 shadow-sm transition-all active:cursor-grabbing',
+                        _props.state() === 'dragging' && 'opacity-20'
+                      )}
+                    >
+                      <div class="text-2xl">{_props.item.id}</div>
+                      <div class="text-xs font-medium">{_props.item.name}</div>
+                    </div>
+                  )}
+                </DragAndDropList>
+              </div>
+
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setGrid((items) => [...items].sort(() => Math.random() - 0.5));
+                }}
+              >
+                🔀 Shuffle Fruits
+              </Button>
+            </div>
           );
         })()}
       </ComponentCard>
