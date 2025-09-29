@@ -73,8 +73,9 @@ body {
     --shadow-xl: 0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 8px 10px -2px hsl(0 0% 0% / 0.1);
     --shadow-2xl: 0px 4px 8px -1px hsl(0 0% 0% / 0.25);
 
+    /* The foregrounds suck for me. */
     --success: oklch(65% 0.15 160);
-    --success-foreground: oklch(1 0 0);
+    --success-foreground: oklch(0.2 0.05 160);
     --warning: oklch(85% 0.15 85);
     --warning-foreground: #a16207;
     --error: oklch(65% 0.18 25);
@@ -170,6 +171,7 @@ body {
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
   --color-warning: var(--warning);

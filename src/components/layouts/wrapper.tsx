@@ -35,5 +35,5 @@ export default function Wrapper(props: FlowProps) {
 function _Toaster() {
   const { inferredTheme } = useThemeContext();
 
-  return <Toaster theme={inferredTheme()} />;
+  return <Toaster theme={inferredTheme()} richColors />;
 }

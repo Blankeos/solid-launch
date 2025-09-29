@@ -4,6 +4,7 @@ import { AlertComp } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { BreadcrumbComp } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
+import { CalloutComp } from '@/components/ui/callout';
 import { CheckboxComp } from '@/components/ui/checkbox';
 import { Collapsible } from '@/components/ui/collapsible';
 import { ContextMenuComp } from '@/components/ui/context-menu';
@@ -223,6 +224,29 @@ export default function ComponentsPage() {
           description="You can add components to your app using the cli."
         />
       </ComponentCard>
+
+      <ComponentCard label="Callout">
+        <CalloutComp
+          title="Default"
+          content="Lorem ipsum dolor sit amet consectetur, adipisicing elit. Tempora cupiditate sapiente officiis ullam, nulla nam sunt? Ipsa facilis ut aspernatur debitis. Qui dolorem modi, assumenda nihil eligendi commodi tempore eos?"
+        />
+        <CalloutComp
+          variant="success"
+          title="Success"
+          content="Lorem ipsum dolor sit amet consectetur, adipisicing elit. Tempora cupiditate sapiente officiis ullam, nulla nam sunt? Ipsa facilis ut aspernatur debitis. Qui dolorem modi, assumenda nihil eligendi commodi tempore eos?"
+        />
+        <CalloutComp
+          variant="warning"
+          title="Warning"
+          content="Lorem ipsum dolor sit amet consectetur, adipisicing elit. Tempora cupiditate sapiente officiis ullam, nulla nam sunt? Ipsa facilis ut aspernatur debitis. Qui dolorem modi, assumenda nihil eligendi commodi tempore eos?"
+        />
+        <CalloutComp
+          variant="error"
+          title="Error"
+          content="Lorem ipsum dolor sit amet consectetur, adipisicing elit. Tempora cupiditate sapiente officiis ullam, nulla nam sunt? Ipsa facilis ut aspernatur debitis. Qui dolorem modi, assumenda nihil eligendi commodi tempore eos?"
+        />
+      </ComponentCard>
+
       <ComponentCard label="Breadcrumbs">
         <BreadcrumbComp
           path={[
@@ -290,7 +314,36 @@ export default function ComponentsPage() {
             toasts[random]();
           }}
         >
-          Show a Toast
+          🎉 Random Toast
+        </Button>
+
+        <Button
+          onClick={() => {
+            toast.success('All changes have been saved!');
+          }}
+        >
+          Success Toast
+        </Button>
+        <Button
+          onClick={() => {
+            toast.warning('Your session will expire in 5 minutes.');
+          }}
+        >
+          Warning Toast
+        </Button>
+        <Button
+          onClick={() => {
+            toast.info('New feature available in your dashboard.');
+          }}
+        >
+          Info Toast
+        </Button>
+        <Button
+          onClick={() => {
+            toast.error('Unable to connect to the server.');
+          }}
+        >
+          Error Toast
         </Button>
       </ComponentCard>
       {/*<ComponentCard label="Tooltip">
