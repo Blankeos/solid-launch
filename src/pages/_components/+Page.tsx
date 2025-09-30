@@ -1,6 +1,4 @@
 import { IconMoonDuo, IconSunDuo } from '@/assets/icons';
-import { arrayMoveImmutable } from '@/components/drag-and-drop/array-move';
-import DragAndDropList, { OnDropEvent } from '@/components/drag-and-drop/drag-and-drop';
 import { AccordionComp } from '@/components/ui/accordion';
 import { AlertComp } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -37,9 +35,9 @@ import { ColumnDef } from '@tanstack/solid-table';
 import { useDisclosure, useToggle } from 'bagon-hooks';
 import { createEffect, createSignal, FlowProps, For } from 'solid-js';
 import { JSX } from 'solid-js/jsx-runtime';
-import { createStore, reconcile } from 'solid-js/store';
 import { toast } from 'solid-sonner';
 import { followCursor } from 'tippy.js';
+import { DragExample } from './drag-example';
 
 export default function ComponentsPage() {
   return (
@@ -838,258 +836,20 @@ export default function ComponentsPage() {
         })()}
       </ComponentCard>
       <ComponentCard label="Drag and Drop Lists" class="gap-3">
-        <span class="text-xs">List</span>
-        {(() => {
-          const [list, setList] = createStore([
-            {
-              id: '001',
-              name: 'Bulbasaur',
-              img: 'https://oyster.ignimgs.com/mediawiki/apis.ign.com/pokemon-quest/9/9b/001pq.jpg',
-            },
-            {
-              id: '004',
-              name: 'Charmander',
-              img: 'https://img.rankedboost.com/wp-content/uploads/2018/08/Pokemon-Quest-Charmander.png',
-            },
-            {
-              id: '007',
-              name: 'Squirtle',
-              img: 'https://img.rankedboost.com/wp-content/uploads/2018/08/Pokemon-Quest-Squirtle.png',
-            },
-          ]);
-
-          return (
-            <div class="flex flex-col gap-y-2">
-              <DragAndDropList
-                items={list}
-                itemIdAccessor={(item) => item.id}
-                onDrop={(params) => {
-                  const reorderedItems = arrayMoveImmutable(
-                    list,
-                    params.sourceIndex,
-                    params.targetIndex
-                  );
-                  // Update the SolidJS store. `reconcile` is used for efficient, deep updates.
-                  setList(reconcile(reorderedItems));
-                }}
-              >
-                {(_item) => (
-                  <div
-                    ref={_item.ref}
-                    class="bg-card flex cursor-grab items-center gap-3 rounded-lg border p-3 shadow-sm transition-all active:cursor-grabbing"
-                  >
-                    <img
-                      src={_item.item.img}
-                      class="h-10 w-10 rounded-full bg-white object-cover object-center"
-                      alt={_item.item.name}
-                    />
-                    <div class="flex-1">
-                      <h4 class="text-foreground font-medium">{_item.item.name}</h4>
-                      <p class="text-muted-foreground text-xs">ID: {_item.item.id}</p>
-                    </div>
-                    <div
-                      class={`text-xs font-medium ${_item.state() === 'dragging' ? 'text-destructive' : _item.state() === 'over' ? 'text-primary' : 'text-muted-foreground'}`}
-                    >
-                      {_item.state()}
-                    </div>
-                  </div>
-                )}
-              </DragAndDropList>
-            </div>
-          );
-        })()}
-
-        <span class="text-xs">Grid</span>
-        {(() => {
-          const [grid, setGrid] = createStore([
-            { id: '🍎', name: 'Apple' },
-            { id: '🍊', name: 'Orange' },
-            { id: '🍇', name: 'Grape' },
-            { id: '🍌', name: 'Banana' },
-            { id: '🍓', name: 'Strawberry' },
-            { id: '🥝', name: 'Kiwi' },
-          ]);
-
-          return (
-            <div class="flex flex-col gap-y-2">
-              <div class="grid grid-cols-3 gap-2">
-                <DragAndDropList
-                  items={grid}
-                  itemIdAccessor={(item) => item.id}
-                  onDrop={(params) => {
-                    const reorderedItems = arrayMoveImmutable(
-                      grid,
-                      params.sourceIndex,
-                      params.targetIndex
-                    );
-                    setGrid(reconcile(reorderedItems));
-                  }}
-                >
-                  {(_props) => (
-                    <div
-                      ref={_props.ref}
-                      class={cn(
-                        'bg-card flex cursor-grab flex-col items-center gap-2 rounded-lg border p-3 shadow-sm transition-all active:cursor-grabbing',
-                        _props.state() === 'dragging' && 'opacity-20'
-                      )}
-                    >
-                      <div class="text-2xl">{_props.item.id}</div>
-                      <div class="text-xs font-medium">{_props.item.name}</div>
-                    </div>
-                  )}
-                </DragAndDropList>
-              </div>
-
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                  setGrid((items) => [...items].sort(() => Math.random() - 0.5));
-                }}
-              >
-                🔀 Shuffle Fruits
-              </Button>
-            </div>
-          );
-        })()}
-
-        <span class="text-xs">Trello Board (Cross-list drag)</span>
-        {(() => {
-          const [board, setBoard] = createStore({
-            todo: {
-              title: 'Todo',
-              columnId: 'todo',
-              items: [
-                { id: 't1', title: 'Design mockups', assignee: 'Alice' },
-                { id: 't2', title: 'Write API docs', assignee: 'Bob' },
-                { id: 't3', title: 'Review PR #42', assignee: 'You' },
-              ],
-            },
-            done: {
-              title: 'Done',
-              columnId: 'done',
-              items: [
-                { id: 'd1', title: 'Setup CI pipeline', assignee: 'Alice' },
-                { id: 'd2', title: 'Deploy to staging', assignee: 'Bob' },
-              ],
-            },
-          });
-
-          function handleBoardDrop(params: OnDropEvent<(typeof board.todo.items)[number]>) {
-            // Moving within the same list
-            if (
-              params.sourceInstanceId === 'todo-list' &&
-              params.targetInstanceId === 'todo-list'
-            ) {
-              const sourceIndex = board.todo.items.findIndex((item) => item.id === params.sourceId);
-              const targetIndex = board.todo.items.findIndex((item) => item.id === params.targetId);
-              const reorderedItems = arrayMoveImmutable(board.todo.items, sourceIndex, targetIndex);
-              setBoard('todo', 'items', reconcile(reorderedItems));
-            } else if (
-              params.sourceInstanceId === 'done-list' &&
-              params.targetInstanceId === 'done-list'
-            ) {
-              const sourceIndex = board.done.items.findIndex((item) => item.id === params.sourceId);
-              const targetIndex = board.done.items.findIndex((item) => item.id === params.targetId);
-              const reorderedItems = arrayMoveImmutable(board.done.items, sourceIndex, targetIndex);
-              setBoard('done', 'items', reconcile(reorderedItems));
-            }
-            // Moving from done list to todo list
-            else if (
-              params.sourceInstanceId === 'done-list' &&
-              params.targetInstanceId === 'todo-list'
-            ) {
-              const sourceIndex = board.done.items.findIndex((item) => item.id === params.sourceId);
-              const movedItem = board.done.items[sourceIndex];
-              setBoard('todo', 'items', reconcile([...board.todo.items, movedItem]));
-              setBoard(
-                'done',
-                'items',
-                reconcile(board.done.items.filter((_, i) => i !== sourceIndex))
-              );
-            }
-            // Moving from todo list to done list
-            else if (
-              params.sourceInstanceId === 'todo-list' &&
-              params.targetInstanceId === 'done-list'
-            ) {
-              const sourceIndex = board.todo.items.findIndex((item) => item.id === params.sourceId);
-              const movedItem = board.todo.items[sourceIndex];
-              setBoard('done', 'items', reconcile([...board.done.items, movedItem]));
-              setBoard(
-                'todo',
-                'items',
-                reconcile(board.todo.items.filter((_, i) => i !== sourceIndex))
-              );
-            }
-          }
-
-          return (
-            <div class="grid grid-cols-2 gap-4">
-              <div class="flex flex-col gap-2 bg-green-500">
-                <h4 class="text-xs font-semibold">{board.todo.title}</h4>
-                <DragAndDropList
-                  instanceId="todo-list"
-                  items={board.todo.items}
-                  itemIdAccessor={(item) => item.id}
-                  extraInstanceIds={['done-list']}
-                  onDrop={handleBoardDrop}
-                >
-                  {(_item) => (
-                    <div
-                      ref={_item.ref}
-                      class="bg-card relative flex cursor-grab flex-col gap-1 rounded-lg border p-3 shadow-sm transition-all active:cursor-grabbing"
-                    >
-                      <span class="text-sm font-medium">{_item.item.title}</span>
-                      <span class="text-muted-foreground text-xs">@{_item.item.assignee}</span>
-
-                      {_item.state() === 'over' && (
-                        <span
-                          class="absolute right-0 -bottom-1 left-0 flex h-0.5 items-center bg-blue-500"
-                          aria-hidden
-                        >
-                          <span class="absolute right-0 h-1.5 w-1.5 rounded-full bg-blue-500" />
-                          <span class="absolute left-0 h-1.5 w-1.5 rounded-full bg-blue-500" />
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </DragAndDropList>
-              </div>
-
-              <div class="flex flex-col gap-2 bg-green-500">
-                <h4 class="text-xs font-semibold">{board.done.title}</h4>
-                <DragAndDropList
-                  instanceId="done-list"
-                  items={board.done.items}
-                  itemIdAccessor={(item) => item.id}
-                  extraInstanceIds={['todo-list']}
-                  onDrop={handleBoardDrop}
-                >
-                  {(_item) => (
-                    <div
-                      ref={_item.ref}
-                      class="bg-card relative flex cursor-grab flex-col gap-1 rounded-lg border p-3 shadow-sm transition-all active:cursor-grabbing"
-                    >
-                      <span class="text-sm font-medium">{_item.item.title}</span>
-                      <span class="text-muted-foreground text-xs">@{_item.item.assignee}</span>
-
-                      {_item.state() === 'over' && (
-                        <span
-                          class="absolute right-0 -bottom-1 left-0 flex h-0.5 items-center bg-blue-500"
-                          aria-hidden
-                        >
-                          <span class="absolute right-0 h-1.5 w-1.5 rounded-full bg-blue-500" />
-                          <span class="absolute left-0 h-1.5 w-1.5 rounded-full bg-blue-500" />
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </DragAndDropList>
-              </div>
-            </div>
-          );
-        })()}
+        <span class="max-w-lg text-sm">
+          Thoughtfully designed as 1 API, multiple usecases. <br />
+          If you have a more complex usecase, read the{' '}
+          <code class="bg-foreground text-background rounded p-0.5">drag-and-drop</code> folder.
+          Powered by{' '}
+          <a
+            href="https://atlassian.design/components/pragmatic-drag-and-drop/"
+            class="text-primary"
+          >
+            pragmatic-dnd
+          </a>
+          .
+        </span>
+        <DragExample />
       </ComponentCard>
     </div>
   );
