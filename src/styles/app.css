@@ -134,6 +134,7 @@ body {
 
 @theme {
   --font-manrope: 'Manrope', 'sans-serif';
+  --default-border-width: 0.5px;
   /* --font-sans: Inter, sans-serif; */
   /* --font-serif: Source Serif 4, serif; */
   /* --font-mono: JetBrains Mono, monospace; */

@@ -33,7 +33,6 @@ const DraggableListItem = <T,>(props: {
   children: (state: Accessor<DragState>, ref: (el: HTMLElement) => void) => JSX.Element;
 }) => {
   const [state, setState] = createSignal<DragState>('idle');
-  // `ref` will be assigned to the `div` element that acts as the draggable/droppable area.
   let ref!: HTMLElement;
   const instanceId = useContext(InstanceIdContext);
 
@@ -59,21 +58,23 @@ const DraggableListItem = <T,>(props: {
           // Data provided when this element is a potential drop target.
           getData: () => ({ id: props.id }) as { id: string | number }, // Explicit type for data
           getIsSticky: () => true, // Allows dropping directly onto the element.
-          canDrop: ({ source }) => {
+          canDrop: ({ source, input }) => {
             // Type assertion for source.data to access custom properties robustly.
             const sourceData = source.data as {
               id: string | number;
               type: string;
               instanceId: string | null;
             };
-            // A drop is allowed if:
-            // 1. It's from the same drag-and-drop instance (prevents cross-list dragging).
-            // 2. It's the same item type.
-            // 3. It's not dragging onto itself.
-            return (
-              // sourceData.instanceId === instanceId() &&
-              sourceData.type === props.itemType && sourceData.id !== props.id
-            );
+
+            const canDrop =
+              // Same drag-and-drop instance
+              sourceData.instanceId === instanceId() &&
+              // Same item type
+              sourceData.type === props.itemType &&
+              // Not dragging onto itself.
+              sourceData.id !== props.id;
+
+            return canDrop;
           },
           onDragEnter: () => setState('over'), // Set state when a draggable item enters this target.
           onDragLeave: () => setState('idle'), // Reset state when a draggable item leaves.
@@ -83,9 +84,6 @@ const DraggableListItem = <T,>(props: {
     );
   });
 
-  // The `div` element acts as the draggable and droppable area.
-  // Its children will be the actual rendered content provided by the consumer.
-  // The `group-item` class is preserved from the original component structure.
   // eslint-disable-next-line solid/reactivity
   return props.children(state, (el) => (ref = el));
 };

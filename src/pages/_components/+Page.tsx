@@ -928,6 +928,70 @@ export default function ComponentsPage() {
             </div>
           );
         })()}
+
+        <span class="text-xs">Trello Board (Cross-list drag)</span>
+        {(() => {
+          const [board, setBoard] = createStore({
+            todo: {
+              title: 'Todo',
+              columnId: 'todo',
+              items: [
+                { id: 't1', title: 'Design mockups', assignee: 'Alice' },
+                { id: 't2', title: 'Write API docs', assignee: 'Bob' },
+                { id: 't3', title: 'Review PR #42', assignee: 'You' },
+              ],
+            },
+            done: {
+              title: 'Done',
+              columnId: 'done',
+              items: [{ id: 'd1', title: 'Setup CI pipeline', assignee: 'Alice' }],
+            },
+          });
+
+          return (
+            <div class="grid grid-cols-2 gap-4">
+              <div class="flex flex-col gap-2">
+                <h4 class="text-xs font-semibold">{board.todo.title}</h4>
+                <DragAndDropList
+                  items={board.todo.items}
+                  setItems={(items) => setBoard('todo', 'items', items)}
+                  itemIdAccessor={(item) => item.id}
+                  // externalLists={[{ items: done, setItems: setDone }]}
+                >
+                  {(_item) => (
+                    <div
+                      ref={_item.ref}
+                      class="bg-card flex cursor-grab flex-col gap-1 rounded-lg border p-3 shadow-sm transition-all active:cursor-grabbing"
+                    >
+                      <span class="text-sm font-medium">{_item.item.title}</span>
+                      <span class="text-muted-foreground text-xs">@{_item.item.assignee}</span>
+                    </div>
+                  )}
+                </DragAndDropList>
+              </div>
+
+              <div class="flex flex-col gap-2">
+                <h4 class="text-xs font-semibold">{board.done.title}</h4>
+                <DragAndDropList
+                  items={board.done.items}
+                  setItems={(items) => setBoard('done', 'items', items)}
+                  itemIdAccessor={(item) => item.id}
+                  // externalLists={[{ items: todo, setItems: setTodo }]}
+                >
+                  {(_item) => (
+                    <div
+                      ref={_item.ref}
+                      class="bg-card flex cursor-grab flex-col gap-1 rounded-lg border p-3 shadow-sm transition-all active:cursor-grabbing"
+                    >
+                      <span class="text-sm font-medium">{_item.item.title}</span>
+                      <span class="text-muted-foreground text-xs">@{_item.item.assignee}</span>
+                    </div>
+                  )}
+                </DragAndDropList>
+              </div>
+            </div>
+          );
+        })()}
       </ComponentCard>
     </div>
   );
