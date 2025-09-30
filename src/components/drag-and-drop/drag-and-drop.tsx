@@ -8,7 +8,6 @@ import {
   onCleanup,
   useContext,
 } from 'solid-js';
-import { reconcile } from 'solid-js/store';
 
 import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
 import {
@@ -17,12 +16,17 @@ import {
   monitorForElements,
 } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 
-import { TransitionGroup } from 'solid-transition-group';
-import { arrayMoveImmutable } from './array-move';
-
 // Context to share a unique instance ID across related drag-and-drop elements.
 // This prevents elements from different lists on the same page from interacting.
-const InstanceIdContext = createContext<() => string | null>(() => null);
+type DraggableContextValue = {
+  instanceId: Accessor<string | null>;
+  extraInstanceIds: string[] | undefined;
+};
+
+const DraggableContext = createContext<DraggableContextValue>({
+  instanceId: () => null,
+  extraInstanceIds: undefined,
+} satisfies DraggableContextValue);
 
 export type DragState = 'idle' | 'dragging' | 'over';
 
@@ -34,7 +38,7 @@ const DraggableListItem = <T,>(props: {
 }) => {
   const [state, setState] = createSignal<DragState>('idle');
   let ref!: HTMLElement;
-  const instanceId = useContext(InstanceIdContext);
+  const { instanceId, extraInstanceIds } = useContext(DraggableContext);
 
   createEffect(() => {
     // Combine draggable and drop target behaviors for the element.
@@ -58,7 +62,7 @@ const DraggableListItem = <T,>(props: {
           // Data provided when this element is a potential drop target.
           getData: () => ({ id: props.id }) as { id: string | number }, // Explicit type for data
           getIsSticky: () => true, // Allows dropping directly onto the element.
-          canDrop: ({ source, input }) => {
+          canDrop: ({ source, input: _ }) => {
             // Type assertion for source.data to access custom properties robustly.
             const sourceData = source.data as {
               id: string | number;
@@ -66,9 +70,14 @@ const DraggableListItem = <T,>(props: {
               instanceId: string | null;
             };
 
+            const allowedInstanceIds =
+              sourceData.instanceId === instanceId() ||
+              (extraInstanceIds
+                ? extraInstanceIds.includes(sourceData.instanceId as string)
+                : false);
+
             const canDrop =
-              // Same drag-and-drop instance
-              sourceData.instanceId === instanceId() &&
+              allowedInstanceIds &&
               // Same item type
               sourceData.type === props.itemType &&
               // Not dragging onto itself.
@@ -88,6 +97,17 @@ const DraggableListItem = <T,>(props: {
   return props.children(state, (el) => (ref = el));
 };
 
+export type OnDropEvent<T extends object> = {
+  sourceId: string | number;
+  targetId: string | number;
+  sourceIndex: number;
+  targetIndex: number;
+  sourceData: T;
+  targetData: T;
+  sourceInstanceId: string | null;
+  targetInstanceId: string | null;
+};
+export type OnDropHandler<T extends object> = (params: OnDropEvent<T>) => void;
 /**
  * A generic and headless SolidJS component that provides a drag-and-drop/sortable list.
  * It manages the list's state and handles item reordering (content swap in this case) on drop.
@@ -95,7 +115,7 @@ const DraggableListItem = <T,>(props: {
  * Allows for trivial implementation of:
  * - List Drag/Sort
  * - Grid Drag/Sort
- * - Cross-list Drag/Sort i.e. Trello Boards
+ * - Board (Cross-list) Drag/Sort i.e. Trello Boards
  *
  * IMPORTANT: Make sure the item has 'transition' class in tailwind (or similar) to get animations.
  *
@@ -116,8 +136,6 @@ const DraggableListItem = <T,>(props: {
 export default function DragAndDropList<T extends object>(props: {
   /** The array of items to display and manage. */
   items: T[];
-  /** Update the list after a drag. */
-  setItems: (newItems: T[]) => void;
   /** Return a unique id for each item. */
   itemIdAccessor: (item: T) => string | number;
   /** Optional type string; default "list-item". */
@@ -128,80 +146,107 @@ export default function DragAndDropList<T extends object>(props: {
     state: Accessor<DragState>;
     ref: (_ref: HTMLElement) => void;
   }) => JSX.Element;
+  /** Extra instance IDs that this list should accept/interact with for cross-list drag-and-drop. */
+  extraInstanceIds?: string[];
+  /** Optional custom instance ID to override the default generated one. */
+  instanceId?: string;
+  /** Callback fired when an item is dropped. Provides detailed information about the drag operation. */
+  onDrop: OnDropHandler<T>;
 }) {
-  // Generate a unique instance ID for this specific list to prevent cross-list interactions.
+  // Generate or use a provided unique instance ID for this specific list to prevent cross-list interactions.
   const [instanceId] = createSignal<string>(
-    `drag-drop-instance-${Math.random().toString(36).substring(2, 9)}`
+    // eslint-disable-next-line solid/reactivity
+    props.instanceId || `drag-drop-instance-${Math.random().toString(36).substring(2, 9)}`
   );
 
   // Monitor for global drag events to handle the actual item reordering.
   createEffect(() => {
     onCleanup(
       monitorForElements({
-        // Only monitor events originating from the same drag-and-drop instance.
+        // Allow monitoring events from the same drag-and-drop instance or any extra instances.
         canMonitor: ({ source }) => {
           const sourceData = source.data as { instanceId: string | null };
-          return sourceData.instanceId === instanceId();
+
+          console.log('HELLO', source);
+          return (
+            sourceData.instanceId === instanceId() ||
+            (props.extraInstanceIds
+              ? props.extraInstanceIds.includes(sourceData.instanceId as string)
+              : false)
+          );
         },
         onDrop: ({ source, location }) => {
-          const destination = location.current.dropTargets[0];
-          if (!destination) {
+          const target = location.current.dropTargets[0];
+          if (!target) {
             return; // No valid drop target found.
           }
 
-          // Extract IDs from source and destination data. Type assertion handles implicit 'any' errors.
-          const startId = (source.data as { id: string | number }).id;
-          const destinationId = (destination.data as { id: string | number }).id;
+          // Extract IDs from source and target data. Type assertion handles implicit 'any' errors.
+          const sourceId = (source.data as { id: string | number }).id;
+          const targetId = (target.data as { id: string | number }).id;
 
-          if (startId === undefined || destinationId === undefined) {
+          if (sourceId === undefined || targetId === undefined) {
             console.warn("Drag and drop data missing 'id' property. Check `getInitialData`.");
             return;
           }
 
-          // Find the current indices of the start and destination items in the list.
-          const startIndex = props.items.findIndex(
-            (item) => props.itemIdAccessor(item) === startId
-          );
-          const destinationIndex = props.items.findIndex(
-            (item) => props.itemIdAccessor(item) === destinationId
-          );
+          // Helper to get nth child index of an element within its parent
+          const getElementIndex = (el: HTMLElement): number => {
+            let index = 0;
+            let sibling = el.previousElementSibling;
+            while (sibling) {
+              index++;
+              sibling = sibling.previousElementSibling;
+            }
+            return index;
+          };
 
-          if (startIndex === -1 || destinationIndex === -1) {
-            console.warn(
-              'Dragged item or drop target not found in the list. This may indicate an ID mismatch.'
-            );
-            return;
-          }
+          const sourceIndex = source.element ? getElementIndex(source.element) : -1;
+          const targetIndex = target.element ? getElementIndex(target.element) : -1;
 
-          // Use arrayMoveImmutable to reorder the array.
-          // This creates a new array with the item at startIndex moved to destinationIndex.
-          const reorderedItems = arrayMoveImmutable(props.items, startIndex, destinationIndex);
+          const sourceInstanceId = (source.data as { instanceId: string | null }).instanceId;
+          const targetInstanceId = instanceId();
 
-          // Update the SolidJS store. `reconcile` is used for efficient, deep updates.
-          // @ts-ignore
-          props.setItems(reconcile(reorderedItems));
+          // Note: sourceData and targetData are not available here for cross-list drops,
+          // so we pass undefined. The consumer should look up the data using the IDs.
+          props.onDrop?.({
+            sourceId,
+            targetId,
+            sourceIndex,
+            targetIndex,
+            sourceData: undefined as any,
+            targetData: undefined as any,
+            sourceInstanceId,
+            targetInstanceId,
+          });
         },
       })
     );
   });
 
   return (
-    <InstanceIdContext.Provider value={instanceId}>
+    <DraggableContext.Provider
+      value={{
+        instanceId,
+        // eslint-disable-next-line solid/reactivity
+        extraInstanceIds: props.extraInstanceIds,
+      }}
+    >
       {/* TransitionGroup for smooth animations when items are added/removed/reordered */}
-      <TransitionGroup name="group-item">
-        <For each={props.items}>
-          {(item) => (
-            <DraggableListItem
-              item={item} // Pass the full item, although DraggableListItem only needs its ID
-              id={props.itemIdAccessor(item)} // Unique ID for this specific item
-              itemType={props.itemType || 'list-item'} // Type of draggable item
-            >
-              {/* The children prop of DraggableListItem receives the drag state */}
-              {(state, ref) => props.children({ item, state, ref })}
-            </DraggableListItem>
-          )}
-        </For>
-      </TransitionGroup>
-    </InstanceIdContext.Provider>
+      {/*<TransitionGroup name="group-item">*/}
+      <For each={props.items}>
+        {(item) => (
+          <DraggableListItem
+            item={item} // Pass the full item, although DraggableListItem only needs its ID
+            id={props.itemIdAccessor(item)} // Unique ID for this specific item
+            itemType={props.itemType || 'list-item'} // Type of draggable item
+          >
+            {/* The children prop of DraggableListItem receives the drag state */}
+            {(state, ref) => props.children({ item, state, ref })}
+          </DraggableListItem>
+        )}
+      </For>
+      {/*</TransitionGroup>*/}
+    </DraggableContext.Provider>
   );
 }

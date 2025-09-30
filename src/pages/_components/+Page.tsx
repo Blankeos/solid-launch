@@ -1,5 +1,6 @@
 import { IconMoonDuo, IconSunDuo } from '@/assets/icons';
-import DragAndDropList from '@/components/drag-and-drop/drag-and-drop';
+import { arrayMoveImmutable } from '@/components/drag-and-drop/array-move';
+import DragAndDropList, { OnDropEvent } from '@/components/drag-and-drop/drag-and-drop';
 import { AccordionComp } from '@/components/ui/accordion';
 import { AlertComp } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -36,7 +37,7 @@ import { ColumnDef } from '@tanstack/solid-table';
 import { useDisclosure, useToggle } from 'bagon-hooks';
 import { createEffect, createSignal, FlowProps, For } from 'solid-js';
 import { JSX } from 'solid-js/jsx-runtime';
-import { createStore } from 'solid-js/store';
+import { createStore, reconcile } from 'solid-js/store';
 import { toast } from 'solid-sonner';
 import { followCursor } from 'tippy.js';
 
@@ -859,7 +860,19 @@ export default function ComponentsPage() {
 
           return (
             <div class="flex flex-col gap-y-2">
-              <DragAndDropList items={list} setItems={setList} itemIdAccessor={(item) => item.id}>
+              <DragAndDropList
+                items={list}
+                itemIdAccessor={(item) => item.id}
+                onDrop={(params) => {
+                  const reorderedItems = arrayMoveImmutable(
+                    list,
+                    params.sourceIndex,
+                    params.targetIndex
+                  );
+                  // Update the SolidJS store. `reconcile` is used for efficient, deep updates.
+                  setList(reconcile(reorderedItems));
+                }}
+              >
                 {(_item) => (
                   <div
                     ref={_item.ref}
@@ -900,7 +913,18 @@ export default function ComponentsPage() {
           return (
             <div class="flex flex-col gap-y-2">
               <div class="grid grid-cols-3 gap-2">
-                <DragAndDropList items={grid} setItems={setGrid} itemIdAccessor={(item) => item.id}>
+                <DragAndDropList
+                  items={grid}
+                  itemIdAccessor={(item) => item.id}
+                  onDrop={(params) => {
+                    const reorderedItems = arrayMoveImmutable(
+                      grid,
+                      params.sourceIndex,
+                      params.targetIndex
+                    );
+                    setGrid(reconcile(reorderedItems));
+                  }}
+                >
                   {(_props) => (
                     <div
                       ref={_props.ref}
@@ -944,47 +968,121 @@ export default function ComponentsPage() {
             done: {
               title: 'Done',
               columnId: 'done',
-              items: [{ id: 'd1', title: 'Setup CI pipeline', assignee: 'Alice' }],
+              items: [
+                { id: 'd1', title: 'Setup CI pipeline', assignee: 'Alice' },
+                { id: 'd2', title: 'Deploy to staging', assignee: 'Bob' },
+              ],
             },
           });
 
+          function handleBoardDrop(params: OnDropEvent<(typeof board.todo.items)[number]>) {
+            // Moving within the same list
+            if (
+              params.sourceInstanceId === 'todo-list' &&
+              params.targetInstanceId === 'todo-list'
+            ) {
+              const sourceIndex = board.todo.items.findIndex((item) => item.id === params.sourceId);
+              const targetIndex = board.todo.items.findIndex((item) => item.id === params.targetId);
+              const reorderedItems = arrayMoveImmutable(board.todo.items, sourceIndex, targetIndex);
+              setBoard('todo', 'items', reconcile(reorderedItems));
+            } else if (
+              params.sourceInstanceId === 'done-list' &&
+              params.targetInstanceId === 'done-list'
+            ) {
+              const sourceIndex = board.done.items.findIndex((item) => item.id === params.sourceId);
+              const targetIndex = board.done.items.findIndex((item) => item.id === params.targetId);
+              const reorderedItems = arrayMoveImmutable(board.done.items, sourceIndex, targetIndex);
+              setBoard('done', 'items', reconcile(reorderedItems));
+            }
+            // Moving from done list to todo list
+            else if (
+              params.sourceInstanceId === 'done-list' &&
+              params.targetInstanceId === 'todo-list'
+            ) {
+              const sourceIndex = board.done.items.findIndex((item) => item.id === params.sourceId);
+              const movedItem = board.done.items[sourceIndex];
+              setBoard('todo', 'items', reconcile([...board.todo.items, movedItem]));
+              setBoard(
+                'done',
+                'items',
+                reconcile(board.done.items.filter((_, i) => i !== sourceIndex))
+              );
+            }
+            // Moving from todo list to done list
+            else if (
+              params.sourceInstanceId === 'todo-list' &&
+              params.targetInstanceId === 'done-list'
+            ) {
+              const sourceIndex = board.todo.items.findIndex((item) => item.id === params.sourceId);
+              const movedItem = board.todo.items[sourceIndex];
+              setBoard('done', 'items', reconcile([...board.done.items, movedItem]));
+              setBoard(
+                'todo',
+                'items',
+                reconcile(board.todo.items.filter((_, i) => i !== sourceIndex))
+              );
+            }
+          }
+
           return (
             <div class="grid grid-cols-2 gap-4">
-              <div class="flex flex-col gap-2">
+              <div class="flex flex-col gap-2 bg-green-500">
                 <h4 class="text-xs font-semibold">{board.todo.title}</h4>
                 <DragAndDropList
+                  instanceId="todo-list"
                   items={board.todo.items}
-                  setItems={(items) => setBoard('todo', 'items', items)}
                   itemIdAccessor={(item) => item.id}
-                  // externalLists={[{ items: done, setItems: setDone }]}
+                  extraInstanceIds={['done-list']}
+                  onDrop={handleBoardDrop}
                 >
                   {(_item) => (
                     <div
                       ref={_item.ref}
-                      class="bg-card flex cursor-grab flex-col gap-1 rounded-lg border p-3 shadow-sm transition-all active:cursor-grabbing"
+                      class="bg-card relative flex cursor-grab flex-col gap-1 rounded-lg border p-3 shadow-sm transition-all active:cursor-grabbing"
                     >
                       <span class="text-sm font-medium">{_item.item.title}</span>
                       <span class="text-muted-foreground text-xs">@{_item.item.assignee}</span>
+
+                      {_item.state() === 'over' && (
+                        <span
+                          class="absolute right-0 -bottom-1 left-0 flex h-0.5 items-center bg-blue-500"
+                          aria-hidden
+                        >
+                          <span class="absolute right-0 h-1.5 w-1.5 rounded-full bg-blue-500" />
+                          <span class="absolute left-0 h-1.5 w-1.5 rounded-full bg-blue-500" />
+                        </span>
+                      )}
                     </div>
                   )}
                 </DragAndDropList>
               </div>
 
-              <div class="flex flex-col gap-2">
+              <div class="flex flex-col gap-2 bg-green-500">
                 <h4 class="text-xs font-semibold">{board.done.title}</h4>
                 <DragAndDropList
+                  instanceId="done-list"
                   items={board.done.items}
-                  setItems={(items) => setBoard('done', 'items', items)}
                   itemIdAccessor={(item) => item.id}
-                  // externalLists={[{ items: todo, setItems: setTodo }]}
+                  extraInstanceIds={['todo-list']}
+                  onDrop={handleBoardDrop}
                 >
                   {(_item) => (
                     <div
                       ref={_item.ref}
-                      class="bg-card flex cursor-grab flex-col gap-1 rounded-lg border p-3 shadow-sm transition-all active:cursor-grabbing"
+                      class="bg-card relative flex cursor-grab flex-col gap-1 rounded-lg border p-3 shadow-sm transition-all active:cursor-grabbing"
                     >
                       <span class="text-sm font-medium">{_item.item.title}</span>
                       <span class="text-muted-foreground text-xs">@{_item.item.assignee}</span>
+
+                      {_item.state() === 'over' && (
+                        <span
+                          class="absolute right-0 -bottom-1 left-0 flex h-0.5 items-center bg-blue-500"
+                          aria-hidden
+                        >
+                          <span class="absolute right-0 h-1.5 w-1.5 rounded-full bg-blue-500" />
+                          <span class="absolute left-0 h-1.5 w-1.5 rounded-full bg-blue-500" />
+                        </span>
+                      )}
                     </div>
                   )}
                 </DragAndDropList>
