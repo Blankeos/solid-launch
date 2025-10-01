@@ -18,3 +18,7 @@ export { default as IconChevronsLeft } from './solar:double-alt-arrow-left-broke
 export { default as IconChevronsRight } from './solar:double-alt-arrow-right-broken.svg';
 export { default as IconSunDuo } from './solar:sun-2-bold-duotone.svg';
 export { default as IconMoonDuo } from './solar:moon-stars-bold-duotone.svg';
+export { default as IconEyeOff } from './lucide:eye-off.svg';
+export { default as IconChevronsUpDown } from './lucide:chevrons-up-down.svg';
+export { default as IconArrowUp } from './lucide:arrow-up.svg';
+export { default as IconArrowDown } from './lucide:arrow-down.svg';

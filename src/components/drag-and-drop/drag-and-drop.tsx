@@ -152,7 +152,8 @@ export const useDragAndDropContext = () => {
 type DragAndDropProviderProps = {
   /** Unique identifier for this drag-and-drop instance. */
   instanceId?: string;
-  onDrop: OnDropHandler;
+  onDrop?: OnDropHandler;
+  onDropTargetChange?: OnDropHandler;
 };
 
 export const DragAndDropProvider = (props: FlowProps<DragAndDropProviderProps>) => {
@@ -169,6 +170,28 @@ export const DragAndDropProvider = (props: FlowProps<DragAndDropProviderProps>) 
           const s = source.data as { instanceId: string };
           return s.instanceId === instanceId();
         },
+        onDropTargetChange: ({ source, location }) => {
+          if (!props.onDropTargetChange) return;
+          const target = location.current.dropTargets[0];
+          if (!target) return;
+
+          const sourceId = (source.data as { id: string | number }).id;
+          const targetId = (target.data as { id: string | number }).id;
+
+          if (sourceId === undefined || targetId === undefined) return;
+
+          const sourceEntry = registry.get(sourceId);
+          const targetEntry = registry.get(targetId);
+
+          props.onDropTargetChange({
+            sourceId,
+            targetId,
+            sourceData: sourceEntry?.data,
+            targetData: targetEntry?.data,
+            sourceInstanceId: (source.data as { instanceId: string }).instanceId,
+            targetInstanceId: instanceId(),
+          });
+        },
         onDrop: ({ source, location }) => {
           const target = location.current.dropTargets[0];
           if (!target) return;
@@ -181,7 +204,7 @@ export const DragAndDropProvider = (props: FlowProps<DragAndDropProviderProps>) 
           const sourceEntry = registry.get(sourceId);
           const targetEntry = registry.get(targetId);
 
-          props.onDrop({
+          props.onDrop?.({
             sourceId,
             targetId,
             sourceData: sourceEntry?.data,

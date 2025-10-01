@@ -96,6 +96,55 @@ const PokemonListExample = () => {
   );
 };
 
+const SortAsYouDragExample = () => {
+  const [list, setList] = createStore([
+    { id: '1', name: 'Alpha', emoji: '🚀' },
+    { id: '2', name: 'Beta', emoji: '⭐' },
+    { id: '3', name: 'Gamma', emoji: '🔥' },
+    { id: '4', name: 'Delta', emoji: '💎' },
+  ]);
+
+  return (
+    <DragAndDropProvider
+      instanceId="sort-list"
+      onDropTargetChange={({ sourceId, targetId }) => {
+        const sourceIndex = list.findIndex((item) => item.id === sourceId);
+        const targetIndex = list.findIndex((item) => item.id === targetId);
+        if (sourceIndex === -1 || targetIndex === -1) return;
+
+        const reorderedItems = arrayMoveImmutable(list, sourceIndex, targetIndex);
+        setList(reconcile(reorderedItems));
+      }}
+    >
+      <span class="text-xs">List (but sort-as-you-drag, idk it looks cooler)</span>
+      <div class="flex flex-col gap-y-2">
+        <TransitionGroup name="group-item">
+          <For each={list}>
+            {(item) => (
+              <DraggableItem id={item.id} data={item}>
+                {(dragState, dragRef) => (
+                  <div
+                    ref={dragRef}
+                    class={cn(
+                      'bg-card cursor-grab rounded-lg border p-3 shadow-sm transition-all active:cursor-grabbing',
+                      dragState() === 'over' && 'bg-primary/20 rotate-2',
+                      dragState() === 'dragging' && 'opacity-50'
+                    )}
+                  >
+                    <span class="font-medium">
+                      {item.emoji} {item.name}
+                    </span>
+                  </div>
+                )}
+              </DraggableItem>
+            )}
+          </For>
+        </TransitionGroup>
+      </div>
+    </DragAndDropProvider>
+  );
+};
+
 const FruitGridExample = () => {
   const [grid, setGrid] = createStore([
     { id: '🍎', name: 'Apple' },
@@ -395,6 +444,7 @@ export function DragExample() {
   return (
     <>
       <PokemonListExample />
+      <SortAsYouDragExample />
       <FruitGridExample />
       <TrelloBoardExample />
       <TrophyDropExample />

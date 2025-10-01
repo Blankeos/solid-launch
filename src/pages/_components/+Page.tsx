@@ -9,6 +9,7 @@ import { CheckboxComp } from '@/components/ui/checkbox';
 import { Collapsible } from '@/components/ui/collapsible';
 import { ContextMenuComp } from '@/components/ui/context-menu';
 import { DataTable } from '@/components/ui/data-table/data-table';
+import { TableColumnHeader } from '@/components/ui/data-table/table-column-header';
 import { CalendarComp, CalendarRangeComp } from '@/components/ui/date-picker/calendar-comp';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import {
@@ -754,11 +755,11 @@ export default function ComponentsPage() {
             },
             {
               accessorKey: 'email',
-              header: 'Email',
+              header: (_props) => <TableColumnHeader column={_props.column} title="Email" />,
             },
             {
               accessorKey: 'amount',
-              header: () => <div class="text-right">Amount</div>,
+              header: (_props) => <TableColumnHeader column={_props.column} title="Amount" />,
               cell: (props) => {
                 // eslint-disable-next-line solid/reactivity
                 const amount = parseFloat(props.row.getValue('amount'));
