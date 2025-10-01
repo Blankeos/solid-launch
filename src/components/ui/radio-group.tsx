@@ -29,7 +29,7 @@ const RadioGroupItem = <T extends ValidComponent = 'div'>(
   return (
     <RadioGroupPrimitive.Item class={cn('flex items-center space-x-2', local.class)} {...others}>
       <RadioGroupPrimitive.ItemInput />
-      <RadioGroupPrimitive.ItemControl class="border-primary text-primary ring-offset-background focus-visible:ring-ring aspect-square size-4 rounded-full border focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+      <RadioGroupPrimitive.ItemControl class="data-checked:border-primary text-primary ring-offset-background focus-visible:ring-ring aspect-square size-4 rounded-full border focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
         <RadioGroupPrimitive.ItemIndicator class="flex h-full items-center justify-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"

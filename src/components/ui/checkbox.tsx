@@ -22,7 +22,7 @@ const Checkbox = <T extends ValidComponent = 'div'>(
       {...others}
     >
       <CheckboxPrimitive.Input class="peer" />
-      <CheckboxPrimitive.Control class="border-primary ring-offset-background peer-focus-visible:ring-ring data-[checked]:bg-primary data-[indeterminate]:bg-primary data-[checked]:text-primary-foreground data-[indeterminate]:text-primary-foreground size-4 shrink-0 rounded-sm border peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2 peer-focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 data-[checked]:border-none data-[indeterminate]:border-none">
+      <CheckboxPrimitive.Control class="data-checked:border-primary ring-offset-background peer-focus-visible:ring-ring data-[checked]:bg-primary data-[indeterminate]:bg-primary data-[checked]:text-primary-foreground data-[indeterminate]:text-primary-foreground size-4 shrink-0 rounded-sm border peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2 peer-focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 data-[checked]:border-none data-[indeterminate]:border-none">
         <CheckboxPrimitive.Indicator>
           <Switch>
             <Match when={!others.indeterminate}>
