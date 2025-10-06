@@ -18,6 +18,49 @@ app.get('/up', async (c) => {
 // For the Backend APIs
 app.route('/api', appRouter)
 
+// For OpenAPI
+import { openAPIRouteHandler } from 'hono-openapi'
+app.get(
+  '/api/docs/json',
+  openAPIRouteHandler(app, {
+    documentation: {
+      info: {
+        title: 'Solid Launch API',
+        version: '1.0.0',
+        description: 'API in Hono',
+      },
+      servers: [{ url: 'http://localhost:3000', description: 'Local Server' }],
+    },
+  })
+)
+app.get('/api/docs', (c) => {
+  return c.html(`<!doctype html>
+<html>
+  <head>
+    <title>Solid Launch API Reference</title>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
+    <div id="app"></div>
+    <!-- Load the Script -->
+    <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+    <!-- Initialize the Scalar API Reference -->
+    <script>
+      Scalar.createApiReference('#app', {
+        // The URL of the OpenAPI/Swagger document
+        url: 'http://localhost:3000/api/docs/json',
+        // Avoid CORS issues
+        proxyUrl: 'https://proxy.scalar.com',
+        theme: 'saturn'
+      })
+    </script>
+  </body>
+</html>`)
+})
+
 // Vike
 apply(app, {
   pageContext: (c) => {

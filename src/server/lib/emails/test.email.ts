@@ -1,6 +1,6 @@
 import { publicEnv } from '@/env.public'
-import { zValidator } from '@hono/zod-validator'
 import { Hono } from 'hono'
+import { validator as zValidator } from 'hono-openapi'
 import { z } from 'zod'
 import { sendEmail } from './nodemailer'
 
@@ -19,6 +19,7 @@ export function renderTestEmail(email: string): string {
   `
 }
 
+// Only for Hono
 export const testEmailRouter = new Hono()
 if (publicEnv.NODE_ENV === 'development') {
   testEmailRouter.get(

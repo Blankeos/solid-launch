@@ -1,12 +1,12 @@
 ## 💙 Solid Launch
 
-> An sophisticated boiler-plate built for **simplicity**.
+> A sophisticated and opinionated boiler-plate built for **simplicity** and **readiness**.
 
 ![Image](https://assets.solidjs.com/banner?type=Starter%20Kit&background=tiles&project=Solid%20Launch)
 
 [Carlo](https://carlo.vercel.app/)'s starter for making a Vike + Solid app with batteries included on stuff I like after experimenting for years.
 
-This is handcrafted from my own research. This might not work for you, but it works for me. 🤓
+This is handcrafted from my own research. My goal for this is almost like Rails where **opinions > flexibility**. This might not work for you, but it works for me. 🤓
 
 You can also try my other starters:
 
@@ -25,23 +25,23 @@ You can also try my other starters:
 - [x] 🔑 Authentication-Ready - One thing devs get stuck on. There's a practical auth implemented from scratch here that doesn't vendor-lock you into any auth provider.
   - [x] Password
   - [ ] Transactional Emails (Forgot Password, Email Verification)
-  - [ ] OAuth
+  - [ ] OAuth (Google, GitHub, extend as you wish)
   - [ ] Magic Link
   - [ ] User Management Dashboard
 
 ### Tech Stack
 
 - [x] **Bun** - Runtime and package manager. You can always switch to Node and PNPM if you wish.
-- [x] **SolidJS** - Frontend framework that I like. Pretty underrated, but awesome!
+- [x] **SolidJS** - Frontend framework that I like. Pretty underrated, but devx is superior than any other framework I tried!
 - [x] **Vike** - Like NextJS, but just a middleware. SSR library on-top of Vite. Use on any JS backend. Flexible, Simple, and Fast!
-- [x] **Hono** - 2nd fastest Bun framework(?), run anywhere, uses easy-to-understand web-standard paradigms.
-- [x] **tRPC** - E2E typesafety without context switching. Just amazing DevX.
+- [x] **Hono** - 2nd fastest Bun framework(?), run anywhere, uses easy-to-understand web-standard paradigms w/ typesafety and a bunch of QoLs built-in.
+- [x] **OpenAPI** - A standard doc that other clients can use for your API (i.e. on Flutter, etc.) w/ hono-openapi.
 - [x] **Tailwind** - Styling the web has been pretty pleasant with it. I even use it on React Native for work. It's amazing.
 - [x] **Prisma** - Great _migrations_ workflow, but I want to maximize perf.
 - [x] **Kysely** - Great typesafe _query builder_ for SQL, minimally wraps around db connection.
 - [x] **SQLite/LibSQL (Turso)** - Cheapest database, easy to use.
-- [x] **Lucia Book + Arctic** - Makes self-rolling auth easy, and not dependent on any third-party. (You may learn a thing or two with this low-level implementation as well!)
-- [ ] **SES or MimePost** - Emails
+- [x] **Lucia Book + Arctic** - Makes self-rolling auth easy, and not dependent on any third-party. (You may learn a thing or two with this low-level implementation as well). I chose not to use better-auth, everything is custom built.
+- [x] **Nodemailer** - Emails w/ any SMTP-compatible provider (Amazon SES, Resend, etc.). Amazon is the cheapest.
 - [ ] **Backblaze** - Cheap blob object storage with an S3-compatible API.
 - [ ] **LemonSqueezy** - Accept payments and pay foreign taxes.
 
@@ -119,20 +119,24 @@ I took care of the painstaking parts to help you develop easily on a SPA + SSR +
 
       ```tsx
       // +data.ts
-      import { initTRPCSSRClient } from '@/lib/trpc-ssr-client'
+      import { initHonoClient } from '@/lib/hono-client'
       import { PageContext } from 'vike/types'
 
       export type Data = ReturnType<Awaited<typeof data>>
 
       export async function data(pageContext: PageContext) {
-        const { request, response } = pageContext
+        const { urlParsed, request, response } = pageContext
 
-        const trpcClient = initTRPCSSRClient(request.header(), response.headers) // Pass the headers here.
+        const hc = initHonoClient(urlParsed.origin!, {
+          requestHeaders: request.header(),
+          responseHeaders: response.headers,
+        })
 
-        const result = await trpcClient.auth.currentUser.query()
+        const apiResponse = await hc.auth.$get()
+        const result = await apiResponse.json()
 
         return {
-          user: result.user ?? null,
+          user: result?.user ?? null,
         }
       }
       ```
@@ -158,13 +162,17 @@ I took care of the painstaking parts to help you develop easily on a SPA + SSR +
       ```ts
       // +guard.ts (If you don't have +data.ts in the same route).
       export async function guard(pageContext: PageContext) {
-        const { request, response } = pageContext
+        const { urlParsed, request, response } = pageContext
 
-        const trpcClient = initTRPCSSRClient(request.header(), response.headers) // Pass the headers here.
+        const hc = initHonoClient(urlParsed.origin!, {
+          requestHeaders: request.header(),
+          responseHeaders: response.headers,
+        })
 
-        const result = await trpcClient.auth.currentUser.query()
+        const apiResponse = await hc.auth.$get()
+        const result = await apiResponse.json()
 
-        if (!result.user) {
+        if (!result?.user) {
           throw redirect('/') // Must be a public route.
         }
       }
@@ -179,8 +187,8 @@ I took care of the painstaking parts to help you develop easily on a SPA + SSR +
       ```
 
 4.  Dataloading Practices - Also have these out-of-the-box for most usecases since they're tricky to do if you're clueless:
-    - Tanstack Query (Client-only) - Use `trpc-client.ts`
-    - Hydrated Tanstack Query (SSR) - Use `create-dehydrated-state.ts` + `trpc-ssr-client.ts`
+    - Tanstack Query (Client-only) - Use `honoClient` from `@/lib/hono-client.ts`
+    - Hydrated Tanstack Query (SSR) - Use `create-dehydrated-state.ts` + `initHonoClient`
 
 ### Backend Architecture
 
@@ -238,31 +246,14 @@ Here are some guides on how to deploy.
 > - ORM: Prisma -> Drizzle
 > - Database: SQLite -> PostgreSQL, CockroachDB, MongoDB
 
-<!-- ## Usage
+### FAQs
 
-```bash
-$ npm install # or pnpm install or yarn install
-```
+- Why not better-auth?
 
-### Learn more on the [Solid Website](https://solidjs.com) and come chat with us on our [Discord](https://discord.com/invite/solidjs)
-
-## Available Scripts
-
-In the project directory, you can run:
-
-### `npm run dev`
-
-Runs the app in the development mode.<br>
-Open [http://localhost:5173](http://localhost:5173) to view it in the browser.
-
-### `npm run build`
-
-Builds the app for production to the `dist` folder.<br>
-It correctly bundles Solid in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
-
-## Deployment
-
-Learn more about deploying your application with the [documentations](https://vitejs.dev/guide/static-deploy.html) -->
+  - I thought long and hard about this, and I'm foreseeing a lot of pushback on this so I'll document it here.
+  - I completely understand the extreme strawman argument of "I want to build an app, so here's the entire OAuth spec to implement it". In almost 99% of usecases, you will choose better-auth to save time, it will be better tested, and will give you more flexibility for easier auth flows for 99% of apps. This Lucia implementation is for that extra flexibility for harder auth flows in 1% of apps--which your next SaaS and mine most likely won't be, so why??
+  - I initially wrote the template when better-auth wasn't the standard solution, while Lucia was the up and coming one. Lucia actually made me learn about auth more than any resource in my career, so I started to prefer it. Better auth will save you time, but I already spent that time, and this is the flywheel I wrote to save just as much time as using better auth.
+  - I genuinely believe simple auth isn't so complicated that you'd need a library to abstract it. And for complex auth, you will almost always need a custom solution eventually.
+  - But it won't save me time if I change my server framework, my database, etc. Better auth wins there.
+  - It will save me time if I want to support a custom auth flow that better auth doesn't support yet. (I have no examples)
+  - It will save me time if I want to implement auth in other languages other than javascript.

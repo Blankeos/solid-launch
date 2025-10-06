@@ -1,5 +1,5 @@
-import { zValidator } from '@hono/zod-validator'
 import { Hono } from 'hono'
+import { describeRoute, validator as zValidator } from 'hono-openapi'
 import { z } from 'zod'
 import { authMiddleware, requireAuthMiddleware } from './auth.middleware'
 import { deleteSessionTokenCookie, setSessionTokenCookie } from './auth.utilities'
@@ -17,6 +17,7 @@ export const authController = new Hono<{
     session: { id: string; expiresAt: Date } | undefined
   }
 }>()
+  .use(describeRoute({ tags: ['Auth'] }))
   // Get current user
   .get('/', authMiddleware, async (c) => {
     const user = c.get('user')
@@ -59,7 +60,7 @@ export const authController = new Hono<{
   )
 
   // Logout
-  .get('/logout', authMiddleware, requireAuthMiddleware, async (c) => {
+  .get('/logout', authMiddleware, requireAuthMiddleware, describeRoute({}), async (c) => {
     const session = c.get('session')
 
     await authDAO.invalidateSession(session.id)
@@ -101,7 +102,7 @@ export const authController = new Hono<{
   )
 
   // Google Login
-  .get('/login/google', async (c) => {
+  .get('/login/google', describeRoute({}), async (c) => {
     const { redirectUrl } = c.req.query()
 
     const { stateCookie, codeVerifierCookie, redirectUrlCookie, authorizationUrl } =
@@ -115,7 +116,7 @@ export const authController = new Hono<{
   })
 
   // Google Login Callback
-  .get('/login/google/callback', async (c) => {
+  .get('/login/google/callback', describeRoute({}), async (c) => {
     const allCookies = getCookie(c)
     const storedState = allCookies['google_oauth_state']
     const storedCodeVerifier = allCookies['google_oauth_codeverifier']
@@ -139,7 +140,7 @@ export const authController = new Hono<{
     return c.redirect(redirectUrl)
   })
   // GitHub Login
-  .get('/login/github', async (c) => {
+  .get('/login/github', describeRoute({}), async (c) => {
     const { redirectUrl } = c.req.query()
 
     const { stateCookie, redirectUrlCookie, authorizationUrl } = await authService.githubLogin({
@@ -153,7 +154,7 @@ export const authController = new Hono<{
   })
 
   // GitHub Login Callback
-  .get('/login/github/callback', async (c) => {
+  .get('/login/github/callback', describeRoute({}), async (c) => {
     const code = c.req.query('code')
     const state = c.req.query('state')
 
