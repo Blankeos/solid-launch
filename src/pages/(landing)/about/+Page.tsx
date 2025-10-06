@@ -1,13 +1,13 @@
-import { Button } from '@/components/ui/button';
-import { useCounterContext } from '@/stores/counter.context';
-import { useMetadata } from 'vike-metadata-solid';
+import { Button } from '@/components/ui/button'
+import { useCounterContext } from '@/stores/counter.context'
+import { useMetadata } from 'vike-metadata-solid'
 
 export default function AboutPage() {
-  const { count: globalCount, setCount: setGlobalCount } = useCounterContext();
+  const { count: globalCount, setCount: setGlobalCount } = useCounterContext()
 
   useMetadata({
     title: 'About | Solid Launch',
-  });
+  })
 
   return (
     <div class="flex h-full flex-1 flex-col">
@@ -18,5 +18,5 @@ export default function AboutPage() {
         </Button>
       </div>
     </div>
-  );
+  )
 }

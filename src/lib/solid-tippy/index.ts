@@ -1,1 +1,1 @@
-export * from './tippy';
+export * from './tippy'

@@ -1,7 +1,7 @@
-import { privateEnv } from '@/env.private';
-import nodemailer from 'nodemailer';
+import { privateEnv } from '@/env.private'
+import nodemailer from 'nodemailer'
 
-const FROM = privateEnv.SMTP_FROM;
+const FROM = privateEnv.SMTP_FROM
 
 const transporter = nodemailer.createTransport({
   host: privateEnv.SMTP_HOST,
@@ -11,22 +11,22 @@ const transporter = nodemailer.createTransport({
     user: privateEnv.SMTP_USER,
     pass: privateEnv.SMTP_PASS,
   },
-});
+})
 
 export async function sendEmail(params: {
-  from?: string;
-  to: string;
-  subject: string;
-  html: string;
+  from?: string
+  to: string
+  subject: string
+  html: string
 }) {
-  const { from = FROM, to, subject, html } = params;
+  const { from = FROM, to, subject, html } = params
 
   const info = await transporter.sendMail({
     from,
     to,
     subject,
     html,
-  });
+  })
 
-  console.log('[sendEmail] Message sent:', info.messageId);
+  console.log('[sendEmail] Message sent:', info.messageId)
 }

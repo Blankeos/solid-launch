@@ -1,10 +1,10 @@
-import type { Component, ComponentProps } from 'solid-js';
-import { splitProps } from 'solid-js';
+import type { Component, ComponentProps } from 'solid-js'
+import { splitProps } from 'solid-js'
 
-import type { VariantProps } from 'class-variance-authority';
-import { cva } from 'class-variance-authority';
+import type { VariantProps } from 'class-variance-authority'
+import { cva } from 'class-variance-authority'
 
-import { cn } from '@/utils/cn';
+import { cn } from '@/utils/cn'
 
 const calloutVariants = cva('rounded-md border-l-4 p-2 pl-4', {
   variants: {
@@ -18,33 +18,33 @@ const calloutVariants = cva('rounded-md border-l-4 p-2 pl-4', {
   defaultVariants: {
     variant: 'default',
   },
-});
+})
 
-type CalloutProps = ComponentProps<'div'> & VariantProps<typeof calloutVariants>;
+type CalloutProps = ComponentProps<'div'> & VariantProps<typeof calloutVariants>
 
 const Callout: Component<CalloutProps> = (props) => {
-  const [local, others] = splitProps(props, ['class', 'variant']);
-  return <div class={cn(calloutVariants({ variant: local.variant }), local.class)} {...others} />;
-};
+  const [local, others] = splitProps(props, ['class', 'variant'])
+  return <div class={cn(calloutVariants({ variant: local.variant }), local.class)} {...others} />
+}
 
 const CalloutTitle: Component<ComponentProps<'h3'>> = (props) => {
-  const [local, others] = splitProps(props, ['class']);
-  return <h3 class={cn('font-semibold', local.class)} {...others} />;
-};
+  const [local, others] = splitProps(props, ['class'])
+  return <h3 class={cn('font-semibold', local.class)} {...others} />
+}
 
 const CalloutContent: Component<ComponentProps<'div'>> = (props) => {
-  const [local, others] = splitProps(props, ['class']);
-  return <div class={cn('mt-2', local.class)} {...others} />;
-};
+  const [local, others] = splitProps(props, ['class'])
+  return <div class={cn('mt-2', local.class)} {...others} />
+}
 
-export { Callout, CalloutContent, CalloutTitle };
+export { Callout, CalloutContent, CalloutTitle }
 
 // ---
 
 export const CalloutComp = (
   props: CalloutProps & {
-    title?: string;
-    content?: string;
+    title?: string
+    content?: string
   }
 ) => {
   return (
@@ -52,5 +52,5 @@ export const CalloutComp = (
       <CalloutTitle>{props.title}</CalloutTitle>
       <CalloutContent>{props.content}</CalloutContent>
     </Callout>
-  );
-};
+  )
+}

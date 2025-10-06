@@ -1,21 +1,21 @@
-import type { ComponentProps, ParentComponent } from 'solid-js';
-import { For, mergeProps, Show, splitProps, type Component, type JSXElement } from 'solid-js';
+import type { ComponentProps, ParentComponent } from 'solid-js'
+import { For, mergeProps, Show, splitProps, type Component, type JSXElement } from 'solid-js'
 
-import { cn } from '@/utils/cn';
+import { cn } from '@/utils/cn'
 
 export type TimelinePropsItem = Omit<
   TimelineItemProps,
   'isActive' | 'isActiveBullet' | 'bulletSize' | 'lineSize'
 > & {
-  bulletSize?: number;
-};
+  bulletSize?: number
+}
 
 export type TimelineProps = {
-  items: TimelinePropsItem[];
-  activeItem: number;
-  bulletSize?: number;
-  lineSize?: number;
-};
+  items: TimelinePropsItem[]
+  activeItem: number
+  bulletSize?: number
+  lineSize?: number
+}
 
 /*
   No bullet or line is active when activeItem is -1
@@ -24,7 +24,7 @@ export type TimelineProps = {
 */
 
 const Timeline: Component<TimelineProps> = (rawProps) => {
-  const props = mergeProps({ bulletSize: 16, lineSize: 2 }, rawProps);
+  const props = mergeProps({ bulletSize: 16, lineSize: 2 }, rawProps)
 
   return (
     <ul
@@ -47,20 +47,20 @@ const Timeline: Component<TimelineProps> = (rawProps) => {
         )}
       </For>
     </ul>
-  );
-};
+  )
+}
 
 export type TimelineItemProps = {
-  title: JSXElement;
-  description?: JSXElement;
-  bullet?: JSXElement;
-  isLast?: boolean;
-  isActive: boolean;
-  isActiveBullet: boolean;
-  class?: string;
-  bulletSize: number;
-  lineSize: number;
-};
+  title: JSXElement
+  description?: JSXElement
+  bullet?: JSXElement
+  isLast?: boolean
+  isActive: boolean
+  isActiveBullet: boolean
+  class?: string
+  bulletSize: number
+  lineSize: number
+}
 
 const TimelineItem: Component<TimelineItemProps> = (props) => {
   const [local, others] = splitProps(props, [
@@ -73,7 +73,7 @@ const TimelineItem: Component<TimelineItemProps> = (props) => {
     'isActiveBullet',
     'bulletSize',
     'lineSize',
-  ]);
+  ])
   return (
     <li
       class={cn(
@@ -99,15 +99,15 @@ const TimelineItem: Component<TimelineItemProps> = (props) => {
         <TimelineItemDescription>{local.description}</TimelineItemDescription>
       </Show>
     </li>
-  );
-};
+  )
+}
 
 export type TimelineItemBulletProps = {
-  children?: JSXElement;
-  isActive?: boolean;
-  bulletSize: number;
-  lineSize: number;
-};
+  children?: JSXElement
+  isActive?: boolean
+  bulletSize: number
+  lineSize: number
+}
 
 const TimelineItemBullet: Component<TimelineItemBulletProps> = (props) => {
   return (
@@ -126,20 +126,20 @@ const TimelineItemBullet: Component<TimelineItemBulletProps> = (props) => {
     >
       {props.children}
     </div>
-  );
-};
+  )
+}
 
 const TimelineItemTitle: ParentComponent = (props) => {
-  return <div class="mb-1 text-base leading-none font-semibold">{props.children}</div>;
-};
+  return <div class="mb-1 text-base leading-none font-semibold">{props.children}</div>
+}
 
 const TimelineItemDescription: Component<ComponentProps<'p'>> = (props) => {
-  const [local, others] = splitProps(props, ['class', 'children']);
+  const [local, others] = splitProps(props, ['class', 'children'])
   return (
     <p class={cn('text-muted-foreground text-sm', local.class)} {...others}>
       {local.children}
     </p>
-  );
-};
+  )
+}
 
-export { Timeline };
+export { Timeline }

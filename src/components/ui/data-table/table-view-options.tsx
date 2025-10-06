@@ -1,9 +1,9 @@
-import { For } from 'solid-js';
+import { For } from 'solid-js'
 
-import type { Table } from '@tanstack/solid-table';
+import type { Table } from '@tanstack/solid-table'
 
-import { IconSettings } from '@/assets/icons';
-import { Button } from '@/components/ui/button';
+import { IconSettings } from '@/assets/icons'
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -11,11 +11,11 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@/components/ui/dropdown-menu'
 
 type TableViewOptionsProps<TData> = {
-  table: Table<TData>;
-};
+  table: Table<TData>
+}
 
 export function TableViewOptions<TData>(props: TableViewOptionsProps<TData>) {
   return (
@@ -49,5 +49,5 @@ export function TableViewOptions<TData>(props: TableViewOptionsProps<TData>) {
         </For>
       </DropdownMenuContent>
     </DropdownMenu>
-  );
+  )
 }

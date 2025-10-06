@@ -1,16 +1,16 @@
-import { FlowProps } from 'solid-js';
+import { FlowProps } from 'solid-js'
 
-import { Toaster } from 'solid-sonner';
+import { Toaster } from 'solid-sonner'
 
-import { AuthContextProvider } from '@/stores/auth.context';
-import { CounterContextProvider } from '@/stores/counter.context';
+import { AuthContextProvider } from '@/stores/auth.context'
+import { CounterContextProvider } from '@/stores/counter.context'
 
-import { ThemeContextProvider, useThemeContext } from '@/contexts/theme.context';
-import { QueryClient } from '@tanstack/query-core';
-import { QueryClientProvider } from '@tanstack/solid-query';
-import { SolidQueryDevtools } from '@tanstack/solid-query-devtools';
+import { ThemeContextProvider, useThemeContext } from '@/contexts/theme.context'
+import { QueryClient } from '@tanstack/query-core'
+import { QueryClientProvider } from '@tanstack/solid-query'
+import { SolidQueryDevtools } from '@tanstack/solid-query-devtools'
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient()
 
 export default function Wrapper(props: FlowProps) {
   return (
@@ -29,11 +29,11 @@ export default function Wrapper(props: FlowProps) {
         </QueryClientProvider>
       </AuthContextProvider>
     </>
-  );
+  )
 }
 
 function _Toaster() {
-  const { inferredTheme } = useThemeContext();
+  const { inferredTheme } = useThemeContext()
 
-  return <Toaster theme={inferredTheme()} richColors />;
+  return <Toaster theme={inferredTheme()} richColors />
 }

@@ -1,23 +1,23 @@
-import type { Table } from '@tanstack/solid-table';
+import type { Table } from '@tanstack/solid-table'
 
 import {
   IconChevronLeft,
   IconChevronRight,
   IconChevronsLeft,
   IconChevronsRight,
-} from '@/assets/icons';
-import { Button } from '@/components/ui/button';
+} from '@/assets/icons'
+import { Button } from '@/components/ui/button'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '@/components/ui/select'
 
 type TablePaginationProps<TData> = {
-  table: Table<TData>;
-};
+  table: Table<TData>
+}
 
 export function TablePagination<TData>(props: TablePaginationProps<TData>) {
   return (
@@ -86,5 +86,5 @@ export function TablePagination<TData>(props: TablePaginationProps<TData>) {
         </div>
       </div>
     </div>
-  );
+  )
 }

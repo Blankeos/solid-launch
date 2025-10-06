@@ -3,7 +3,7 @@ declare global {
     namespace JSX {
       /** Extend directives for `use-*` syntax. */
       interface Directives {
-        form: (node: HTMLFormElement) => void;
+        form: (node: HTMLFormElement) => void
       }
     }
   }

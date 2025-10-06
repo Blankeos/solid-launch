@@ -5,18 +5,18 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator kysely {
-    provider = "prisma-kysely"
+  provider = "prisma-kysely"
 
-    // Optionally provide a destination directory for the generated file
-    // and a filename of your choice
-    output = "../../src/server/db"
-    fileName = "types.ts"
-    // Optionally generate runtime enums to a separate file
-    enumFileName = "enums.ts"
+  // Optionally provide a destination directory for the generated file
+  // and a filename of your choice
+  output       = "../src/server/db"
+  fileName     = "types.ts"
+  // Optionally generate runtime enums to a separate file
+  enumFileName = "enums.ts"
 
-    //  prismaSchemaFolder: https://www.prisma.io/blog/organize-your-prisma-schema-with-multi-file-support
-    //  driverAdapters: https://www.prisma.io/blog/prisma-turso-ea-support-rXGd_Tmy3UXX
-    previewFeatures = ["prismaSchemaFolder", "driverAdapters"]
+  //  prismaSchemaFolder: https://www.prisma.io/blog/organize-your-prisma-schema-with-multi-file-support
+  //  driverAdapters: https://www.prisma.io/blog/prisma-turso-ea-support-rXGd_Tmy3UXX
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {

@@ -1,17 +1,17 @@
-import { IconSolid } from '@/assets/icons';
-import { Button } from '@/components/ui/button';
-import { getRoute } from '@/route-tree.gen';
-import { useCounterContext } from '@/stores/counter.context';
-import { createSignal } from 'solid-js';
-import { toast } from 'solid-sonner';
-import { useMetadata } from 'vike-metadata-solid';
+import { IconSolid } from '@/assets/icons'
+import { Button } from '@/components/ui/button'
+import { getRoute } from '@/route-tree.gen'
+import { useCounterContext } from '@/stores/counter.context'
+import { createSignal } from 'solid-js'
+import { toast } from 'solid-sonner'
+import { useMetadata } from 'vike-metadata-solid'
 
 export default function HomePage() {
-  const [count, setCount] = createSignal(0);
+  const [count, setCount] = createSignal(0)
 
-  const { count: globalCount, setCount: setGlobalCount } = useCounterContext();
+  const { count: globalCount, setCount: setGlobalCount } = useCounterContext()
 
-  useMetadata({});
+  useMetadata({})
 
   return (
     <div class="flex h-full flex-1 flex-col">
@@ -43,11 +43,11 @@ export default function HomePage() {
                   () =>
                     toast.promise(
                       async () => {
-                        const random = Math.floor(Math.random() * 2);
+                        const random = Math.floor(Math.random() * 2)
 
-                        if (random === 0) await new Promise((resolve) => setTimeout(resolve, 2000));
+                        if (random === 0) await new Promise((resolve) => setTimeout(resolve, 2000))
                         if (random === 1)
-                          await new Promise((resolve, reject) => setTimeout(reject, 2000));
+                          await new Promise((resolve, reject) => setTimeout(reject, 2000))
                       },
                       {
                         loading: '🍞 Cooking your toast...',
@@ -56,26 +56,26 @@ export default function HomePage() {
                       }
                     ),
                   async () => {
-                    const toastIdAlphabet = 'abcdefghijklmnopqrstuvwxyz1234567890';
+                    const toastIdAlphabet = 'abcdefghijklmnopqrstuvwxyz1234567890'
                     const toastId = [...Array(5)].reduce(
                       (acc, _) =>
                         acc + toastIdAlphabet[Math.floor(Math.random() * toastIdAlphabet.length)],
                       ''
-                    );
-                    toast.loading('🔪 Slicing your toast...', { id: toastId });
-                    await new Promise((resolve) => setTimeout(resolve, 800));
-                    toast.loading('🤺 Slicing EVEN HARDER!!!', { id: toastId });
-                    await new Promise((resolve) => setTimeout(resolve, 800));
-                    toast.loading("💣 It's GONNA BLOW!!!", { id: toastId });
-                    await new Promise((resolve) => setTimeout(resolve, 500));
+                    )
+                    toast.loading('🔪 Slicing your toast...', { id: toastId })
+                    await new Promise((resolve) => setTimeout(resolve, 800))
+                    toast.loading('🤺 Slicing EVEN HARDER!!!', { id: toastId })
+                    await new Promise((resolve) => setTimeout(resolve, 800))
+                    toast.loading("💣 It's GONNA BLOW!!!", { id: toastId })
+                    await new Promise((resolve) => setTimeout(resolve, 500))
 
                     toast.promise(
                       async () => {
-                        const random = Math.floor(Math.random() * 2);
+                        const random = Math.floor(Math.random() * 2)
 
-                        if (random === 0) await new Promise((resolve) => setTimeout(resolve, 2000));
+                        if (random === 0) await new Promise((resolve) => setTimeout(resolve, 2000))
                         if (random === 1)
-                          await new Promise((resolve, reject) => setTimeout(reject, 2000));
+                          await new Promise((resolve, reject) => setTimeout(reject, 2000))
                       },
                       {
                         loading: '👨‍🍳 Cooking EVEN HARDER!!!',
@@ -83,13 +83,13 @@ export default function HomePage() {
                         error: '☄️ Toast BURNT!',
                         id: toastId,
                       }
-                    );
+                    )
                   },
-                ];
+                ]
 
-                const random = Math.floor(Math.random() * toasts.length);
+                const random = Math.floor(Math.random() * toasts.length)
 
-                toasts[random]();
+                toasts[random]()
               }}
             >
               🍞 Show a Toast
@@ -105,5 +105,5 @@ export default function HomePage() {
         </div>
       </div>
     </div>
-  );
+  )
 }

@@ -1,46 +1,46 @@
-import { IconLoading } from '@/assets/icons';
-import { getRoute } from '@/route-tree.gen';
-import { useAuthContext } from '@/stores/auth.context';
-import { createEffect, createSignal, FlowProps, Match, mergeProps, Show, Switch } from 'solid-js';
-import { navigate } from 'vike/client/router';
+import { IconLoading } from '@/assets/icons'
+import { getRoute } from '@/route-tree.gen'
+import { useAuthContext } from '@/stores/auth.context'
+import { createEffect, createSignal, FlowProps, Match, mergeProps, Show, Switch } from 'solid-js'
+import { navigate } from 'vike/client/router'
 
 type ProtectedRouteProps = {
   /** Redirect when authenticated. */
-  redirect?: string;
+  redirect?: string
   /** Fallback when not authed. @defaultValue /sign-in */
-  fallback?: string;
-};
+  fallback?: string
+}
 
 export default function ProtectedRoute(props: FlowProps<ProtectedRouteProps>) {
-  const { user, loading } = useAuthContext();
+  const { user, loading } = useAuthContext()
 
-  const defaultProps = mergeProps({ fallback: getRoute('/sign-in') }, props);
+  const defaultProps = mergeProps({ fallback: getRoute('/sign-in') }, props)
 
-  const [showProtector, setShowProtector] = createSignal(!Boolean(user()));
+  const [showProtector, setShowProtector] = createSignal(!Boolean(user()))
 
   createEffect(() => {
-    if (loading()) return; // Still fetching. Don't do anything.
+    if (loading()) return // Still fetching. Don't do anything.
 
     // Stopped fetching. User Exists.
     if (user()) {
       // When there's a user and there's a "redirect". Go to it.
       // Usecase: Going into /login, but there's actually a user.
       if (props.redirect) {
-        navigate(props.redirect);
-        return;
+        navigate(props.redirect)
+        return
       }
 
       // Remove the protector.
-      setShowProtector(false);
+      setShowProtector(false)
     }
 
     if (!user() && !loading()) {
-      navigate(defaultProps.fallback);
+      navigate(defaultProps.fallback)
 
       // Remove the protector.
-      setShowProtector(false);
+      setShowProtector(false)
     }
-  });
+  })
 
   return (
     <>
@@ -64,5 +64,5 @@ export default function ProtectedRoute(props: FlowProps<ProtectedRouteProps>) {
 
       <Show when={user() && !loading()}>{props.children}</Show>
     </>
-  );
+  )
 }

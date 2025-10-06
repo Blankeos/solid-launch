@@ -1,12 +1,12 @@
-import { privateEnv } from '@/env.private';
+import { privateEnv } from '@/env.private'
 import {
   CopyObjectCommand,
   DeleteObjectCommand,
   GetObjectCommand,
   PutObjectCommand,
   S3Client,
-} from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+} from '@aws-sdk/client-s3'
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
 // ===========================================================================
 // Client
@@ -20,7 +20,7 @@ export const s3Client = new S3Client({
     accessKeyId: privateEnv.S3_ACCESS_KEY_ID,
     secretAccessKey: privateEnv.S3_SECRET_ACCESS_KEY,
   },
-});
+})
 
 // ===========================================================================
 // Methods
@@ -36,9 +36,9 @@ export async function generateUploadUrl(uniqueId: string) {
   const command = new PutObjectCommand({
     Bucket: privateEnv.S3_BUCKET_NAME,
     Key: `temp/${uniqueId}`,
-  });
+  })
 
-  const signedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+  const signedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 })
 
   return {
     signedUrl: signedUrl,
@@ -47,14 +47,14 @@ export async function generateUploadUrl(uniqueId: string) {
      * BackBlaze can't do POST for some reason.
      */
     fields: [],
-  };
+  }
 }
 
 export async function transferFileFromTempToPermanent(uniqueId: string) {
-  const oldKey = `temp/${uniqueId}`;
-  const newKey = `permanent/${uniqueId}`;
+  const oldKey = `temp/${uniqueId}`
+  const newKey = `permanent/${uniqueId}`
 
-  console.log('[transferFileFromtempToPermanent] Transferring', oldKey, 'to', newKey);
+  console.log('[transferFileFromtempToPermanent] Transferring', oldKey, 'to', newKey)
 
   // Copy the object to the new location.
   await s3Client.send(
@@ -63,16 +63,16 @@ export async function transferFileFromTempToPermanent(uniqueId: string) {
       CopySource: `${privateEnv.S3_BUCKET_NAME}/${oldKey}`,
       Key: newKey,
     })
-  );
+  )
 
-  console.log('[transferFileFromTempToPermanent] Deleting', oldKey);
+  console.log('[transferFileFromTempToPermanent] Deleting', oldKey)
   // Delete from old location.
   await s3Client.send(
     new DeleteObjectCommand({
       Bucket: privateEnv.S3_BUCKET_NAME,
       Key: oldKey,
     })
-  );
+  )
 }
 
 export async function getImageUrlFromImageObjKey(imageObjKey: string) {
@@ -82,16 +82,16 @@ export async function getImageUrlFromImageObjKey(imageObjKey: string) {
       Bucket: privateEnv.S3_BUCKET_NAME,
       /** Assumes that this image is already permanent. */
       Key: `permanent/${imageObjKey}`,
-    });
+    })
 
     // Create the presigned URL.
     const signedUrl = await getSignedUrl(s3Client, command, {
       expiresIn: 3600,
-    });
+    })
 
-    return signedUrl;
+    return signedUrl
   } catch (err) {
-    console.log('Error creating presigned URL', err);
+    console.log('Error creating presigned URL', err)
   }
-  return null;
+  return null
 }

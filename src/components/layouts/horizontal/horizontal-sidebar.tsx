@@ -1,14 +1,14 @@
-import { DropdownMenuComp } from '@/components/ui/dropdown-menu';
-import { getRoute } from '@/route-tree.gen';
-import { useAuthContext } from '@/stores/auth.context';
-import { Show, VoidProps } from 'solid-js';
-import { toast } from 'solid-sonner';
-import { navigate } from 'vike/client/router';
+import { DropdownMenuComp } from '@/components/ui/dropdown-menu'
+import { getRoute } from '@/route-tree.gen'
+import { useAuthContext } from '@/stores/auth.context'
+import { Show, VoidProps } from 'solid-js'
+import { toast } from 'solid-sonner'
+import { navigate } from 'vike/client/router'
 
-type HorizontalSidebarProps = {};
+type HorizontalSidebarProps = {}
 
 export default function HorizontalSidebar(_props: VoidProps<HorizontalSidebarProps>) {
-  const { user, loading, logout } = useAuthContext();
+  const { user, loading, logout } = useAuthContext()
 
   return (
     <div class="flex h-full w-56 shrink-0 flex-col border-r px-8 py-8">
@@ -35,8 +35,8 @@ export default function HorizontalSidebar(_props: VoidProps<HorizontalSidebarPro
                 itemId: 'logout',
                 itemDisplay: 'Logout',
                 itemOnSelect: () => {
-                  logout();
-                  toast.success('Logged out!');
+                  logout()
+                  toast.success('Logged out!')
                 },
               },
             ]}
@@ -53,5 +53,5 @@ export default function HorizontalSidebar(_props: VoidProps<HorizontalSidebarPro
         </Show>
       </div>
     </div>
-  );
+  )
 }

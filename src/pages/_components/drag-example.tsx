@@ -3,19 +3,19 @@ import {
   DraggableItem,
   Droppable,
   useAutoScroll,
-} from '@/components/drag-and-drop/drag-and-drop';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/utils/cn';
-import { For, Index } from 'solid-js';
-import { createStore, reconcile } from 'solid-js/store';
-import { TransitionGroup } from 'solid-transition-group';
+} from '@/components/drag-and-drop/drag-and-drop'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/utils/cn'
+import { For, Index } from 'solid-js'
+import { createStore, reconcile } from 'solid-js/store'
+import { TransitionGroup } from 'solid-transition-group'
 
 const arrayMoveImmutable = <T,>(arr: T[], from: number, to: number): T[] => {
-  const newArr = [...arr];
-  const [item] = newArr.splice(from, 1);
-  newArr.splice(to, 0, item);
-  return newArr;
-};
+  const newArr = [...arr]
+  const [item] = newArr.splice(from, 1)
+  newArr.splice(to, 0, item)
+  return newArr
+}
 
 const PokemonListExample = () => {
   const [list, setList] = createStore([
@@ -34,17 +34,17 @@ const PokemonListExample = () => {
       name: 'Squirtle',
       img: 'https://img.rankedboost.com/wp-content/uploads/2018/08/Pokemon-Quest-Squirtle.png',
     },
-  ]);
+  ])
 
   return (
     <DragAndDropProvider
       onDrop={({ sourceId, targetId }) => {
-        const sourceIndex = list.findIndex((item) => item.id === sourceId);
-        const targetIndex = list.findIndex((item) => item.id === targetId);
-        if (sourceIndex === -1 || targetIndex === -1) return;
+        const sourceIndex = list.findIndex((item) => item.id === sourceId)
+        const targetIndex = list.findIndex((item) => item.id === targetId)
+        if (sourceIndex === -1 || targetIndex === -1) return
 
-        const reorderedItems = arrayMoveImmutable(list, sourceIndex, targetIndex);
-        setList(reconcile(reorderedItems));
+        const reorderedItems = arrayMoveImmutable(list, sourceIndex, targetIndex)
+        setList(reconcile(reorderedItems))
       }}
     >
       <span class="text-xs">List</span>
@@ -93,8 +93,8 @@ const PokemonListExample = () => {
         </TransitionGroup>
       </div>
     </DragAndDropProvider>
-  );
-};
+  )
+}
 
 const SortAsYouDragExample = () => {
   const [list, setList] = createStore([
@@ -102,18 +102,18 @@ const SortAsYouDragExample = () => {
     { id: '2', name: 'Beta', emoji: '⭐' },
     { id: '3', name: 'Gamma', emoji: '🔥' },
     { id: '4', name: 'Delta', emoji: '💎' },
-  ]);
+  ])
 
   return (
     <DragAndDropProvider
       instanceId="sort-list"
       onDropTargetChange={({ sourceId, targetId }) => {
-        const sourceIndex = list.findIndex((item) => item.id === sourceId);
-        const targetIndex = list.findIndex((item) => item.id === targetId);
-        if (sourceIndex === -1 || targetIndex === -1) return;
+        const sourceIndex = list.findIndex((item) => item.id === sourceId)
+        const targetIndex = list.findIndex((item) => item.id === targetId)
+        if (sourceIndex === -1 || targetIndex === -1) return
 
-        const reorderedItems = arrayMoveImmutable(list, sourceIndex, targetIndex);
-        setList(reconcile(reorderedItems));
+        const reorderedItems = arrayMoveImmutable(list, sourceIndex, targetIndex)
+        setList(reconcile(reorderedItems))
       }}
     >
       <span class="text-xs">List (but sort-as-you-drag, idk it looks cooler)</span>
@@ -142,8 +142,8 @@ const SortAsYouDragExample = () => {
         </TransitionGroup>
       </div>
     </DragAndDropProvider>
-  );
-};
+  )
+}
 
 const FruitGridExample = () => {
   const [grid, setGrid] = createStore([
@@ -153,18 +153,18 @@ const FruitGridExample = () => {
     { id: '🍌', name: 'Banana' },
     { id: '🍓', name: 'Strawberry' },
     { id: '🥝', name: 'Kiwi' },
-  ]);
+  ])
 
   return (
     <DragAndDropProvider
       instanceId="fruit-grid"
       onDrop={({ sourceId, targetId }) => {
-        const sourceIndex = grid.findIndex((item) => item.id === sourceId);
-        const targetIndex = grid.findIndex((item) => item.id === targetId);
-        if (sourceIndex === -1 || targetIndex === -1) return;
+        const sourceIndex = grid.findIndex((item) => item.id === sourceId)
+        const targetIndex = grid.findIndex((item) => item.id === targetId)
+        if (sourceIndex === -1 || targetIndex === -1) return
 
-        const reorderedItems = arrayMoveImmutable(grid, sourceIndex, targetIndex);
-        setGrid(reconcile(reorderedItems));
+        const reorderedItems = arrayMoveImmutable(grid, sourceIndex, targetIndex)
+        setGrid(reconcile(reorderedItems))
       }}
     >
       <span class="text-xs">Grid</span>
@@ -197,19 +197,19 @@ const FruitGridExample = () => {
           size="sm"
           variant="outline"
           onClick={() => {
-            setGrid((items) => [...items].sort(() => Math.random() - 0.5));
+            setGrid((items) => [...items].sort(() => Math.random() - 0.5))
           }}
         >
           🔀 Shuffle Fruits
         </Button>
       </div>
     </DragAndDropProvider>
-  );
-};
+  )
+}
 
 const TrelloBoardExample = () => {
-  type Task = { id: string; title: string; assignee: string };
-  type Column = { columnId: string; title: string; items: Task[] };
+  type Task = { id: string; title: string; assignee: string }
+  type Column = { columnId: string; title: string; items: Task[] }
 
   const [board, setBoard] = createStore<Column[]>([
     {
@@ -236,12 +236,12 @@ const TrelloBoardExample = () => {
       columnId: 'done',
       items: [],
     },
-  ]);
+  ])
   const [columnSorting, setColumnSorting] = createStore([
     { id: 'todo' },
     { id: 'doing' },
     { id: 'done' },
-  ]);
+  ])
 
   function moveTask(
     fromColumnIndex: number,
@@ -251,34 +251,34 @@ const TrelloBoardExample = () => {
   ) {
     if (fromColumnIndex === toColumnIndex) {
       // Move within the same column
-      const column = { ...board[fromColumnIndex] };
-      const newItems = arrayMoveImmutable(column.items, fromIndex, toIndex);
-      setBoard(fromColumnIndex, 'items', reconcile(newItems));
+      const column = { ...board[fromColumnIndex] }
+      const newItems = arrayMoveImmutable(column.items, fromIndex, toIndex)
+      setBoard(fromColumnIndex, 'items', reconcile(newItems))
     } else {
       // Move between columns
-      const task = board[fromColumnIndex].items[fromIndex];
+      const task = board[fromColumnIndex].items[fromIndex]
       setBoard(
         fromColumnIndex,
         'items',
         reconcile(board[fromColumnIndex].items.filter((_, i) => i !== fromIndex))
-      );
+      )
       setBoard(
         toColumnIndex,
         'items',
         reconcile(
           (() => {
-            const next = [...board[toColumnIndex].items];
-            next.splice(toIndex, 0, task);
-            return next;
+            const next = [...board[toColumnIndex].items]
+            next.splice(toIndex, 0, task)
+            return next
           })()
         )
-      );
+      )
     }
   }
 
   function moveColumn(fromIndex: number, toIndex: number) {
-    const reordered = arrayMoveImmutable(columnSorting, fromIndex, toIndex);
-    setColumnSorting(reconcile(reordered));
+    const reordered = arrayMoveImmutable(columnSorting, fromIndex, toIndex)
+    setColumnSorting(reconcile(reordered))
   }
 
   return (
@@ -286,49 +286,49 @@ const TrelloBoardExample = () => {
       instanceId="trello-board"
       onDrop={({ sourceId, targetId, sourceData, targetData }) => {
         // COLUMN MOVE
-        const isColumn = sourceData && 'column' in sourceData;
+        const isColumn = sourceData && 'column' in sourceData
         if (isColumn) {
-          const fromIndex = columnSorting.findIndex((col) => col.id === sourceId);
-          const toIndex = columnSorting.findIndex((col) => col.id === targetId);
-          if (fromIndex === -1 || toIndex === -1) return;
-          moveColumn(fromIndex, toIndex);
-          return;
+          const fromIndex = columnSorting.findIndex((col) => col.id === sourceId)
+          const toIndex = columnSorting.findIndex((col) => col.id === targetId)
+          if (fromIndex === -1 || toIndex === -1) return
+          moveColumn(fromIndex, toIndex)
+          return
         }
 
         // TASK MOVE
-        const fromColumnIndex = board.findIndex((col) => col.items.some((t) => t.id === sourceId));
-        const toColumnIndex = board.findIndex((col) => col.columnId === targetData?.columnId);
-        if (fromColumnIndex === -1 || toColumnIndex === -1) return;
+        const fromColumnIndex = board.findIndex((col) => col.items.some((t) => t.id === sourceId))
+        const toColumnIndex = board.findIndex((col) => col.columnId === targetData?.columnId)
+        if (fromColumnIndex === -1 || toColumnIndex === -1) return
 
-        const fromIndex = board[fromColumnIndex].items.findIndex((t) => t.id === sourceId);
-        const toIndex = board[toColumnIndex].items.findIndex((t) => t.id === targetId);
-        if (fromIndex === -1) return;
+        const fromIndex = board[fromColumnIndex].items.findIndex((t) => t.id === sourceId)
+        const toIndex = board[toColumnIndex].items.findIndex((t) => t.id === targetId)
+        if (fromIndex === -1) return
 
-        const insertIndex = toIndex === -1 ? board[toColumnIndex].items.length : toIndex;
-        moveTask(fromColumnIndex, fromIndex, toColumnIndex, insertIndex);
+        const insertIndex = toIndex === -1 ? board[toColumnIndex].items.length : toIndex
+        moveTask(fromColumnIndex, fromIndex, toColumnIndex, insertIndex)
       }}
     >
       <span class="text-xs">Trello Board (Cross-list drag & sortable columns)</span>
       <div class="grid grid-cols-3 gap-4">
         <For each={columnSorting}>
           {(column, _columnIndex) => {
-            const columnId = column.id;
-            const col = board.find((_b) => _b.columnId === columnId)!;
+            const columnId = column.id
+            const col = board.find((_b) => _b.columnId === columnId)!
 
             return (
               <DraggableItem
                 id={columnId}
                 data={{ column: true, columnId: columnId }}
                 dropTargetCanDrop={(_s) => {
-                  return true;
+                  return true
                 }}
               >
                 {(columnState, columnRef) => {
                   const scrollRef = useAutoScroll({
                     canScroll: ({ source }) => {
-                      return !('column' in source.data.data);
+                      return !('column' in source.data.data)
                     },
-                  });
+                  })
 
                   return (
                     <div
@@ -367,33 +367,33 @@ const TrelloBoardExample = () => {
                         </For>
                       </div>
                     </div>
-                  );
+                  )
                 }}
               </DraggableItem>
-            );
+            )
           }}
         </For>
       </div>
     </DragAndDropProvider>
-  );
-};
+  )
+}
 
 const TrophyDropExample = () => {
   const [slots, setSlots] = createStore<{ left: string | null; right: string | null }>({
     left: null,
     right: '🏆',
-  });
+  })
 
   return (
     <DragAndDropProvider
       instanceId="trophy-drop"
       onDrop={({ sourceId, targetId }) => {
         if (sourceId === 'left-slot' && targetId === 'right-slot') {
-          setSlots('left', null);
-          setSlots('right', '🏆');
+          setSlots('left', null)
+          setSlots('right', '🏆')
         } else if (sourceId === 'right-slot' && targetId === 'left-slot') {
-          setSlots('left', '🏆');
-          setSlots('right', null);
+          setSlots('left', '🏆')
+          setSlots('right', null)
         }
       }}
     >
@@ -437,8 +437,8 @@ const TrophyDropExample = () => {
         </Index>
       </div>
     </DragAndDropProvider>
-  );
-};
+  )
+}
 
 export function DragExample() {
   return (
@@ -449,5 +449,5 @@ export function DragExample() {
       <TrelloBoardExample />
       <TrophyDropExample />
     </>
-  );
+  )
 }

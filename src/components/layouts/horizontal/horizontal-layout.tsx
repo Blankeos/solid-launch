@@ -1,7 +1,7 @@
-import { FlowProps } from 'solid-js';
-import HorizontalSidebar from './horizontal-sidebar';
+import { FlowProps } from 'solid-js'
+import HorizontalSidebar from './horizontal-sidebar'
 
-type HorizontalLayoutProps = {};
+type HorizontalLayoutProps = {}
 
 export default function HorizontalLayout(props: FlowProps<HorizontalLayoutProps>) {
   return (
@@ -9,5 +9,5 @@ export default function HorizontalLayout(props: FlowProps<HorizontalLayoutProps>
       <HorizontalSidebar />
       <main class="grow px-5">{props.children}</main>
     </div>
-  );
+  )
 }

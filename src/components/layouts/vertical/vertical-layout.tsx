@@ -1,8 +1,8 @@
-import { FlowProps } from 'solid-js';
-import VerticalFooter from './vertical-footer';
-import VerticalNav from './vertical-nav';
+import { FlowProps } from 'solid-js'
+import VerticalFooter from './vertical-footer'
+import VerticalNav from './vertical-nav'
 
-type VerticalLayoutProps = {};
+type VerticalLayoutProps = {}
 
 export default function VerticalLayout(props: FlowProps<VerticalLayoutProps>) {
   return (
@@ -11,5 +11,5 @@ export default function VerticalLayout(props: FlowProps<VerticalLayoutProps>) {
       <main class="flex flex-1 flex-col">{props.children}</main>
       <VerticalFooter />
     </div>
-  );
+  )
 }

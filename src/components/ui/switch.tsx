@@ -1,24 +1,24 @@
-import type { ComponentProps, JSX, ValidComponent } from 'solid-js';
-import { children, Show, splitProps } from 'solid-js';
+import type { ComponentProps, JSX, ValidComponent } from 'solid-js'
+import { children, Show, splitProps } from 'solid-js'
 
-import type { PolymorphicProps } from '@kobalte/core';
-import * as SwitchPrimitive from '@kobalte/core/switch';
+import type { PolymorphicProps } from '@kobalte/core'
+import * as SwitchPrimitive from '@kobalte/core/switch'
 
-import { cn } from '@/utils/cn';
+import { cn } from '@/utils/cn'
 
-const Switch = SwitchPrimitive.Root;
-const SwitchDescription = SwitchPrimitive.Description;
-const SwitchErrorMessage = SwitchPrimitive.ErrorMessage;
+const Switch = SwitchPrimitive.Root
+const SwitchDescription = SwitchPrimitive.Description
+const SwitchErrorMessage = SwitchPrimitive.ErrorMessage
 
 type SwitchControlProps = SwitchPrimitive.SwitchControlProps & {
-  class?: string | undefined;
-  children?: JSX.Element;
-};
+  class?: string | undefined
+  children?: JSX.Element
+}
 
 const SwitchControl = <T extends ValidComponent = 'input'>(
   props: PolymorphicProps<T, SwitchControlProps>
 ) => {
-  const [local, others] = splitProps(props as SwitchControlProps, ['class', 'children']);
+  const [local, others] = splitProps(props as SwitchControlProps, ['class', 'children'])
   return (
     <>
       <SwitchPrimitive.Input
@@ -37,15 +37,15 @@ const SwitchControl = <T extends ValidComponent = 'input'>(
         {local.children}
       </SwitchPrimitive.Control>
     </>
-  );
-};
+  )
+}
 
-type SwitchThumbProps = SwitchPrimitive.SwitchThumbProps & { class?: string | undefined };
+type SwitchThumbProps = SwitchPrimitive.SwitchThumbProps & { class?: string | undefined }
 
 const SwitchThumb = <T extends ValidComponent = 'div'>(
   props: PolymorphicProps<T, SwitchThumbProps>
 ) => {
-  const [local, others] = splitProps(props as SwitchThumbProps, ['class']);
+  const [local, others] = splitProps(props as SwitchThumbProps, ['class'])
   return (
     <SwitchPrimitive.Thumb
       class={cn(
@@ -54,15 +54,15 @@ const SwitchThumb = <T extends ValidComponent = 'div'>(
       )}
       {...others}
     />
-  );
-};
+  )
+}
 
-type SwitchLabelProps = SwitchPrimitive.SwitchLabelProps & { class?: string | undefined };
+type SwitchLabelProps = SwitchPrimitive.SwitchLabelProps & { class?: string | undefined }
 
 const SwitchLabel = <T extends ValidComponent = 'label'>(
   props: PolymorphicProps<T, SwitchLabelProps>
 ) => {
-  const [local, others] = splitProps(props as SwitchLabelProps, ['class']);
+  const [local, others] = splitProps(props as SwitchLabelProps, ['class'])
   return (
     <SwitchPrimitive.Label
       class={cn(
@@ -71,24 +71,24 @@ const SwitchLabel = <T extends ValidComponent = 'label'>(
       )}
       {...others}
     />
-  );
-};
+  )
+}
 
-export { Switch, SwitchControl, SwitchDescription, SwitchErrorMessage, SwitchLabel, SwitchThumb };
+export { Switch, SwitchControl, SwitchDescription, SwitchErrorMessage, SwitchLabel, SwitchThumb }
 
 // ---
 
 type SwitchCompProps = ComponentProps<typeof Switch> & {
-  label?: JSX.Element;
-  controlProps?: SwitchControlProps;
-  thumbProps?: SwitchThumbProps;
-  labelProps?: SwitchLabelProps;
-};
+  label?: JSX.Element
+  controlProps?: SwitchControlProps
+  thumbProps?: SwitchThumbProps
+  labelProps?: SwitchLabelProps
+}
 
 const SwitchComp = (props: SwitchCompProps) => {
-  const [local, others] = splitProps(props, ['label', 'controlProps', 'thumbProps', 'labelProps']);
+  const [local, others] = splitProps(props, ['label', 'controlProps', 'thumbProps', 'labelProps'])
 
-  const label = children(() => local.label);
+  const label = children(() => local.label)
 
   return (
     <SwitchPrimitive.Root class={cn('flex items-center space-x-2', others.class)} {...others}>
@@ -99,7 +99,7 @@ const SwitchComp = (props: SwitchCompProps) => {
         <SwitchLabel {...local.labelProps}>{label()}</SwitchLabel>
       </Show>
     </SwitchPrimitive.Root>
-  );
-};
+  )
+}
 
-export { SwitchComp };
+export { SwitchComp }

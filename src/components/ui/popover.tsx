@@ -1,25 +1,25 @@
-import type { Component, ComponentProps, ValidComponent } from 'solid-js';
-import { Show, splitProps } from 'solid-js';
+import type { Component, ComponentProps, ValidComponent } from 'solid-js'
+import { Show, splitProps } from 'solid-js'
 
-import type { PolymorphicProps } from '@kobalte/core/polymorphic';
-import * as PopoverPrimitive from '@kobalte/core/popover';
+import type { PolymorphicProps } from '@kobalte/core/polymorphic'
+import * as PopoverPrimitive from '@kobalte/core/popover'
 
-import { cn } from '@/utils/cn';
-import { JSX } from 'solid-js/jsx-runtime';
+import { cn } from '@/utils/cn'
+import { JSX } from 'solid-js/jsx-runtime'
 
-const PopoverTrigger = PopoverPrimitive.Trigger;
+const PopoverTrigger = PopoverPrimitive.Trigger
 
 const Popover: Component<PopoverPrimitive.PopoverRootProps> = (props) => {
-  return <PopoverPrimitive.Root gutter={4} {...props} />;
-};
+  return <PopoverPrimitive.Root gutter={4} {...props} />
+}
 
 type PopoverContentProps<T extends ValidComponent = 'div'> =
-  PopoverPrimitive.PopoverContentProps<T> & { class?: string | undefined };
+  PopoverPrimitive.PopoverContentProps<T> & { class?: string | undefined }
 
 const PopoverContent = <T extends ValidComponent = 'div'>(
   props: PolymorphicProps<T, PopoverContentProps<T>>
 ) => {
-  const [local, others] = splitProps(props as PopoverContentProps, ['class']);
+  const [local, others] = splitProps(props as PopoverContentProps, ['class'])
   return (
     <PopoverPrimitive.Portal>
       <PopoverPrimitive.Content
@@ -30,22 +30,22 @@ const PopoverContent = <T extends ValidComponent = 'div'>(
         {...others}
       />
     </PopoverPrimitive.Portal>
-  );
-};
+  )
+}
 
-export { Popover, PopoverContent, PopoverTrigger };
+export { Popover, PopoverContent, PopoverTrigger }
 
 // ---
 
 export const PopoverComp: Component<
   ComponentProps<typeof Popover> & {
-    content?: JSX.Element;
-    contentProps?: ComponentProps<typeof PopoverContent>;
-    children: JSX.Element;
-    arrow?: boolean;
+    content?: JSX.Element
+    contentProps?: ComponentProps<typeof PopoverContent>
+    children: JSX.Element
+    arrow?: boolean
   }
 > = (props) => {
-  const [local, rest] = splitProps(props, ['children', 'content', 'contentProps', 'arrow']);
+  const [local, rest] = splitProps(props, ['children', 'content', 'contentProps', 'arrow'])
   return (
     <Popover {...rest}>
       <PopoverTrigger>{local.children}</PopoverTrigger>
@@ -56,5 +56,5 @@ export const PopoverComp: Component<
         {local.content}
       </PopoverContent>
     </Popover>
-  );
-};
+  )
+}

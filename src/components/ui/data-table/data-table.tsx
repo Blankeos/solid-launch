@@ -1,14 +1,14 @@
 // A bit edited, mainly the integration with DataTableToolbarOptions.
 // Quality of life updates:
 // - Disable the toolbar if I want to.
-import { createSignal, For, Show } from 'solid-js';
+import { createSignal, For, Show } from 'solid-js'
 
 import type {
   ColumnDef,
   ColumnFiltersState,
   SortingState,
   VisibilityState,
-} from '@tanstack/solid-table';
+} from '@tanstack/solid-table'
 
 import {
   createSolidTable,
@@ -19,44 +19,44 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-} from '@tanstack/solid-table';
+} from '@tanstack/solid-table'
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './table'
 
-import { TablePagination } from './table-pagination';
-import { type DataTableToolbarOptions, TableToolbar } from './table-toolbar';
+import { TablePagination } from './table-pagination'
+import { type DataTableToolbarOptions, TableToolbar } from './table-toolbar'
 
 type DataTableProps<TData, TValue> = {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
-  toolbar?: DataTableToolbarOptions & { disabled?: boolean };
-};
+  columns: ColumnDef<TData, TValue>[]
+  data: TData[]
+  toolbar?: DataTableToolbarOptions & { disabled?: boolean }
+}
 
 export function DataTable<TData, TValue>(props: DataTableProps<TData, TValue>) {
-  const [rowSelection, setRowSelection] = createSignal({});
-  const [columnVisibility, setColumnVisibility] = createSignal<VisibilityState>({});
-  const [columnFilters, setColumnFilters] = createSignal<ColumnFiltersState>([]);
-  const [sorting, setSorting] = createSignal<SortingState>([]);
+  const [rowSelection, setRowSelection] = createSignal({})
+  const [columnVisibility, setColumnVisibility] = createSignal<VisibilityState>({})
+  const [columnFilters, setColumnFilters] = createSignal<ColumnFiltersState>([])
+  const [sorting, setSorting] = createSignal<SortingState>([])
 
   const table = createSolidTable({
     get data() {
-      return props.data;
+      return props.data
     },
     get columns() {
-      return props.columns;
+      return props.columns
     },
     state: {
       get sorting() {
-        return sorting();
+        return sorting()
       },
       get columnVisibility() {
-        return columnVisibility();
+        return columnVisibility()
       },
       get rowSelection() {
-        return rowSelection();
+        return rowSelection()
       },
       get columnFilters() {
-        return columnFilters();
+        return columnFilters()
       },
     },
     enableRowSelection: true,
@@ -70,7 +70,7 @@ export function DataTable<TData, TValue>(props: DataTableProps<TData, TValue>) {
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
-  });
+  })
 
   return (
     <div class="space-y-4">
@@ -130,5 +130,5 @@ export function DataTable<TData, TValue>(props: DataTableProps<TData, TValue>) {
       </div>
       <TablePagination table={table} />
     </div>
-  );
+  )
 }

@@ -1,38 +1,38 @@
-import { Button } from '@/components/ui/button';
-import { getRoute } from '@/route-tree.gen';
-import { useAuthContext } from '@/stores/auth.context';
-import { useCounterContext } from '@/stores/counter.context';
-import getTitle from '@/utils/get-title';
-import { createForm } from '@felte/solid';
-import { validator } from '@felte/validator-zod';
-import { toast } from 'solid-sonner';
-import { useMetadata } from 'vike-metadata-solid';
-import { navigate } from 'vike/client/router';
-import { z } from 'zod';
+import { Button } from '@/components/ui/button'
+import { getRoute } from '@/route-tree.gen'
+import { useAuthContext } from '@/stores/auth.context'
+import { useCounterContext } from '@/stores/counter.context'
+import getTitle from '@/utils/get-title'
+import { createForm } from '@felte/solid'
+import { validator } from '@felte/validator-zod'
+import { toast } from 'solid-sonner'
+import { useMetadata } from 'vike-metadata-solid'
+import { navigate } from 'vike/client/router'
+import { z } from 'zod'
 
 export default function SignUpPage() {
   useMetadata({
     title: getTitle('Sign Up'),
-  });
+  })
 
-  const { count: globalCount, setCount: setGlobalCount } = useCounterContext();
+  const { count: globalCount, setCount: setGlobalCount } = useCounterContext()
 
-  const { register } = useAuthContext();
+  const { register } = useAuthContext()
 
   const schema = z.object({
     username: z.string(),
     password: z.string(),
-  });
+  })
 
   const { form, data } = createForm({
     extend: validator({ schema }),
-    onSubmit: async (values: typeof schema._type) => {
+    onSubmit: async (values: z.infer<typeof schema>) => {
       toast.promise(
         async () => {
-          const result = await register(values.username, values.password);
+          const result = await register(values.username, values.password)
 
           if (result) {
-            navigate(getRoute('/dashboard'));
+            navigate(getRoute('/dashboard'))
           }
         },
         {
@@ -40,9 +40,9 @@ export default function SignUpPage() {
           success: 'Registered!',
           loading: 'Registering...',
         }
-      );
+      )
     },
-  });
+  })
 
   return (
     <div class="flex h-full flex-1 flex-col">
@@ -75,5 +75,5 @@ export default function SignUpPage() {
         </pre>
       </div>
     </div>
-  );
+  )
 }

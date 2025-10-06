@@ -1,11 +1,11 @@
-import type { JSX } from 'solid-js';
-import { createSignal, For, Show } from 'solid-js';
+import type { JSX } from 'solid-js'
+import { createSignal, For, Show } from 'solid-js'
 
-import type { Column } from '@tanstack/solid-table';
+import type { Column } from '@tanstack/solid-table'
 
-import { IconCheck, IconCirclePlus } from '@/assets/icons';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { IconCheck, IconCirclePlus } from '@/assets/icons'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import {
   Command,
   CommandEmpty,
@@ -14,25 +14,25 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
-} from '@/components/ui/command';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Separator } from '@/components/ui/separator';
-import { cn } from '@/utils/cn';
+} from '@/components/ui/command'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Separator } from '@/components/ui/separator'
+import { cn } from '@/utils/cn'
 
 type TableFacetedFilterProps<TData, TValue> = {
-  column?: Column<TData, TValue>;
-  title?: string;
+  column?: Column<TData, TValue>
+  title?: string
   options: {
-    label: string;
-    value: string;
-    icon?: (props: { class?: string }) => JSX.Element;
-  }[];
-};
+    label: string
+    value: string
+    icon?: (props: { class?: string }) => JSX.Element
+  }[]
+}
 
 export function TableFacetedFilter<TData, TValue>(props: TableFacetedFilterProps<TData, TValue>) {
-  const [_selectedValues, setSelectedValues] = createSignal<string[]>([]);
-  const facets = () => props.column?.getFacetedUniqueValues();
-  const selectedValues = () => (props.column?.getFilterValue() ?? []) as string[];
+  const [_selectedValues, setSelectedValues] = createSignal<string[]>([])
+  const facets = () => props.column?.getFacetedUniqueValues()
+  const selectedValues = () => (props.column?.getFilterValue() ?? []) as string[]
 
   return (
     <Popover placement="bottom-start">
@@ -72,17 +72,17 @@ export function TableFacetedFilter<TData, TValue>(props: TableFacetedFilterProps
             <CommandGroup>
               <For each={props.options}>
                 {(option) => {
-                  const isSelected = () => selectedValues().includes(option.value);
+                  const isSelected = () => selectedValues().includes(option.value)
                   return (
                     <CommandItem
                       onSelect={() => {
-                        let newValues;
+                        let newValues
                         if (isSelected()) {
-                          newValues = selectedValues().filter((item) => item !== option.value);
+                          newValues = selectedValues().filter((item) => item !== option.value)
                         } else {
-                          newValues = [...selectedValues(), option.value];
+                          newValues = [...selectedValues(), option.value]
                         }
-                        props.column?.setFilterValue(newValues.length ? newValues : undefined);
+                        props.column?.setFilterValue(newValues.length ? newValues : undefined)
                       }}
                     >
                       <div
@@ -107,7 +107,7 @@ export function TableFacetedFilter<TData, TValue>(props: TableFacetedFilterProps
                         )}
                       </Show>
                     </CommandItem>
-                  );
+                  )
                 }}
               </For>
             </CommandGroup>
@@ -117,8 +117,8 @@ export function TableFacetedFilter<TData, TValue>(props: TableFacetedFilterProps
                 <CommandGroup>
                   <CommandItem
                     onSelect={() => {
-                      setSelectedValues([]);
-                      props.column?.setFilterValue(undefined);
+                      setSelectedValues([])
+                      props.column?.setFilterValue(undefined)
                     }}
                     class="justify-center text-center"
                   >
@@ -131,5 +131,5 @@ export function TableFacetedFilter<TData, TValue>(props: TableFacetedFilterProps
         </Command>
       </PopoverContent>
     </Popover>
-  );
+  )
 }

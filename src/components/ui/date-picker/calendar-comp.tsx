@@ -3,9 +3,9 @@
 // Maximizes flexibility + reusability.
 // date-picker.tsx is untouched and completely from solid-ui.
 
-import { cn } from '@/utils/cn';
-import { Index, createMemo } from 'solid-js';
-import { Portal } from 'solid-js/web';
+import { cn } from '@/utils/cn'
+import { Index, createMemo } from 'solid-js'
+import { Portal } from 'solid-js/web'
 import {
   DatePicker,
   DatePickerContent,
@@ -27,19 +27,19 @@ import {
   DatePickerView,
   DatePickerViewControl,
   DatePickerViewTrigger,
-} from './date-picker';
+} from './date-picker'
 
 const CalendarCompContent = (props: {
-  class?: string;
-  'aria-label'?: string;
-  isRange?: boolean;
-  inPopover?: boolean;
+  class?: string
+  'aria-label'?: string
+  isRange?: boolean
+  inPopover?: boolean
 }) => {
   const dayView = (
     <DatePickerView view="day">
       <DatePickerContext>
         {(api) => {
-          const offset = createMemo(() => api().getOffset?.({ months: 1 }));
+          const offset = createMemo(() => api().getOffset?.({ months: 1 }))
           return (
             <>
               <DatePickerViewControl>
@@ -140,11 +140,11 @@ const CalendarCompContent = (props: {
                 </DatePickerTable>
               )}
             </>
-          );
+          )
         }}
       </DatePickerContext>
     </DatePickerView>
-  );
+  )
 
   const monthView = (
     <DatePickerView view="month">
@@ -179,7 +179,7 @@ const CalendarCompContent = (props: {
         )}
       </DatePickerContext>
     </DatePickerView>
-  );
+  )
 
   const yearView = (
     <DatePickerView view="year">
@@ -214,7 +214,7 @@ const CalendarCompContent = (props: {
         )}
       </DatePickerContext>
     </DatePickerView>
-  );
+  )
 
   return (
     <DatePickerContent
@@ -229,22 +229,22 @@ const CalendarCompContent = (props: {
       {monthView}
       {yearView}
     </DatePickerContent>
-  );
-};
+  )
+}
 
 // ---
 
 const CalendarComp = (props: {
-  value?: Date;
-  onChange?: (date: Date) => void;
-  defaultValue?: Date;
-  class?: string;
-  'aria-label'?: string;
-  withControls?: boolean;
-  format?: (date: Date) => string;
-  open?: boolean;
+  value?: Date
+  onChange?: (date: Date) => void
+  defaultValue?: Date
+  class?: string
+  'aria-label'?: string
+  withControls?: boolean
+  format?: (date: Date) => string
+  open?: boolean
 }) => {
-  const isOpen = () => (props.withControls ? props.open : true);
+  const isOpen = () => (props.withControls ? props.open : true)
 
   return (
     <DatePicker
@@ -271,20 +271,20 @@ const CalendarComp = (props: {
         <CalendarCompContent class={props.class} aria-label={props['aria-label']} />
       )}
     </DatePicker>
-  );
-};
+  )
+}
 
 const CalendarRangeComp = (props: {
-  value?: Date[];
-  onChange?: (dates: Date[]) => void;
-  defaultValue?: Date[];
-  class?: string;
-  'aria-label'?: string;
-  format?: (date: Date) => string;
-  withPicker?: boolean;
-  open?: boolean;
+  value?: Date[]
+  onChange?: (dates: Date[]) => void
+  defaultValue?: Date[]
+  class?: string
+  'aria-label'?: string
+  format?: (date: Date) => string
+  withPicker?: boolean
+  open?: boolean
 }) => {
-  const isOpen = () => (props.withPicker ? props.open : true);
+  const isOpen = () => (props.withPicker ? props.open : true)
 
   return (
     <DatePicker
@@ -319,7 +319,7 @@ const CalendarRangeComp = (props: {
         <CalendarCompContent isRange class={props.class} aria-label={props['aria-label']} />
       )}
     </DatePicker>
-  );
-};
+  )
+}
 
-export { CalendarComp, CalendarRangeComp };
+export { CalendarComp, CalendarRangeComp }

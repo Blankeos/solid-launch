@@ -1,26 +1,26 @@
-import type { ComponentProps, ParentProps, ValidComponent } from 'solid-js';
-import { createMemo, createSignal, Show, splitProps, type Component } from 'solid-js';
+import type { ComponentProps, ParentProps, ValidComponent } from 'solid-js'
+import { createMemo, createSignal, Show, splitProps, type Component } from 'solid-js'
 
-import type { PolymorphicProps } from '@kobalte/core/polymorphic';
-import * as TooltipPrimitive from '@kobalte/core/tooltip';
+import type { PolymorphicProps } from '@kobalte/core/polymorphic'
+import * as TooltipPrimitive from '@kobalte/core/tooltip'
 
-import { cn } from '@/utils/cn';
-import { useMouse } from 'bagon-hooks';
-import { JSX } from 'solid-js/jsx-runtime';
+import { cn } from '@/utils/cn'
+import { useMouse } from 'bagon-hooks'
+import { JSX } from 'solid-js/jsx-runtime'
 
-const TooltipTrigger = TooltipPrimitive.Trigger;
+const TooltipTrigger = TooltipPrimitive.Trigger
 
 const Tooltip: Component<TooltipPrimitive.TooltipRootProps> = (props) => {
-  return <TooltipPrimitive.Root gutter={4} {...props} />;
-};
+  return <TooltipPrimitive.Root gutter={4} {...props} />
+}
 
 type TooltipContentProps<T extends ValidComponent = 'div'> =
-  TooltipPrimitive.TooltipContentProps<T> & { class?: string | undefined };
+  TooltipPrimitive.TooltipContentProps<T> & { class?: string | undefined }
 
 const TooltipContent = <T extends ValidComponent = 'div'>(
   props: PolymorphicProps<T, TooltipContentProps<T>>
 ) => {
-  const [local, others] = splitProps(props as TooltipContentProps, ['class']);
+  const [local, others] = splitProps(props as TooltipContentProps, ['class'])
   return (
     <TooltipPrimitive.Portal>
       <TooltipPrimitive.Content
@@ -31,10 +31,10 @@ const TooltipContent = <T extends ValidComponent = 'div'>(
         {...others}
       />
     </TooltipPrimitive.Portal>
-  );
-};
+  )
+}
 
-export { Tooltip, TooltipContent, TooltipTrigger };
+export { Tooltip, TooltipContent, TooltipTrigger }
 
 // ---
 
@@ -45,13 +45,13 @@ export { Tooltip, TooltipContent, TooltipTrigger };
 export function TooltipComp(
   props: ParentProps &
     Omit<TooltipPrimitive.TooltipRootProps, 'children' | 'delayDuration'> & {
-      triggerProps?: ComponentProps<typeof TooltipTrigger<'button'>>;
-      contentProps?: ComponentProps<typeof TooltipContent<'button'>>;
+      triggerProps?: ComponentProps<typeof TooltipTrigger<'button'>>
+      contentProps?: ComponentProps<typeof TooltipContent<'button'>>
       /** @defaultValue true */
-      hideOnClick?: boolean;
-      content?: JSX.Element;
-      arrow?: boolean;
-      followCursor?: boolean | 'horizontal' | 'vertical';
+      hideOnClick?: boolean
+      content?: JSX.Element
+      arrow?: boolean
+      followCursor?: boolean | 'horizontal' | 'vertical'
     }
 ) {
   // In SolidJS, use splitProps to destructure reactive props for cleaner access
@@ -63,22 +63,22 @@ export function TooltipComp(
     'content',
     'followCursor',
     'arrow',
-  ]);
+  ])
 
-  const hideOnClick = createMemo(() => local.hideOnClick ?? true);
+  const hideOnClick = createMemo(() => local.hideOnClick ?? true)
 
-  const [contentRef, setContentRef] = createSignal<HTMLElement>();
-  const [triggerRef, setTriggerRef] = createSignal<HTMLElement>();
+  const [contentRef, setContentRef] = createSignal<HTMLElement>()
+  const [triggerRef, setTriggerRef] = createSignal<HTMLElement>()
 
-  const { position, ref } = useMouse();
+  const { position, ref } = useMouse()
   const gutterY = createMemo(() => {
-    if (!local.followCursor || local.followCursor === 'horizontal') return undefined;
-    return position().y - (triggerRef()?.getBoundingClientRect().height ?? 0);
-  });
+    if (!local.followCursor || local.followCursor === 'horizontal') return undefined
+    return position().y - (triggerRef()?.getBoundingClientRect().height ?? 0)
+  })
   const shiftX = createMemo(() => {
-    if (!local.followCursor || local.followCursor === 'vertical') return undefined;
-    return position().x - (contentRef()?.getBoundingClientRect().width ?? 0) / 2;
-  });
+    if (!local.followCursor || local.followCursor === 'vertical') return undefined
+    return position().x - (contentRef()?.getBoundingClientRect().width ?? 0) / 2
+  })
 
   return (
     <Tooltip
@@ -94,18 +94,18 @@ export function TooltipComp(
     >
       <TooltipTrigger
         ref={(_ref: any) => {
-          setTriggerRef(_ref);
-          ref(_ref);
+          setTriggerRef(_ref)
+          ref(_ref)
         }}
         {...local.triggerProps}
         onClick={(event) => {
           if (!hideOnClick) {
-            event.preventDefault();
+            event.preventDefault()
           }
         }}
         onPointerDown={(event) => {
           if (!hideOnClick) {
-            event.preventDefault();
+            event.preventDefault()
           }
         }}
       >
@@ -116,10 +116,10 @@ export function TooltipComp(
         {...local.contentProps}
         onPointerDownOutside={(event) => {
           if (!hideOnClick) {
-            event.preventDefault();
+            event.preventDefault()
           }
           // Chain the original handler if it exists
-          local.contentProps?.onPointerDownOutside?.(event);
+          local.contentProps?.onPointerDownOutside?.(event)
         }}
       >
         {local.content}
@@ -128,5 +128,5 @@ export function TooltipComp(
         </Show>
       </TooltipContent>
     </Tooltip>
-  );
+  )
 }

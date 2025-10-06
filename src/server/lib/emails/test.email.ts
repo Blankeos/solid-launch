@@ -1,8 +1,8 @@
-import { publicEnv } from '@/env.public';
-import { zValidator } from '@hono/zod-validator';
-import { Hono } from 'hono';
-import { z } from 'zod';
-import { sendEmail } from './nodemailer';
+import { publicEnv } from '@/env.public'
+import { zValidator } from '@hono/zod-validator'
+import { Hono } from 'hono'
+import { z } from 'zod'
+import { sendEmail } from './nodemailer'
 
 export function renderTestEmail(email: string): string {
   return `
@@ -16,10 +16,10 @@ export function renderTestEmail(email: string): string {
         <p>Thank you!</p>
       </body>
     </html>
-  `;
+  `
 }
 
-export const testEmailRouter = new Hono();
+export const testEmailRouter = new Hono()
 if (publicEnv.NODE_ENV === 'development') {
   testEmailRouter.get(
     '/',
@@ -30,18 +30,18 @@ if (publicEnv.NODE_ENV === 'development') {
       })
     ),
     async (c) => {
-      const validQuery = c.req.valid('query');
+      const validQuery = c.req.valid('query')
 
       await sendEmail({
         html: renderTestEmail(validQuery.email),
         subject: 'Test Email',
         to: validQuery.email,
-      });
+      })
 
       return c.json({
         success: true,
         email_sent_to: validQuery.email,
-      });
+      })
     }
-  );
+  )
 }

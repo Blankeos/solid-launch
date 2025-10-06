@@ -1,5 +1,5 @@
-import { createEnv } from '@t3-oss/env-core';
-import z from 'zod';
+import { createEnv } from '@t3-oss/env-core'
+import z from 'zod'
 
 export const privateEnv = createEnv({
   runtimeEnv: process.env,
@@ -58,4 +58,4 @@ export const privateEnv = createEnv({
     /** Development|Prod For Emails (essentially the name of the sender i.e. Name <email@example.com>) */
     SMTP_FROM: z.string(),
   },
-});
+})

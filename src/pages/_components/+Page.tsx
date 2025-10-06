@@ -1,17 +1,17 @@
-import { IconMoonDuo, IconSunDuo } from '@/assets/icons';
-import { AccordionComp } from '@/components/ui/accordion';
-import { AlertComp } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
-import { BreadcrumbComp } from '@/components/ui/breadcrumb';
-import { Button } from '@/components/ui/button';
-import { CalloutComp } from '@/components/ui/callout';
-import { CheckboxComp } from '@/components/ui/checkbox';
-import { Collapsible } from '@/components/ui/collapsible';
-import { ContextMenuComp } from '@/components/ui/context-menu';
-import { DataTable } from '@/components/ui/data-table/data-table';
-import { TableColumnHeader } from '@/components/ui/data-table/table-column-header';
-import { CalendarComp, CalendarRangeComp } from '@/components/ui/date-picker/calendar-comp';
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { IconMoonDuo, IconSunDuo } from '@/assets/icons'
+import { AccordionComp } from '@/components/ui/accordion'
+import { AlertComp } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
+import { BreadcrumbComp } from '@/components/ui/breadcrumb'
+import { Button } from '@/components/ui/button'
+import { CalloutComp } from '@/components/ui/callout'
+import { CheckboxComp } from '@/components/ui/checkbox'
+import { Collapsible } from '@/components/ui/collapsible'
+import { ContextMenuComp } from '@/components/ui/context-menu'
+import { DataTable } from '@/components/ui/data-table/data-table'
+import { TableColumnHeader } from '@/components/ui/data-table/table-column-header'
+import { CalendarComp, CalendarRangeComp } from '@/components/ui/date-picker/calendar-comp'
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import {
   Drawer,
   DrawerContent,
@@ -19,26 +19,26 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from '@/components/ui/drawer';
-import { DropdownMenuComp } from '@/components/ui/dropdown-menu';
-import { PaginationComp } from '@/components/ui/pagination';
-import { PopoverComp } from '@/components/ui/popover';
-import { RadioGroupComp } from '@/components/ui/radio-group';
-import { SelectComp, SelectOption } from '@/components/ui/select';
-import { SliderComp } from '@/components/ui/slider';
-import { SwitchComp } from '@/components/ui/switch';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Timeline } from '@/components/ui/timeline';
-import { useThemeContext } from '@/contexts/theme.context';
-import { Tippy } from '@/lib/solid-tippy';
-import { cn } from '@/utils/cn';
-import { ColumnDef } from '@tanstack/solid-table';
-import { useDisclosure, useToggle } from 'bagon-hooks';
-import { createEffect, createSignal, FlowProps, For } from 'solid-js';
-import { JSX } from 'solid-js/jsx-runtime';
-import { toast } from 'solid-sonner';
-import { followCursor } from 'tippy.js';
-import { DragExample } from './drag-example';
+} from '@/components/ui/drawer'
+import { DropdownMenuComp } from '@/components/ui/dropdown-menu'
+import { PaginationComp } from '@/components/ui/pagination'
+import { PopoverComp } from '@/components/ui/popover'
+import { RadioGroupComp } from '@/components/ui/radio-group'
+import { SelectComp, SelectOption } from '@/components/ui/select'
+import { SliderComp } from '@/components/ui/slider'
+import { SwitchComp } from '@/components/ui/switch'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Timeline } from '@/components/ui/timeline'
+import { useThemeContext } from '@/contexts/theme.context'
+import { Tippy } from '@/lib/solid-tippy'
+import { cn } from '@/utils/cn'
+import { ColumnDef } from '@tanstack/solid-table'
+import { useDisclosure, useToggle } from 'bagon-hooks'
+import { createEffect, createSignal, FlowProps, For } from 'solid-js'
+import { JSX } from 'solid-js/jsx-runtime'
+import { toast } from 'solid-sonner'
+import { followCursor } from 'tippy.js'
+import { DragExample } from './drag-example'
 
 export default function ComponentsPage() {
   return (
@@ -115,7 +115,7 @@ export default function ComponentsPage() {
       <ComponentCard label="Switch" class="gap-y-5">
         <SwitchComp label="Enable" />
         {(() => {
-          const { theme, toggleTheme } = useThemeContext();
+          const { theme, toggleTheme } = useThemeContext()
 
           return (
             <SwitchComp
@@ -128,7 +128,7 @@ export default function ComponentsPage() {
               }
               onChange={toggleTheme}
             />
-          );
+          )
         })()}
       </ComponentCard>
       <ComponentCard label="Select" class="w-96">
@@ -152,12 +152,12 @@ export default function ComponentsPage() {
         <SelectComp loading options={[]} placeholder="Loading" />
         <SelectComp disabled options={[]} placeholder="Disabled" />
         {(() => {
-          const [value, setValue] = createSignal<string | null>('apple');
+          const [value, setValue] = createSignal<string | null>('apple')
           const options: SelectOption[] = [
             { value: 'apple', label: '🍎 Apple' },
             { value: 'orange', label: '🍊 Orange' },
             { value: 'grape', label: '🍇 Grape' },
-          ];
+          ]
 
           return (
             <>
@@ -168,19 +168,19 @@ export default function ComponentsPage() {
                 options={options}
                 value={options.find((_opt) => _opt.value === value())}
                 onChange={(newValue) => {
-                  setValue(newValue?.value ?? null);
+                  setValue(newValue?.value ?? null)
                 }}
               />
             </>
-          );
+          )
         })()}
         {(() => {
-          const [value, setValue] = createSignal(['apple', 'orange']);
+          const [value, setValue] = createSignal(['apple', 'orange'])
           const options: SelectOption[] = [
             { value: 'apple', label: '🍎 Apple' },
             { value: 'orange', label: '🍊 Orange' },
             { value: 'grape', label: '🍇 Grape' },
-          ];
+          ]
 
           return (
             <>
@@ -193,11 +193,11 @@ export default function ComponentsPage() {
                 options={options}
                 value={options.filter((_opt) => value().includes(_opt.value))}
                 onChange={(newValue) => {
-                  setValue(newValue.map((_opt) => _opt.value));
+                  setValue(newValue.map((_opt) => _opt.value))
                 }}
               />
             </>
-          );
+          )
         })()}
       </ComponentCard>
       <ComponentCard label="Slider" class="gap-5">
@@ -275,11 +275,11 @@ export default function ComponentsPage() {
               () =>
                 toast.promise(
                   async () => {
-                    const random = Math.floor(Math.random() * 2);
+                    const random = Math.floor(Math.random() * 2)
 
-                    if (random === 0) await new Promise((resolve) => setTimeout(resolve, 2000));
+                    if (random === 0) await new Promise((resolve) => setTimeout(resolve, 2000))
                     if (random === 1)
-                      await new Promise((resolve, reject) => setTimeout(reject, 2000));
+                      await new Promise((resolve, reject) => setTimeout(reject, 2000))
                   },
                   {
                     loading: '🍞 Cooking your toast...',
@@ -288,26 +288,26 @@ export default function ComponentsPage() {
                   }
                 ),
               async () => {
-                const toastIdAlphabet = 'abcdefghijklmnopqrstuvwxyz1234567890';
+                const toastIdAlphabet = 'abcdefghijklmnopqrstuvwxyz1234567890'
                 const toastId = [...Array(5)].reduce(
                   (acc, _) =>
                     acc + toastIdAlphabet[Math.floor(Math.random() * toastIdAlphabet.length)],
                   ''
-                );
-                toast.loading('🔪 Slicing your toast...', { id: toastId });
-                await new Promise((resolve) => setTimeout(resolve, 800));
-                toast.loading('🤺 Slicing EVEN HARDER!!!', { id: toastId });
-                await new Promise((resolve) => setTimeout(resolve, 800));
-                toast.loading("💣 It's GONNA BLOW!!!", { id: toastId });
-                await new Promise((resolve) => setTimeout(resolve, 500));
+                )
+                toast.loading('🔪 Slicing your toast...', { id: toastId })
+                await new Promise((resolve) => setTimeout(resolve, 800))
+                toast.loading('🤺 Slicing EVEN HARDER!!!', { id: toastId })
+                await new Promise((resolve) => setTimeout(resolve, 800))
+                toast.loading("💣 It's GONNA BLOW!!!", { id: toastId })
+                await new Promise((resolve) => setTimeout(resolve, 500))
 
                 toast.promise(
                   async () => {
-                    const random = Math.floor(Math.random() * 2);
+                    const random = Math.floor(Math.random() * 2)
 
-                    if (random === 0) await new Promise((resolve) => setTimeout(resolve, 2000));
+                    if (random === 0) await new Promise((resolve) => setTimeout(resolve, 2000))
                     if (random === 1)
-                      await new Promise((resolve, reject) => setTimeout(reject, 2000));
+                      await new Promise((resolve, reject) => setTimeout(reject, 2000))
                   },
                   {
                     loading: '👨‍🍳 Cooking EVEN HARDER!!!',
@@ -315,13 +315,13 @@ export default function ComponentsPage() {
                     error: '☄️ Toast BURNT!',
                     id: toastId,
                   }
-                );
+                )
               },
-            ];
+            ]
 
-            const random = Math.floor(Math.random() * toasts.length);
+            const random = Math.floor(Math.random() * toasts.length)
 
-            toasts[random]();
+            toasts[random]()
           }}
         >
           🎉 Random Toast
@@ -329,28 +329,28 @@ export default function ComponentsPage() {
 
         <Button
           onClick={() => {
-            toast.success('All changes have been saved!');
+            toast.success('All changes have been saved!')
           }}
         >
           Success Toast
         </Button>
         <Button
           onClick={() => {
-            toast.warning('Your session will expire in 5 minutes.');
+            toast.warning('Your session will expire in 5 minutes.')
           }}
         >
           Warning Toast
         </Button>
         <Button
           onClick={() => {
-            toast.info('New feature available in your dashboard.');
+            toast.info('New feature available in your dashboard.')
           }}
         >
           Info Toast
         </Button>
         <Button
           onClick={() => {
-            toast.error('Unable to connect to the server.');
+            toast.error('Unable to connect to the server.')
           }}
         >
           Error Toast
@@ -386,22 +386,22 @@ export default function ComponentsPage() {
           </Button>
         </Tippy>
         {(() => {
-          const [count, setCount] = createSignal(0);
+          const [count, setCount] = createSignal(0)
           createEffect(() => {
             setInterval(() => {
-              setCount((c) => c + 1);
-            }, 1000);
-          });
+              setCount((c) => c + 1)
+            }, 1000)
+          })
           return (
             <Tippy content={<>Reactive content {count()}</>} props={{ hideOnClick: false }}>
               <Button variant="outline" as="div" onClick={() => setCount((c) => c + 1)}>
                 Dont Hide onClick + reactive
               </Button>
             </Tippy>
-          );
+          )
         })()}
         {(() => {
-          const [placement, setPlacement] = useToggle(['top', 'bottom', 'left', 'right'] as const);
+          const [placement, setPlacement] = useToggle(['top', 'bottom', 'left', 'right'] as const)
           return (
             <Tippy
               content={<>Reactive content {placement()}</>}
@@ -411,7 +411,7 @@ export default function ComponentsPage() {
                 Placements + reactive
               </Button>
             </Tippy>
-          );
+          )
         })()}
       </ComponentCard>
       <ComponentCard label="Context Menu">
@@ -495,7 +495,7 @@ export default function ComponentsPage() {
 
         <span class="text-xs">Controlled (manual accessibility, complex usecases)</span>
         {(() => {
-          const [drawerOpen, drawerActions] = useDisclosure();
+          const [drawerOpen, drawerActions] = useDisclosure()
 
           return (
             <>
@@ -519,13 +519,13 @@ export default function ComponentsPage() {
                 </DrawerContent>
               </Drawer>
             </>
-          );
+          )
         })()}
 
         <span class="text-xs">Directions</span>
         <div class="flex gap-1">
           {(() => {
-            const directions = ['bottom', 'top', 'left', 'right'] as const;
+            const directions = ['bottom', 'top', 'left', 'right'] as const
             const labels = [
               {
                 bottom: 'Drawer from bottom',
@@ -533,7 +533,7 @@ export default function ComponentsPage() {
                 left: 'Drawer from left',
                 right: 'Drawer from right',
               },
-            ];
+            ]
             return (
               <For each={directions}>
                 {(dir) => (
@@ -553,7 +553,7 @@ export default function ComponentsPage() {
                   </Drawer>
                 )}
               </For>
-            );
+            )
 
             //....
           })()}
@@ -637,9 +637,9 @@ export default function ComponentsPage() {
         </p>
 
         {(() => {
-          const [open1, actions1] = useDisclosure();
-          const [open2, actions2] = useDisclosure();
-          const [open3, actions3] = useDisclosure();
+          const [open1, actions1] = useDisclosure()
+          const [open2, actions2] = useDisclosure()
+          const [open3, actions3] = useDisclosure()
 
           return (
             <div class="text-foreground/60 contents">
@@ -657,7 +657,7 @@ export default function ComponentsPage() {
               <Button onClick={actions3.toggle}>{open3() ? 'Close 3' : 'Open 3'}</Button>
               <Collapsible open={open3()}>Collapsible 3</Collapsible>
             </div>
-          );
+          )
         })()}
       </ComponentCard>
       <ComponentCard label="Checkbox">
@@ -712,7 +712,7 @@ export default function ComponentsPage() {
             { id: 'zxc6vbn2', status: 'failed', email: 'enzo77@gmail.com', amount: 467 },
             { id: 'asd7fgh3', status: 'processing', email: 'iris23@outlook.com', amount: 589 },
             { id: 'mnb8uio4', status: 'success', email: 'finn99@hotmail.com', amount: 812 },
-          ];
+          ]
 
           const columns: ColumnDef<(typeof data)[number]>[] = [
             {
@@ -762,21 +762,21 @@ export default function ComponentsPage() {
               header: (_props) => <TableColumnHeader column={_props.column} title="Amount" />,
               cell: (props) => {
                 // eslint-disable-next-line solid/reactivity
-                const amount = parseFloat(props.row.getValue('amount'));
+                const amount = parseFloat(props.row.getValue('amount'))
                 const formatted = new Intl.NumberFormat('en-US', {
                   style: 'currency',
                   currency: 'USD',
-                }).format(amount);
-                return <div class="text-right font-medium">{formatted}</div>;
+                }).format(amount)
+                return <div class="text-right font-medium">{formatted}</div>
               },
             },
-          ];
+          ]
 
           const statusFilterOptions = [
             { value: 'success', label: 'Success', checked: true },
             { value: 'failed', label: 'Failed', checked: false },
             { value: 'processing', label: 'Processing', checked: false },
-          ];
+          ]
 
           return (
             <DataTable
@@ -796,7 +796,7 @@ export default function ComponentsPage() {
                 ],
               }}
             />
-          );
+          )
         })()}
       </ComponentCard>
       <ComponentCard label="Timeline">
@@ -821,7 +821,7 @@ export default function ComponentsPage() {
 
       <ComponentCard label="Pagination">
         {(() => {
-          const [currentPage, setCurrentPage] = createSignal(1);
+          const [currentPage, setCurrentPage] = createSignal(1)
 
           return (
             <>
@@ -829,11 +829,11 @@ export default function ComponentsPage() {
               <PaginationComp
                 count={10}
                 onPageChange={(newPage) => {
-                  setCurrentPage(newPage);
+                  setCurrentPage(newPage)
                 }}
               />
             </>
-          );
+          )
         })()}
       </ComponentCard>
       <ComponentCard label="Drag and Drop Lists" class="gap-3">
@@ -853,13 +853,13 @@ export default function ComponentsPage() {
         <DragExample />
       </ComponentCard>
     </div>
-  );
+  )
 }
 
 function ComponentCard(
   props: FlowProps<{
-    label?: JSX.Element;
-    class?: string;
+    label?: JSX.Element
+    class?: string
   }>
 ) {
   return (
@@ -872,14 +872,14 @@ function ComponentCard(
       {props.label && <h3 class="mb-2 text-xs font-semibold">{props.label}</h3>}
       {props.children}
     </div>
-  );
+  )
 }
 
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
 function _DialogExample() {
-  const [dialogOpen, dialogActions] = useDisclosure();
+  const [dialogOpen, dialogActions] = useDisclosure()
 
   return (
     <ComponentCard label="Dialog" class="gap-5">
@@ -918,5 +918,5 @@ function _DialogExample() {
         </DialogContent>
       </Dialog>
     </ComponentCard>
-  );
+  )
 }

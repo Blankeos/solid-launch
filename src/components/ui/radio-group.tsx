@@ -1,31 +1,31 @@
-import type { JSX, ValidComponent } from 'solid-js';
-import { For, splitProps } from 'solid-js';
+import type { JSX, ValidComponent } from 'solid-js'
+import { For, splitProps } from 'solid-js'
 
-import type { PolymorphicProps } from '@kobalte/core/polymorphic';
-import * as RadioGroupPrimitive from '@kobalte/core/radio-group';
+import type { PolymorphicProps } from '@kobalte/core/polymorphic'
+import * as RadioGroupPrimitive from '@kobalte/core/radio-group'
 
-import { cn } from '@/utils/cn';
+import { cn } from '@/utils/cn'
 
 type RadioGroupRootProps<T extends ValidComponent = 'div'> =
-  RadioGroupPrimitive.RadioGroupRootProps<T> & { class?: string | undefined };
+  RadioGroupPrimitive.RadioGroupRootProps<T> & { class?: string | undefined }
 
 const RadioGroup = <T extends ValidComponent = 'div'>(
   props: PolymorphicProps<T, RadioGroupRootProps<T>>
 ) => {
-  const [local, others] = splitProps(props as RadioGroupRootProps, ['class']);
-  return <RadioGroupPrimitive.Root class={cn('grid gap-2', local.class)} {...others} />;
-};
+  const [local, others] = splitProps(props as RadioGroupRootProps, ['class'])
+  return <RadioGroupPrimitive.Root class={cn('grid gap-2', local.class)} {...others} />
+}
 
 type RadioGroupItemProps<T extends ValidComponent = 'div'> =
   RadioGroupPrimitive.RadioGroupItemProps<T> & {
-    class?: string | undefined;
-    children?: JSX.Element;
-  };
+    class?: string | undefined
+    children?: JSX.Element
+  }
 
 const RadioGroupItem = <T extends ValidComponent = 'div'>(
   props: PolymorphicProps<T, RadioGroupItemProps<T>>
 ) => {
-  const [local, others] = splitProps(props as RadioGroupItemProps, ['class', 'children']);
+  const [local, others] = splitProps(props as RadioGroupItemProps, ['class', 'children'])
   return (
     <RadioGroupPrimitive.Item class={cn('flex items-center space-x-2', local.class)} {...others}>
       <RadioGroupPrimitive.ItemInput />
@@ -47,18 +47,18 @@ const RadioGroupItem = <T extends ValidComponent = 'div'>(
       </RadioGroupPrimitive.ItemControl>
       {local.children}
     </RadioGroupPrimitive.Item>
-  );
-};
+  )
+}
 
 type RadioGroupLabelProps<T extends ValidComponent = 'label'> =
   RadioGroupPrimitive.RadioGroupLabelProps<T> & {
-    class?: string | undefined;
-  };
+    class?: string | undefined
+  }
 
 const RadioGroupItemLabel = <T extends ValidComponent = 'label'>(
   props: PolymorphicProps<T, RadioGroupLabelProps<T>>
 ) => {
-  const [local, others] = splitProps(props as RadioGroupLabelProps, ['class']);
+  const [local, others] = splitProps(props as RadioGroupLabelProps, ['class'])
   return (
     <RadioGroupPrimitive.ItemLabel
       class={cn(
@@ -67,35 +67,35 @@ const RadioGroupItemLabel = <T extends ValidComponent = 'label'>(
       )}
       {...others}
     />
-  );
-};
+  )
+}
 
-export { RadioGroup, RadioGroupItem, RadioGroupItemLabel };
+export { RadioGroup, RadioGroupItem, RadioGroupItemLabel }
 
 // ---
 
-import { ComponentProps, Show } from 'solid-js';
+import { ComponentProps, Show } from 'solid-js'
 
 export type RadioGroupOption = {
-  value: string;
-  label?: JSX.Element;
-};
+  value: string
+  label?: JSX.Element
+}
 
 type RadioGroupCompProps = ComponentProps<typeof RadioGroup> & {
-  options: RadioGroupOption[];
-  labelProps?: ComponentProps<typeof RadioGroupItemLabel>;
-  loading?: boolean;
-};
+  options: RadioGroupOption[]
+  labelProps?: ComponentProps<typeof RadioGroupItemLabel>
+  loading?: boolean
+}
 
 export function RadioGroupComp(props: RadioGroupCompProps) {
-  const [local, rest] = splitProps(props, ['options', 'labelProps', 'loading']);
+  const [local, rest] = splitProps(props, ['options', 'labelProps', 'loading'])
 
   function renderLabel(rawValue: RadioGroupOption) {
     return (
       <Show when={rawValue.label} fallback={rawValue.value}>
         {rawValue.label}
       </Show>
-    );
+    )
   }
 
   return (
@@ -108,5 +108,5 @@ export function RadioGroupComp(props: RadioGroupCompProps) {
         )}
       </For>
     </RadioGroup>
-  );
+  )
 }

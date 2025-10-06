@@ -1,7 +1,7 @@
-import typescriptEslint from '@typescript-eslint/eslint-plugin';
-import tsParser from '@typescript-eslint/parser';
-import solid from 'eslint-plugin-solid/configs/recommended';
-import globals from 'globals';
+import typescriptEslint from '@typescript-eslint/eslint-plugin'
+import tsParser from '@typescript-eslint/parser'
+import solid from 'eslint-plugin-solid/configs/recommended'
+import globals from 'globals'
 
 export default [
   {
@@ -34,4 +34,4 @@ export default [
       ],
     },
   },
-];
+]

@@ -1,31 +1,31 @@
-import { children, Show, splitProps } from 'solid-js';
+import { children, Show, splitProps } from 'solid-js'
 
-import { DatePicker as DatePickerPrimitive } from '@ark-ui/solid';
+import { DatePicker as DatePickerPrimitive } from '@ark-ui/solid'
 
-import { buttonVariants } from '@/components/ui/button';
-import { cn } from '@/utils/cn';
+import { buttonVariants } from '@/components/ui/button'
+import { cn } from '@/utils/cn'
 
-const DatePicker = DatePickerPrimitive.Root;
-const DatePickerLabel = DatePickerPrimitive.Label;
-const DatePickerContext = DatePickerPrimitive.Context;
-const DatePickerTableHead = DatePickerPrimitive.TableHead;
-const DatePickerTableBody = DatePickerPrimitive.TableBody;
-const DatePickerYearSelect = DatePickerPrimitive.YearSelect;
-const DatePickerMonthSelect = DatePickerPrimitive.MonthSelect;
-const DatePickerPositioner = DatePickerPrimitive.Positioner;
+const DatePicker = DatePickerPrimitive.Root
+const DatePickerLabel = DatePickerPrimitive.Label
+const DatePickerContext = DatePickerPrimitive.Context
+const DatePickerTableHead = DatePickerPrimitive.TableHead
+const DatePickerTableBody = DatePickerPrimitive.TableBody
+const DatePickerYearSelect = DatePickerPrimitive.YearSelect
+const DatePickerMonthSelect = DatePickerPrimitive.MonthSelect
+const DatePickerPositioner = DatePickerPrimitive.Positioner
 
 const DatePickerControl = (props: DatePickerPrimitive.ControlProps) => {
-  const [local, others] = splitProps(props, ['class']);
+  const [local, others] = splitProps(props, ['class'])
   return (
     <DatePickerPrimitive.Control
       class={cn('inline-flex items-center gap-1', local.class)}
       {...others}
     />
-  );
-};
+  )
+}
 
 const DatePickerInput = (props: DatePickerPrimitive.InputProps) => {
-  const [local, others] = splitProps(props, ['class']);
+  const [local, others] = splitProps(props, ['class'])
   return (
     <DatePickerPrimitive.Input
       class={cn(
@@ -34,15 +34,15 @@ const DatePickerInput = (props: DatePickerPrimitive.InputProps) => {
       )}
       {...others}
     />
-  );
-};
+  )
+}
 
 const DatePickerTrigger = (props: DatePickerPrimitive.TriggerProps) => {
-  const [local, others] = splitProps(props, ['class', 'children']);
+  const [local, others] = splitProps(props, ['class', 'children'])
 
   // prevents rendering children twice
-  const resolvedChildren = children(() => local.children);
-  const hasChildren = () => resolvedChildren.toArray().length !== 0;
+  const resolvedChildren = children(() => local.children)
+  const hasChildren = () => resolvedChildren.toArray().length !== 0
 
   return (
     <DatePickerPrimitive.Trigger
@@ -73,11 +73,11 @@ const DatePickerTrigger = (props: DatePickerPrimitive.TriggerProps) => {
         </svg>
       </Show>
     </DatePickerPrimitive.Trigger>
-  );
-};
+  )
+}
 
 const DatePickerContent = (props: DatePickerPrimitive.ContentProps) => {
-  const [local, others] = splitProps(props, ['class', 'children']);
+  const [local, others] = splitProps(props, ['class', 'children'])
 
   return (
     <DatePickerPrimitive.Content
@@ -89,30 +89,30 @@ const DatePickerContent = (props: DatePickerPrimitive.ContentProps) => {
     >
       {local.children}
     </DatePickerPrimitive.Content>
-  );
-};
+  )
+}
 
 const DatePickerView = (props: DatePickerPrimitive.ViewProps) => {
-  const [local, others] = splitProps(props, ['class']);
-  return <DatePickerPrimitive.View class={cn('space-y-4', local.class)} {...others} />;
-};
+  const [local, others] = splitProps(props, ['class'])
+  return <DatePickerPrimitive.View class={cn('space-y-4', local.class)} {...others} />
+}
 
 const DatePickerViewControl = (props: DatePickerPrimitive.ViewControlProps) => {
-  const [local, others] = splitProps(props, ['class']);
+  const [local, others] = splitProps(props, ['class'])
   return (
     <DatePickerPrimitive.ViewControl
       class={cn('flex items-center justify-between gap-4', local.class)}
       {...others}
     />
-  );
-};
+  )
+}
 
 const DatePickerPrevTrigger = (props: DatePickerPrimitive.PrevTriggerProps) => {
-  const [local, others] = splitProps(props, ['class', 'children']);
+  const [local, others] = splitProps(props, ['class', 'children'])
 
   // prevents rendering children twice
-  const resolvedChildren = children(() => local.children);
-  const hasChildren = () => resolvedChildren.toArray().length !== 0;
+  const resolvedChildren = children(() => local.children)
+  const hasChildren = () => resolvedChildren.toArray().length !== 0
 
   return (
     <DatePickerPrimitive.PrevTrigger
@@ -141,15 +141,15 @@ const DatePickerPrevTrigger = (props: DatePickerPrimitive.PrevTriggerProps) => {
         </svg>
       </Show>
     </DatePickerPrimitive.PrevTrigger>
-  );
-};
+  )
+}
 
 const DatePickerNextTrigger = (props: DatePickerPrimitive.NextTriggerProps) => {
-  const [local, others] = splitProps(props, ['class', 'children']);
+  const [local, others] = splitProps(props, ['class', 'children'])
 
   // prevents rendering children twice
-  const resolvedChildren = children(() => local.children);
-  const hasChildren = () => resolvedChildren.toArray().length !== 0;
+  const resolvedChildren = children(() => local.children)
+  const hasChildren = () => resolvedChildren.toArray().length !== 0
 
   return (
     <DatePickerPrimitive.NextTrigger
@@ -178,53 +178,53 @@ const DatePickerNextTrigger = (props: DatePickerPrimitive.NextTriggerProps) => {
         </svg>
       </Show>
     </DatePickerPrimitive.NextTrigger>
-  );
-};
+  )
+}
 
 const DatePickerViewTrigger = (props: DatePickerPrimitive.ViewTriggerProps) => {
-  const [local, others] = splitProps(props, ['class']);
+  const [local, others] = splitProps(props, ['class'])
   return (
     <DatePickerPrimitive.ViewTrigger
       class={cn(buttonVariants({ variant: 'ghost' }), 'h-7', local.class)}
       {...others}
     />
-  );
-};
+  )
+}
 
 const DatePickerRangeText = (props: DatePickerPrimitive.RangeTextProps) => {
-  const [local, others] = splitProps(props, ['class']);
+  const [local, others] = splitProps(props, ['class'])
   return (
     <DatePickerPrimitive.RangeText class={cn('text-sm font-medium', local.class)} {...others} />
-  );
-};
+  )
+}
 
 const DatePickerTable = (props: DatePickerPrimitive.TableProps) => {
-  const [local, others] = splitProps(props, ['class']);
+  const [local, others] = splitProps(props, ['class'])
   return (
     <DatePickerPrimitive.Table
       class={cn('w-full border-collapse space-y-1', local.class)}
       {...others}
     />
-  );
-};
+  )
+}
 
 const DatePickerTableRow = (props: DatePickerPrimitive.TableRowProps) => {
-  const [local, others] = splitProps(props, ['class']);
-  return <DatePickerPrimitive.TableRow class={cn('mt-2 flex w-full', local.class)} {...others} />;
-};
+  const [local, others] = splitProps(props, ['class'])
+  return <DatePickerPrimitive.TableRow class={cn('mt-2 flex w-full', local.class)} {...others} />
+}
 
 const DatePickerTableHeader = (props: DatePickerPrimitive.TableHeaderProps) => {
-  const [local, others] = splitProps(props, ['class']);
+  const [local, others] = splitProps(props, ['class'])
   return (
     <DatePickerPrimitive.TableHeader
       class={cn('text-muted-foreground w-8 flex-1 text-[0.8rem] font-normal', local.class)}
       {...others}
     />
-  );
-};
+  )
+}
 
 const DatePickerTableCell = (props: DatePickerPrimitive.TableCellProps) => {
-  const [local, others] = splitProps(props, ['class']);
+  const [local, others] = splitProps(props, ['class'])
   return (
     <DatePickerPrimitive.TableCell
       class={cn(
@@ -233,11 +233,11 @@ const DatePickerTableCell = (props: DatePickerPrimitive.TableCellProps) => {
       )}
       {...others}
     />
-  );
-};
+  )
+}
 
 const DatePickerTableCellTrigger = (props: DatePickerPrimitive.TableCellTriggerProps) => {
-  const [local, others] = splitProps(props, ['class']);
+  const [local, others] = splitProps(props, ['class'])
   return (
     <DatePickerPrimitive.TableCellTrigger
       class={cn(
@@ -253,8 +253,8 @@ const DatePickerTableCellTrigger = (props: DatePickerPrimitive.TableCellTriggerP
       )}
       {...others}
     />
-  );
-};
+  )
+}
 
 export {
   DatePicker,
@@ -280,4 +280,4 @@ export {
   DatePickerViewControl,
   DatePickerViewTrigger,
   DatePickerYearSelect,
-};
+}

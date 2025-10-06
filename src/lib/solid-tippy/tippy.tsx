@@ -8,50 +8,50 @@ import {
   onCleanup,
   splitProps,
   untrack,
-} from 'solid-js';
-import makeTippy, { Instance, Props } from 'tippy.js';
-import makeHeadlessTippy from 'tippy.js/headless';
+} from 'solid-js'
+import makeTippy, { Instance, Props } from 'tippy.js'
+import makeHeadlessTippy from 'tippy.js/headless'
 
 export interface TippyOptions {
-  disabled?: boolean;
-  hidden?: boolean;
-  props?: Partial<Props>;
+  disabled?: boolean
+  hidden?: boolean
+  props?: Partial<Props>
 }
 
 export function tippy<T extends Element>(target: T, opts: () => TippyOptions | undefined): void {
   createEffect(() => {
-    const options = opts();
+    const options = opts()
     const instance = makeTippy(
       target,
       untrack(() => options?.props)
-    );
+    )
 
     createComputed(() => {
       if (options?.disabled) {
-        instance.disable();
+        instance.disable()
       } else {
-        instance.enable();
+        instance.enable()
       }
-    });
+    })
 
     createComputed(() => {
       if (options?.hidden) {
-        instance.hide();
+        instance.hide()
       } else {
-        instance.show();
+        instance.show()
       }
-    });
+    })
 
     createComputed(() => {
       instance.setProps({
         ...(options?.props ?? {}),
-      });
-    });
+      })
+    })
 
     onCleanup(() => {
-      instance.destroy();
-    });
-  });
+      instance.destroy()
+    })
+  })
 }
 
 export function tippyHeadless<T extends Element>(
@@ -59,171 +59,171 @@ export function tippyHeadless<T extends Element>(
   opts: () => TippyOptions | undefined
 ): void {
   createEffect(() => {
-    const options = opts();
+    const options = opts()
     const instance = makeHeadlessTippy(
       target,
       untrack(() => options?.props)
-    );
+    )
 
     createComputed(() => {
       if (options?.disabled) {
-        instance.disable();
+        instance.disable()
       } else {
-        instance.enable();
+        instance.enable()
       }
-    });
+    })
 
     createComputed(() => {
       if (options?.hidden) {
-        instance.hide();
+        instance.hide()
       } else {
-        instance.show();
+        instance.show()
       }
-    });
+    })
 
     createComputed(() => {
       instance.setProps({
         ...(options?.props ?? {}),
-      });
-    });
+      })
+    })
 
     onCleanup(() => {
-      instance.destroy();
-    });
-  });
+      instance.destroy()
+    })
+  })
 }
 
 export function useTippy<T extends Element>(
   target: () => T | undefined | null,
   options?: TippyOptions
 ): () => Instance | undefined {
-  const [current, setCurrent] = createSignal<Instance>();
+  const [current, setCurrent] = createSignal<Instance>()
 
   createEffect(() => {
-    const currentTarget = target();
+    const currentTarget = target()
     if (currentTarget) {
       const instance = makeTippy(
         currentTarget,
         untrack(() => options?.props)
-      );
+      )
 
-      setCurrent(instance);
+      setCurrent(instance)
 
       createComputed(() => {
         if (options?.disabled) {
-          instance.disable();
+          instance.disable()
         } else {
-          instance.enable();
+          instance.enable()
         }
-      });
+      })
 
       createComputed(() => {
         if (options?.hidden) {
-          instance.hide();
+          instance.hide()
         } else {
-          instance.show();
+          instance.show()
         }
-      });
+      })
 
       createComputed(() => {
         instance.setProps({
           ...(options?.props ?? {}),
-        });
-      });
+        })
+      })
 
       onCleanup(() => {
-        instance.destroy();
-      });
+        instance.destroy()
+      })
     }
-  });
+  })
 
-  return () => current();
+  return () => current()
 }
 
 export function useTippyHeadless<T extends Element>(
   target: () => T | undefined | null,
   options?: TippyOptions
 ): () => Instance | undefined {
-  const [current, setCurrent] = createSignal<Instance>();
+  const [current, setCurrent] = createSignal<Instance>()
 
   createEffect(() => {
-    const currentTarget = target();
+    const currentTarget = target()
     if (currentTarget) {
       const instance = makeHeadlessTippy(
         currentTarget,
         untrack(() => options?.props)
-      );
+      )
 
-      setCurrent(instance);
+      setCurrent(instance)
 
       createComputed(() => {
         if (options?.disabled) {
-          instance.disable();
+          instance.disable()
         } else {
-          instance.enable();
+          instance.enable()
         }
-      });
+      })
 
       createComputed(() => {
         if (options?.hidden) {
-          instance.hide();
+          instance.hide()
         } else {
-          instance.show();
+          instance.show()
         }
-      });
+      })
 
       createComputed(() => {
         instance.setProps({
           ...(options?.props ?? {}),
-        });
-      });
+        })
+      })
 
       onCleanup(() => {
-        instance.destroy();
-      });
+        instance.destroy()
+      })
     }
-  });
+  })
 
-  return () => current();
+  return () => current()
 }
 
 type CustomTippyOptions = {
-  disabled?: boolean;
-  hidden?: boolean;
-  open?: boolean;
-  content?: string | JSX.Element;
-  props?: Omit<Partial<Props>, 'content'>;
-};
+  disabled?: boolean
+  hidden?: boolean
+  open?: boolean
+  content?: string | JSX.Element
+  props?: Omit<Partial<Props>, 'content'>
+}
 
 export function Tippy(props: CustomTippyOptions & { children: JSX.Element }) {
   // Separate component-specific props from those passed to Tippy.js.
-  const [local, tippyProps] = splitProps(props, ['children', 'content', 'open']);
+  const [local, tippyProps] = splitProps(props, ['children', 'content', 'open'])
 
-  const resolvedChildren = children(() => local.children);
-  const [trigger, setTrigger] = createSignal<HTMLElement>();
+  const resolvedChildren = children(() => local.children)
+  const [trigger, setTrigger] = createSignal<HTMLElement>()
 
   createEffect(() => {
     // Tippy is attached to the first DOM element found in the children.
-    const child = resolvedChildren.toArray()[0];
+    const child = resolvedChildren.toArray()[0]
     if (child instanceof HTMLElement) {
-      setTrigger(child);
+      setTrigger(child)
     }
-  });
+  })
 
   // Create a signal to hold the DOM element for the tooltip content.
-  const [contentContainer, setContentContainer] = createSignal<HTMLDivElement>();
+  const [contentContainer, setContentContainer] = createSignal<HTMLDivElement>()
 
   useTippy(trigger, {
     // Pass reactive getters for Tippy options to `useTippy`.
     // This ensures that changes to these props update the tippy instance.
     get disabled() {
-      return tippyProps.disabled;
+      return tippyProps.disabled
     },
     get hidden() {
       if (local.open !== undefined) {
-        return !local.open;
+        return !local.open
       }
-      return tippyProps.hidden ?? true;
+      return tippyProps.hidden ?? true
     },
     get props() {
       return {
@@ -235,9 +235,9 @@ export function Tippy(props: CustomTippyOptions & { children: JSX.Element }) {
         content: contentContainer(),
         // When open is explicitly provided, disable trigger events
         ...(local.open !== undefined && { trigger: 'manual', hideOnClick: false }),
-      } satisfies TippyOptions['props'];
+      } satisfies TippyOptions['props']
     },
-  });
+  })
 
   return (
     <>
@@ -252,5 +252,5 @@ export function Tippy(props: CustomTippyOptions & { children: JSX.Element }) {
         <div ref={setContentContainer}>{local.content}</div>
       </div>
     </>
-  );
+  )
 }

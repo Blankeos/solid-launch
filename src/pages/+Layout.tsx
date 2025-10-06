@@ -1,12 +1,12 @@
-import { FlowProps } from 'solid-js';
+import { FlowProps } from 'solid-js'
 
 // CSS
-import '@/lib/solid-tippy/tippy.css';
-import '@/styles/app.css';
-import '@/styles/bprogress.css';
+import '@/lib/solid-tippy/tippy.css'
+import '@/styles/app.css'
+import '@/styles/bprogress.css'
 
-import Wrapper from '@/components/layouts/wrapper';
-import { useMetadata } from 'vike-metadata-solid';
+import Wrapper from '@/components/layouts/wrapper'
+import { useMetadata } from 'vike-metadata-solid'
 
 useMetadata.setGlobalDefaults({
   title: 'Home | Solid Launch',
@@ -24,10 +24,10 @@ useMetadata.setGlobalDefaults({
       <>
         <link rel="icon" href="/icon-logo.svg" />
       </>
-    );
+    )
   },
-});
+})
 
 export default function RootLayout(props: FlowProps) {
-  return <Wrapper>{props.children}</Wrapper>;
+  return <Wrapper>{props.children}</Wrapper>
 }

@@ -1,20 +1,20 @@
-import type { ValidComponent } from 'solid-js';
-import { children, createMemo, Match, Show, splitProps, Switch } from 'solid-js';
+import type { ValidComponent } from 'solid-js'
+import { children, createMemo, Match, Show, splitProps, Switch } from 'solid-js'
 
-import * as CheckboxPrimitive from '@kobalte/core/checkbox';
-import type { PolymorphicProps } from '@kobalte/core/polymorphic';
+import * as CheckboxPrimitive from '@kobalte/core/checkbox'
+import type { PolymorphicProps } from '@kobalte/core/polymorphic'
 
-import { cn } from '@/utils/cn';
-import { JSX } from 'solid-js/jsx-runtime';
-import { Label } from './label';
+import { cn } from '@/utils/cn'
+import { JSX } from 'solid-js/jsx-runtime'
+import { Label } from './label'
 
 type CheckboxRootProps<T extends ValidComponent = 'div'> =
-  CheckboxPrimitive.CheckboxRootProps<T> & { class?: string | undefined };
+  CheckboxPrimitive.CheckboxRootProps<T> & { class?: string | undefined }
 
 const Checkbox = <T extends ValidComponent = 'div'>(
   props: PolymorphicProps<T, CheckboxRootProps<T>>
 ) => {
-  const [local, others] = splitProps(props as CheckboxRootProps, ['class']);
+  const [local, others] = splitProps(props as CheckboxRootProps, ['class'])
 
   return (
     <CheckboxPrimitive.Root
@@ -57,20 +57,20 @@ const Checkbox = <T extends ValidComponent = 'div'>(
         </CheckboxPrimitive.Indicator>
       </CheckboxPrimitive.Control>
     </CheckboxPrimitive.Root>
-  );
-};
+  )
+}
 
-export { Checkbox };
+export { Checkbox }
 
 // ---
 
 type CheckboxCompProps<T extends ValidComponent = 'div'> = {
-  label?: JSX.Element;
-  description?: JSX.Element;
-  id?: string;
-  labelProps?: JSX.HTMLAttributes<HTMLLabelElement>;
-  descriptionProps?: JSX.HTMLAttributes<HTMLParagraphElement>;
-} & Omit<CheckboxRootProps<T>, 'id'>;
+  label?: JSX.Element
+  description?: JSX.Element
+  id?: string
+  labelProps?: JSX.HTMLAttributes<HTMLLabelElement>
+  descriptionProps?: JSX.HTMLAttributes<HTMLParagraphElement>
+} & Omit<CheckboxRootProps<T>, 'id'>
 
 export const CheckboxComp = <T extends ValidComponent = 'div'>(
   props: PolymorphicProps<T, CheckboxCompProps<T>>
@@ -81,10 +81,10 @@ export const CheckboxComp = <T extends ValidComponent = 'div'>(
     'id',
     'labelProps',
     'descriptionProps',
-  ]);
-  const id = createMemo(() => local.id || `checkbox-${Math.random().toString(36).slice(2)}`);
+  ])
+  const id = createMemo(() => local.id || `checkbox-${Math.random().toString(36).slice(2)}`)
 
-  const label = children(() => local.label);
+  const label = children(() => local.label)
 
   return (
     <div class="flex items-start space-x-2">
@@ -109,5 +109,5 @@ export const CheckboxComp = <T extends ValidComponent = 'div'>(
         )}
       </div>
     </div>
-  );
-};
+  )
+}

@@ -1,30 +1,30 @@
-import type { Component, ComponentProps, JSX, ValidComponent } from 'solid-js';
-import { For, splitProps } from 'solid-js';
+import type { Component, ComponentProps, JSX, ValidComponent } from 'solid-js'
+import { For, splitProps } from 'solid-js'
 
-import * as DropdownMenuPrimitive from '@kobalte/core/dropdown-menu';
-import { PolymorphicProps } from '@kobalte/core/polymorphic';
+import * as DropdownMenuPrimitive from '@kobalte/core/dropdown-menu'
+import { PolymorphicProps } from '@kobalte/core/polymorphic'
 
-import { cn } from '@/utils/cn';
+import { cn } from '@/utils/cn'
 
-const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
-const DropdownMenuPortal = DropdownMenuPrimitive.Portal;
-const DropdownMenuSub = DropdownMenuPrimitive.Sub;
-const DropdownMenuGroup = DropdownMenuPrimitive.Group;
-const DropdownMenuRadioGroup = DropdownMenuPrimitive.RadioGroup;
+const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger
+const DropdownMenuPortal = DropdownMenuPrimitive.Portal
+const DropdownMenuSub = DropdownMenuPrimitive.Sub
+const DropdownMenuGroup = DropdownMenuPrimitive.Group
+const DropdownMenuRadioGroup = DropdownMenuPrimitive.RadioGroup
 
 const DropdownMenu: Component<DropdownMenuPrimitive.DropdownMenuRootProps> = (props) => {
-  return <DropdownMenuPrimitive.Root gutter={4} {...props} />;
-};
+  return <DropdownMenuPrimitive.Root gutter={4} {...props} />
+}
 
 type DropdownMenuContentProps<T extends ValidComponent = 'div'> =
   DropdownMenuPrimitive.DropdownMenuContentProps<T> & {
-    class?: string | undefined;
-  };
+    class?: string | undefined
+  }
 
 const DropdownMenuContent = <T extends ValidComponent = 'div'>(
   props: PolymorphicProps<T, DropdownMenuContentProps<T>>
 ) => {
-  const [, rest] = splitProps(props as DropdownMenuContentProps, ['class']);
+  const [, rest] = splitProps(props as DropdownMenuContentProps, ['class'])
   return (
     <DropdownMenuPrimitive.Portal>
       <DropdownMenuPrimitive.Content
@@ -35,18 +35,18 @@ const DropdownMenuContent = <T extends ValidComponent = 'div'>(
         {...rest}
       />
     </DropdownMenuPrimitive.Portal>
-  );
-};
+  )
+}
 
 type DropdownMenuItemProps<T extends ValidComponent = 'div'> =
   DropdownMenuPrimitive.DropdownMenuItemProps<T> & {
-    class?: string | undefined;
-  };
+    class?: string | undefined
+  }
 
 const DropdownMenuItem = <T extends ValidComponent = 'div'>(
   props: PolymorphicProps<T, DropdownMenuItemProps<T>>
 ) => {
-  const [, rest] = splitProps(props as DropdownMenuItemProps, ['class']);
+  const [, rest] = splitProps(props as DropdownMenuItemProps, ['class'])
   return (
     <DropdownMenuPrimitive.Item
       class={cn(
@@ -55,51 +55,51 @@ const DropdownMenuItem = <T extends ValidComponent = 'div'>(
       )}
       {...rest}
     />
-  );
-};
+  )
+}
 
 const DropdownMenuShortcut: Component<ComponentProps<'span'>> = (props) => {
-  const [, rest] = splitProps(props, ['class']);
-  return <span class={cn('ml-auto text-xs tracking-widest opacity-60', props.class)} {...rest} />;
-};
+  const [, rest] = splitProps(props, ['class'])
+  return <span class={cn('ml-auto text-xs tracking-widest opacity-60', props.class)} {...rest} />
+}
 
 const DropdownMenuLabel: Component<ComponentProps<'div'> & { inset?: boolean }> = (props) => {
-  const [, rest] = splitProps(props, ['class', 'inset']);
+  const [, rest] = splitProps(props, ['class', 'inset'])
   return (
     <div
       class={cn('px-2 py-1.5 text-sm font-semibold', props.inset && 'pl-8', props.class)}
       {...rest}
     />
-  );
-};
+  )
+}
 
 type DropdownMenuSeparatorProps<T extends ValidComponent = 'hr'> =
   DropdownMenuPrimitive.DropdownMenuSeparatorProps<T> & {
-    class?: string | undefined;
-  };
+    class?: string | undefined
+  }
 
 const DropdownMenuSeparator = <T extends ValidComponent = 'hr'>(
   props: PolymorphicProps<T, DropdownMenuSeparatorProps<T>>
 ) => {
-  const [, rest] = splitProps(props as DropdownMenuSeparatorProps, ['class']);
+  const [, rest] = splitProps(props as DropdownMenuSeparatorProps, ['class'])
   return (
     <DropdownMenuPrimitive.Separator
       class={cn('bg-muted -mx-1 my-1 h-px', props.class)}
       {...rest}
     />
-  );
-};
+  )
+}
 
 type DropdownMenuSubTriggerProps<T extends ValidComponent = 'div'> =
   DropdownMenuPrimitive.DropdownMenuSubTriggerProps<T> & {
-    class?: string | undefined;
-    children?: JSX.Element;
-  };
+    class?: string | undefined
+    children?: JSX.Element
+  }
 
 const DropdownMenuSubTrigger = <T extends ValidComponent = 'div'>(
   props: PolymorphicProps<T, DropdownMenuSubTriggerProps<T>>
 ) => {
-  const [, rest] = splitProps(props as DropdownMenuSubTriggerProps, ['class', 'children']);
+  const [, rest] = splitProps(props as DropdownMenuSubTriggerProps, ['class', 'children'])
   return (
     <DropdownMenuPrimitive.SubTrigger
       class={cn(
@@ -122,18 +122,18 @@ const DropdownMenuSubTrigger = <T extends ValidComponent = 'div'>(
         <path d="M9 6l6 6l-6 6" />
       </svg>
     </DropdownMenuPrimitive.SubTrigger>
-  );
-};
+  )
+}
 
 type DropdownMenuSubContentProps<T extends ValidComponent = 'div'> =
   DropdownMenuPrimitive.DropdownMenuSubContentProps<T> & {
-    class?: string | undefined;
-  };
+    class?: string | undefined
+  }
 
 const DropdownMenuSubContent = <T extends ValidComponent = 'div'>(
   props: PolymorphicProps<T, DropdownMenuSubContentProps<T>>
 ) => {
-  const [, rest] = splitProps(props as DropdownMenuSubContentProps, ['class']);
+  const [, rest] = splitProps(props as DropdownMenuSubContentProps, ['class'])
   return (
     <DropdownMenuPrimitive.SubContent
       class={cn(
@@ -142,19 +142,19 @@ const DropdownMenuSubContent = <T extends ValidComponent = 'div'>(
       )}
       {...rest}
     />
-  );
-};
+  )
+}
 
 type DropdownMenuCheckboxItemProps<T extends ValidComponent = 'div'> =
   DropdownMenuPrimitive.DropdownMenuCheckboxItemProps<T> & {
-    class?: string | undefined;
-    children?: JSX.Element;
-  };
+    class?: string | undefined
+    children?: JSX.Element
+  }
 
 const DropdownMenuCheckboxItem = <T extends ValidComponent = 'div'>(
   props: PolymorphicProps<T, DropdownMenuCheckboxItemProps<T>>
 ) => {
-  const [, rest] = splitProps(props as DropdownMenuCheckboxItemProps, ['class', 'children']);
+  const [, rest] = splitProps(props as DropdownMenuCheckboxItemProps, ['class', 'children'])
   return (
     <DropdownMenuPrimitive.CheckboxItem
       class={cn(
@@ -181,36 +181,36 @@ const DropdownMenuCheckboxItem = <T extends ValidComponent = 'div'>(
       </span>
       {props.children}
     </DropdownMenuPrimitive.CheckboxItem>
-  );
-};
+  )
+}
 
 type DropdownMenuGroupLabelProps<T extends ValidComponent = 'span'> =
   DropdownMenuPrimitive.DropdownMenuGroupLabelProps<T> & {
-    class?: string | undefined;
-  };
+    class?: string | undefined
+  }
 
 const DropdownMenuGroupLabel = <T extends ValidComponent = 'span'>(
   props: PolymorphicProps<T, DropdownMenuGroupLabelProps<T>>
 ) => {
-  const [, rest] = splitProps(props as DropdownMenuGroupLabelProps, ['class']);
+  const [, rest] = splitProps(props as DropdownMenuGroupLabelProps, ['class'])
   return (
     <DropdownMenuPrimitive.GroupLabel
       class={cn('px-2 py-1.5 text-sm font-semibold', props.class)}
       {...rest}
     />
-  );
-};
+  )
+}
 
 type DropdownMenuRadioItemProps<T extends ValidComponent = 'div'> =
   DropdownMenuPrimitive.DropdownMenuRadioItemProps<T> & {
-    class?: string | undefined;
-    children?: JSX.Element;
-  };
+    class?: string | undefined
+    children?: JSX.Element
+  }
 
 const DropdownMenuRadioItem = <T extends ValidComponent = 'div'>(
   props: PolymorphicProps<T, DropdownMenuRadioItemProps<T>>
 ) => {
-  const [, rest] = splitProps(props as DropdownMenuRadioItemProps, ['class', 'children']);
+  const [, rest] = splitProps(props as DropdownMenuRadioItemProps, ['class', 'children'])
   return (
     <DropdownMenuPrimitive.RadioItem
       class={cn(
@@ -237,8 +237,8 @@ const DropdownMenuRadioItem = <T extends ValidComponent = 'div'>(
       </span>
       {props.children}
     </DropdownMenuPrimitive.RadioItem>
-  );
-};
+  )
+}
 
 export {
   DropdownMenu,
@@ -257,39 +257,39 @@ export {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-};
+}
 
 // ---
 
 type OptionItem = {
-  itemId: string;
-  itemDisplay?: JSX.Element;
-  itemOnSelect?: (id: string) => void;
-  itemTip?: JSX.Element;
-  hide?: boolean;
-};
+  itemId: string
+  itemDisplay?: JSX.Element
+  itemOnSelect?: (id: string) => void
+  itemTip?: JSX.Element
+  hide?: boolean
+}
 
-type OptionSeparator = { separator: true };
+type OptionSeparator = { separator: true }
 
-type OptionLabel = { label: JSX.Element };
+type OptionLabel = { label: JSX.Element }
 
 type OptionSub = {
-  subTrigger: JSX.Element;
-  subOptions: DropdownMenuOption[];
-};
+  subTrigger: JSX.Element
+  subOptions: DropdownMenuOption[]
+}
 
-export type DropdownMenuOption = OptionItem | OptionSeparator | OptionLabel | OptionSub;
+export type DropdownMenuOption = OptionItem | OptionSeparator | OptionLabel | OptionSub
 
 const _DropdownMenuSubComp: Component<{ options: DropdownMenuOption[] }> = (props) => {
   return (
     <For each={props.options}>
       {(option) => {
         if ('separator' in option && option.separator === true) {
-          return <DropdownMenuSeparator />;
+          return <DropdownMenuSeparator />
         } else if ('label' in option) {
-          return <DropdownMenuLabel>{option.label}</DropdownMenuLabel>;
+          return <DropdownMenuLabel>{option.label}</DropdownMenuLabel>
         } else if ('subTrigger' in option && 'subOptions' in option) {
-          const sub = option as OptionSub;
+          const sub = option as OptionSub
           return (
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>{sub.subTrigger}</DropdownMenuSubTrigger>
@@ -299,10 +299,10 @@ const _DropdownMenuSubComp: Component<{ options: DropdownMenuOption[] }> = (prop
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
             </DropdownMenuSub>
-          );
+          )
         } else {
-          const item = option as OptionItem;
-          if (item.hide) return null;
+          const item = option as OptionItem
+          if (item.hide) return null
           return (
             <DropdownMenuItem onSelect={() => item.itemOnSelect?.(item.itemId)}>
               {item.itemDisplay}
@@ -310,19 +310,19 @@ const _DropdownMenuSubComp: Component<{ options: DropdownMenuOption[] }> = (prop
                 <DropdownMenuShortcut class="pl-2">{item.itemTip}</DropdownMenuShortcut>
               )}
             </DropdownMenuItem>
-          );
+          )
         }
       }}
     </For>
-  );
-};
+  )
+}
 
 export const DropdownMenuComp: Component<
   ComponentProps<typeof DropdownMenu> & {
-    options: DropdownMenuOption[];
+    options: DropdownMenuOption[]
   }
 > = (props) => {
-  const [, rest] = splitProps(props, ['options', 'children']);
+  const [, rest] = splitProps(props, ['options', 'children'])
   return (
     <DropdownMenu {...rest}>
       <DropdownMenuTrigger>{props.children}</DropdownMenuTrigger>
@@ -330,5 +330,5 @@ export const DropdownMenuComp: Component<
         <_DropdownMenuSubComp options={props.options} />
       </DropdownMenuContent>
     </DropdownMenu>
-  );
-};
+  )
+}

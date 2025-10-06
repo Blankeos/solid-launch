@@ -5,7 +5,7 @@ import {
   useContext,
   type Accessor,
   type Setter,
-} from 'solid-js';
+} from 'solid-js'
 
 // ===========================================================================
 // Context
@@ -13,12 +13,12 @@ import {
 export const CounterContext = createContext({
   count: 0 as unknown as Accessor<number>,
   setCount: ((_newCount: number) => {}) as Setter<number>,
-});
+})
 
 // ===========================================================================
 // Hook
 // ===========================================================================
-export const useCounterContext = () => useContext(CounterContext);
+export const useCounterContext = () => useContext(CounterContext)
 
 // ===========================================================================
 // Provider
@@ -26,7 +26,7 @@ export const useCounterContext = () => useContext(CounterContext);
 
 /** This is an example context paradigm you can use. */
 export const CounterContextProvider: FlowComponent = (props) => {
-  const [count, setCount] = createSignal(0);
+  const [count, setCount] = createSignal(0)
 
   return (
     <CounterContext.Provider
@@ -37,5 +37,5 @@ export const CounterContextProvider: FlowComponent = (props) => {
     >
       {props.children}
     </CounterContext.Provider>
-  );
-};
+  )
+}

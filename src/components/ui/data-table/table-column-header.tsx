@@ -1,23 +1,23 @@
-import type { ComponentProps } from 'solid-js';
-import { Match, Show, Switch } from 'solid-js';
+import type { ComponentProps } from 'solid-js'
+import { Match, Show, Switch } from 'solid-js'
 
-import type { Column } from '@tanstack/solid-table';
+import type { Column } from '@tanstack/solid-table'
 
-import { IconArrowDown, IconArrowUp, IconChevronsUpDown, IconEyeOff } from '@/assets/icons';
-import { Button } from '@/components/ui/button';
+import { IconArrowDown, IconArrowUp, IconChevronsUpDown, IconEyeOff } from '@/assets/icons'
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { cn } from '@/utils/cn';
+} from '@/components/ui/dropdown-menu'
+import { cn } from '@/utils/cn'
 
 type TableColumnHeaderProps<TData, TValue> = ComponentProps<'div'> & {
-  column: Column<TData, TValue>;
-  title: string;
-};
+  column: Column<TData, TValue>
+  title: string
+}
 
 export function TableColumnHeader<TData, TValue>(props: TableColumnHeaderProps<TData, TValue>) {
   return (
@@ -61,5 +61,5 @@ export function TableColumnHeader<TData, TValue>(props: TableColumnHeaderProps<T
         </DropdownMenu>
       </div>
     </Show>
-  );
+  )
 }

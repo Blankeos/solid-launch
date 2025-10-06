@@ -28,20 +28,20 @@
 // - External trigger a11y docs - added.
 // ----------------------------------------------------------------
 
-import { cn } from '@/utils/cn';
-import { type JSX, children, createSignal, onCleanup, onMount, splitProps } from 'solid-js';
+import { cn } from '@/utils/cn'
+import { type JSX, children, createSignal, onCleanup, onMount, splitProps } from 'solid-js'
 
 export interface CollapsibleProps extends JSX.HTMLAttributes<HTMLDivElement> {
-  open?: boolean;
+  open?: boolean
   /**
    * Applied to the collapsing wrapper div (the element whose height changes). Generally no need to touch this besides changing the transition duration.
    */
-  containerClass?: string;
+  containerClass?: string
   /**
    * Applied to the content div (the measured inner wrapper)
    */
-  class?: string;
-  children: JSX.Element;
+  class?: string
+  children: JSX.Element
 }
 
 /*
@@ -70,35 +70,35 @@ export interface CollapsibleProps extends JSX.HTMLAttributes<HTMLDivElement> {
  *        </button>
  */
 export function Collapsible(props: CollapsibleProps) {
-  let innerRef: HTMLDivElement | undefined;
-  let lastHeight = 0;
+  let innerRef: HTMLDivElement | undefined
+  let lastHeight = 0
 
-  const [local, others] = splitProps(props, ['open', 'containerClass', 'class', 'children']);
-  const [height, setHeight] = createSignal<number | string>('auto');
+  const [local, others] = splitProps(props, ['open', 'containerClass', 'class', 'children'])
+  const [height, setHeight] = createSignal<number | string>('auto')
 
   // Observe the *inner* element’s size so any content change is reflected
   const resizeHandler = () => {
     if (innerRef) {
-      lastHeight = innerRef.scrollHeight;
-      setHeight(lastHeight); // keep latest value when open
+      lastHeight = innerRef.scrollHeight
+      setHeight(lastHeight) // keep latest value when open
     }
-  };
+  }
 
-  let ro: ResizeObserver;
+  let ro: ResizeObserver
   onMount(() => {
-    if (!innerRef) return;
-    ro = new ResizeObserver(resizeHandler);
-    ro.observe(innerRef);
-    resizeHandler(); // ensure initial read
-  });
+    if (!innerRef) return
+    ro = new ResizeObserver(resizeHandler)
+    ro.observe(innerRef)
+    resizeHandler() // ensure initial read
+  })
 
-  onCleanup(() => ro?.disconnect());
+  onCleanup(() => ro?.disconnect())
 
   // Select what to render based on open state
   // (invoke children here once so ResizeObserver sees static children of inner)
-  const content = children(() => local.children);
+  const content = children(() => local.children)
 
-  const heightStyle = () => (local.open ? `${height()}px` : '0px');
+  const heightStyle = () => (local.open ? `${height()}px` : '0px')
   return (
     <div
       style={{ height: heightStyle() }}
@@ -111,5 +111,5 @@ export function Collapsible(props: CollapsibleProps) {
         {content()}
       </div>
     </div>
-  );
+  )
 }

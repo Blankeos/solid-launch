@@ -100,35 +100,35 @@ import {
   JSX,
   onCleanup,
   useContext,
-} from 'solid-js';
+} from 'solid-js'
 
-import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
+import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine'
 import {
   draggable,
   dropTargetForElements,
   monitorForElements,
-} from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+} from '@atlaskit/pragmatic-drag-and-drop/element/adapter'
 
 /* ---------- 1. Context ---------- */
 
 export type OnDropEvent = {
-  sourceId: string | number;
-  targetId: string | number;
+  sourceId: string | number
+  targetId: string | number
   /** Never typesafe, there's no way to infer from internal items. Make sure to cast. */
-  sourceData: any;
+  sourceData: any
   /** Never typesafe, there's no way to infer from internal items. Make sure to cast. */
-  targetData: any;
+  targetData: any
   /** Mostly no point, it's the same anyway as instanceId anyway. Just for debugging. */
-  sourceInstanceId: string | null;
+  sourceInstanceId: string | null
   /** Mostly no point, it's the same anyway as instanceId anyway. Just for debugging. */
-  targetInstanceId: string | null;
-};
+  targetInstanceId: string | null
+}
 
-export type OnDropHandler = (event: OnDropEvent) => void;
+export type OnDropHandler = (event: OnDropEvent) => void
 
 type DragAndDropContextValue = {
   /** Unique identifier for this drag-and-drop instance. */
-  instanceId: string;
+  instanceId: string
   /**
    * In-memory lookup registry for all draggable and droppable components in this provider.
    * The registry serves as a central reference that maps component IDs to their full data payloads.
@@ -138,50 +138,50 @@ type DragAndDropContextValue = {
    * This ensures the consumer's `onDrop` callback receives the complete contextual information
    * needed to properly handle the drag-and-drop operation.
    */
-  registry: Map<string | number, { id: string | number; data: any }>;
-};
+  registry: Map<string | number, { id: string | number; data: any }>
+}
 
-const DragAndDropContext = createContext<DragAndDropContextValue>();
+const DragAndDropContext = createContext<DragAndDropContextValue>()
 
 export const useDragAndDropContext = () => {
-  const ctx = useContext(DragAndDropContext);
-  if (!ctx) throw new Error('useDragAndDropContext must be used within <DragAndDropProvider>');
-  return ctx;
-};
+  const ctx = useContext(DragAndDropContext)
+  if (!ctx) throw new Error('useDragAndDropContext must be used within <DragAndDropProvider>')
+  return ctx
+}
 
 type DragAndDropProviderProps = {
   /** Unique identifier for this drag-and-drop instance. */
-  instanceId?: string;
-  onDrop?: OnDropHandler;
-  onDropTargetChange?: OnDropHandler;
-};
+  instanceId?: string
+  onDrop?: OnDropHandler
+  onDropTargetChange?: OnDropHandler
+}
 
 export const DragAndDropProvider = (props: FlowProps<DragAndDropProviderProps>) => {
   const instanceId = createMemo(
     () => props.instanceId ?? `draginstance-${Math.random().toString(36).substring(2, 9)}`
-  );
+  )
 
-  let registry = new Map<string | number, { id: string | number; data: any }>();
+  let registry = new Map<string | number, { id: string | number; data: any }>()
 
   createEffect(() => {
     onCleanup(
       monitorForElements({
         canMonitor: ({ source }) => {
-          const s = source.data as { instanceId: string };
-          return s.instanceId === instanceId();
+          const s = source.data as { instanceId: string }
+          return s.instanceId === instanceId()
         },
         onDropTargetChange: ({ source, location }) => {
-          if (!props.onDropTargetChange) return;
-          const target = location.current.dropTargets[0];
-          if (!target) return;
+          if (!props.onDropTargetChange) return
+          const target = location.current.dropTargets[0]
+          if (!target) return
 
-          const sourceId = (source.data as { id: string | number }).id;
-          const targetId = (target.data as { id: string | number }).id;
+          const sourceId = (source.data as { id: string | number }).id
+          const targetId = (target.data as { id: string | number }).id
 
-          if (sourceId === undefined || targetId === undefined) return;
+          if (sourceId === undefined || targetId === undefined) return
 
-          const sourceEntry = registry.get(sourceId);
-          const targetEntry = registry.get(targetId);
+          const sourceEntry = registry.get(sourceId)
+          const targetEntry = registry.get(targetId)
 
           props.onDropTargetChange({
             sourceId,
@@ -190,19 +190,19 @@ export const DragAndDropProvider = (props: FlowProps<DragAndDropProviderProps>) 
             targetData: targetEntry?.data,
             sourceInstanceId: (source.data as { instanceId: string }).instanceId,
             targetInstanceId: instanceId(),
-          });
+          })
         },
         onDrop: ({ source, location }) => {
-          const target = location.current.dropTargets[0];
-          if (!target) return;
+          const target = location.current.dropTargets[0]
+          if (!target) return
 
-          const sourceId = (source.data as { id: string | number }).id;
-          const targetId = (target.data as { id: string | number }).id;
+          const sourceId = (source.data as { id: string | number }).id
+          const targetId = (target.data as { id: string | number }).id
 
-          if (sourceId === undefined || targetId === undefined) return;
+          if (sourceId === undefined || targetId === undefined) return
 
-          const sourceEntry = registry.get(sourceId);
-          const targetEntry = registry.get(targetId);
+          const sourceEntry = registry.get(sourceId)
+          const targetEntry = registry.get(targetId)
 
           props.onDrop?.({
             sourceId,
@@ -211,27 +211,27 @@ export const DragAndDropProvider = (props: FlowProps<DragAndDropProviderProps>) 
             targetData: targetEntry?.data,
             sourceInstanceId: (source.data as { instanceId: string }).instanceId,
             targetInstanceId: instanceId(),
-          });
+          })
         },
       })
-    );
-  });
+    )
+  })
 
   const contextValue: DragAndDropContextValue = {
     // Does not need to change on mount.
     // eslint-disable-next-line solid/reactivity
     instanceId: instanceId(),
     registry: registry,
-  };
+  }
 
   return (
     <DragAndDropContext.Provider value={contextValue}>{props.children}</DragAndDropContext.Provider>
-  );
-};
+  )
+}
 
 /* ---------- 2. Building Blocks ---------- */
 
-export type DragState = 'idle' | 'dragging' | 'over';
+export type DragState = 'idle' | 'dragging' | 'over'
 
 /**
  * DraggableItem is both `draggable()` and `dropTargetForElements()`, just for simplicity
@@ -239,23 +239,23 @@ export type DragState = 'idle' | 'dragging' | 'over';
  * dropTargetForElements is enabled by default, but can be disabled.
  */
 export const DraggableItem = (props: {
-  id: string | number;
-  type?: string;
-  data?: any;
-  dropTargetType?: string | string[];
-  dropTargetCanDrop?: (sourceData: any) => boolean;
+  id: string | number
+  type?: string
+  data?: any
+  dropTargetType?: string | string[]
+  dropTargetCanDrop?: (sourceData: any) => boolean
   /** @defaultValue true */
-  enableDropTarget?: boolean;
-  children: (state: Accessor<DragState>, ref: (el: HTMLElement) => void) => JSX.Element;
+  enableDropTarget?: boolean
+  children: (state: Accessor<DragState>, ref: (el: HTMLElement) => void) => JSX.Element
 }) => {
-  const [state, setState] = createSignal<DragState>('idle');
-  let ref!: HTMLElement;
-  const { instanceId, registry } = useDragAndDropContext();
+  const [state, setState] = createSignal<DragState>('idle')
+  let ref!: HTMLElement
+  const { instanceId, registry } = useDragAndDropContext()
 
   createEffect(() => {
-    registry.set(props.id, { id: props.id, data: props.data });
-    onCleanup(() => registry.delete(props.id));
-  });
+    registry.set(props.id, { id: props.id, data: props.data })
+    onCleanup(() => registry.delete(props.id))
+  })
 
   createEffect(() => {
     onCleanup(
@@ -281,20 +281,20 @@ export const DraggableItem = (props: {
                 getIsSticky: () => true,
                 canDrop: ({ source }) => {
                   const s = source.data as {
-                    id: string | number;
-                    type: string;
-                    instanceId: string;
-                    data: any;
-                  };
-                  if (s.instanceId !== instanceId) return false;
+                    id: string | number
+                    type: string
+                    instanceId: string
+                    data: any
+                  }
+                  if (s.instanceId !== instanceId) return false
 
                   const types = Array.isArray(props.dropTargetType)
                     ? props.dropTargetType
-                    : [props.dropTargetType || 'item'];
-                  if (!types.includes(s.type)) return false;
+                    : [props.dropTargetType || 'item']
+                  if (!types.includes(s.type)) return false
 
-                  if (props.dropTargetCanDrop) return props.dropTargetCanDrop(s.data);
-                  return true;
+                  if (props.dropTargetCanDrop) return props.dropTargetCanDrop(s.data)
+                  return true
                 },
                 onDragEnter: () => setState('over'),
                 onDragLeave: () => setState('idle'),
@@ -303,29 +303,29 @@ export const DraggableItem = (props: {
             ]
           : [])
       )
-    );
-  });
+    )
+  })
 
   // eslint-disable-next-line solid/reactivity
-  return props.children(state, (el) => (ref = el));
-};
+  return props.children(state, (el) => (ref = el))
+}
 
 /** Droppable is only `dropTargetForElements()`, useful for areas where an item can be dragged into. */
 export const Droppable = (props: {
-  id: string | number;
-  type?: string | string[];
-  data?: any;
-  canDrop?: (sourceData: any) => boolean;
-  children: (state: Accessor<DragState>, ref: (el: HTMLElement) => void) => JSX.Element;
+  id: string | number
+  type?: string | string[]
+  data?: any
+  canDrop?: (sourceData: any) => boolean
+  children: (state: Accessor<DragState>, ref: (el: HTMLElement) => void) => JSX.Element
 }) => {
-  const [state, setState] = createSignal<DragState>('idle');
-  let ref!: HTMLElement;
-  const { instanceId, registry } = useDragAndDropContext();
+  const [state, setState] = createSignal<DragState>('idle')
+  let ref!: HTMLElement
+  const { instanceId, registry } = useDragAndDropContext()
 
   createEffect(() => {
-    registry.set(props.id, { id: props.id, data: props.data });
-    onCleanup(() => registry.delete(props.id));
-  });
+    registry.set(props.id, { id: props.id, data: props.data })
+    onCleanup(() => registry.delete(props.id))
+  })
 
   createEffect(() => {
     onCleanup(
@@ -336,52 +336,52 @@ export const Droppable = (props: {
           getIsSticky: () => true,
           canDrop: ({ source }) => {
             const s = source.data as {
-              id: string | number;
-              type: string;
-              instanceId: string;
-              data: any;
-            };
-            if (s.instanceId !== instanceId) return false;
+              id: string | number
+              type: string
+              instanceId: string
+              data: any
+            }
+            if (s.instanceId !== instanceId) return false
 
-            const types = Array.isArray(props.type) ? props.type : [props.type || 'item'];
-            if (!types.includes(s.type)) return false;
+            const types = Array.isArray(props.type) ? props.type : [props.type || 'item']
+            if (!types.includes(s.type)) return false
 
-            if (props.canDrop) return props.canDrop(s.data);
-            return true;
+            if (props.canDrop) return props.canDrop(s.data)
+            return true
           },
           onDragEnter: () => setState('over'),
           onDragLeave: () => setState('idle'),
           onDrop: () => setState('idle'),
         })
       )
-    );
-  });
+    )
+  })
 
   // eslint-disable-next-line solid/reactivity
-  return props.children(state, (el) => (ref = el));
-};
+  return props.children(state, (el) => (ref = el))
+}
 
 /* ---------- 3. Auto-scroll helper ---------- */
-import { autoScrollForElements } from '@atlaskit/pragmatic-drag-and-drop-auto-scroll/element';
+import { autoScrollForElements } from '@atlaskit/pragmatic-drag-and-drop-auto-scroll/element'
 
 type AutoScrollOptions = {
-  canScroll?: (args: { source: any }) => boolean;
-};
+  canScroll?: (args: { source: any }) => boolean
+}
 
 export const useAutoScroll = (opts?: AutoScrollOptions) => {
-  let ref: HTMLElement;
+  let ref: HTMLElement
 
   createEffect(() => {
-    const { canScroll = () => true } = opts ?? { canScroll: () => true };
-    if (!ref) return;
+    const { canScroll = () => true } = opts ?? { canScroll: () => true }
+    if (!ref) return
 
     onCleanup(
       autoScrollForElements({
         element: ref,
         canScroll: canScroll,
       })
-    );
-  });
+    )
+  })
 
-  return (el: HTMLElement) => (ref = el);
-};
+  return (el: HTMLElement) => (ref = el)
+}

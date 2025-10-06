@@ -1,69 +1,69 @@
-import type { JSX, ValidComponent } from 'solid-js';
-import { children, createEffect, createSignal, onCleanup, Show, splitProps } from 'solid-js';
+import type { JSX, ValidComponent } from 'solid-js'
+import { children, createEffect, createSignal, onCleanup, Show, splitProps } from 'solid-js'
 
-import type { PolymorphicProps } from '@kobalte/core/polymorphic';
-import * as SliderPrimitive from '@kobalte/core/slider';
+import type { PolymorphicProps } from '@kobalte/core/polymorphic'
+import * as SliderPrimitive from '@kobalte/core/slider'
 
-import { Label } from '@/components/ui/label';
-import { cn } from '@/utils/cn';
+import { Label } from '@/components/ui/label'
+import { cn } from '@/utils/cn'
 
 type SliderRootProps<T extends ValidComponent = 'div'> = SliderPrimitive.SliderRootProps<T> & {
-  class?: string | undefined;
-};
+  class?: string | undefined
+}
 
 const Slider = <T extends ValidComponent = 'div'>(
   props: PolymorphicProps<T, SliderRootProps<T>>
 ) => {
-  const [local, others] = splitProps(props as SliderRootProps, ['class']);
+  const [local, others] = splitProps(props as SliderRootProps, ['class'])
   return (
     <SliderPrimitive.Root
       class={cn('relative flex w-full touch-none flex-col items-center select-none', local.class)}
       {...others}
     />
-  );
-};
+  )
+}
 
 type SliderTrackProps<T extends ValidComponent = 'div'> = SliderPrimitive.SliderTrackProps<T> & {
-  class?: string | undefined;
-};
+  class?: string | undefined
+}
 
 const SliderTrack = <T extends ValidComponent = 'div'>(
   props: PolymorphicProps<T, SliderTrackProps<T>>
 ) => {
-  const [local, others] = splitProps(props as SliderTrackProps, ['class']);
+  const [local, others] = splitProps(props as SliderTrackProps, ['class'])
   return (
     <SliderPrimitive.Track
       class={cn('bg-secondary relative h-2 w-full grow rounded-full', local.class)}
       {...others}
     />
-  );
-};
+  )
+}
 
 type SliderFillProps<T extends ValidComponent = 'div'> = SliderPrimitive.SliderFillProps<T> & {
-  class?: string | undefined;
-};
+  class?: string | undefined
+}
 
 const SliderFill = <T extends ValidComponent = 'div'>(
   props: PolymorphicProps<T, SliderFillProps<T>>
 ) => {
-  const [local, others] = splitProps(props as SliderFillProps, ['class']);
+  const [local, others] = splitProps(props as SliderFillProps, ['class'])
   return (
     <SliderPrimitive.Fill
       class={cn('bg-primary absolute h-full rounded-full', local.class)}
       {...others}
     />
-  );
-};
+  )
+}
 
 type SliderThumbProps<T extends ValidComponent = 'span'> = SliderPrimitive.SliderThumbProps<T> & {
-  class?: string | undefined;
-  children?: JSX.Element;
-};
+  class?: string | undefined
+  children?: JSX.Element
+}
 
 const SliderThumb = <T extends ValidComponent = 'span'>(
   props: PolymorphicProps<T, SliderThumbProps<T>>
 ) => {
-  const [local, others] = splitProps(props as SliderThumbProps, ['class', 'children']);
+  const [local, others] = splitProps(props as SliderThumbProps, ['class', 'children'])
   return (
     <SliderPrimitive.Thumb
       class={cn(
@@ -75,22 +75,22 @@ const SliderThumb = <T extends ValidComponent = 'span'>(
       {local.children}
       <SliderPrimitive.Input />
     </SliderPrimitive.Thumb>
-  );
-};
+  )
+}
 
 const SliderLabel = <T extends ValidComponent = 'label'>(
   props: PolymorphicProps<T, SliderPrimitive.SliderLabelProps<T>>
 ) => {
-  return <SliderPrimitive.Label as={Label} {...props} />;
-};
+  return <SliderPrimitive.Label as={Label} {...props} />
+}
 
 const SliderValueLabel = <T extends ValidComponent = 'label'>(
   props: PolymorphicProps<T, SliderPrimitive.SliderValueLabelProps<T>>
 ) => {
-  return <SliderPrimitive.ValueLabel as={Label} {...props} />;
-};
+  return <SliderPrimitive.ValueLabel as={Label} {...props} />
+}
 
-export { Slider, SliderFill, SliderLabel, SliderThumb, SliderTrack, SliderValueLabel };
+export { Slider, SliderFill, SliderLabel, SliderThumb, SliderTrack, SliderValueLabel }
 
 // ---
 
@@ -99,24 +99,24 @@ const SliderThumbWithTip = (
     thumbTip: (value) => `${value}`,
   }
 ) => {
-  let thumbRef: HTMLSpanElement | undefined;
+  let thumbRef: HTMLSpanElement | undefined
 
-  const [value, setValue] = createSignal<number | undefined>(undefined);
+  const [value, setValue] = createSignal<number | undefined>(undefined)
 
   createEffect(() => {
-    if (!thumbRef) return;
+    if (!thumbRef) return
 
     const update = () => {
-      const val = thumbRef!.getAttribute('aria-valuenow');
-      setValue(val ? parseFloat(val) : undefined);
-    };
+      const val = thumbRef!.getAttribute('aria-valuenow')
+      setValue(val ? parseFloat(val) : undefined)
+    }
 
-    update();
-    const mo = new MutationObserver(update);
-    mo.observe(thumbRef!, { attributes: true, attributeFilter: ['aria-valuenow'] });
+    update()
+    const mo = new MutationObserver(update)
+    mo.observe(thumbRef!, { attributes: true, attributeFilter: ['aria-valuenow'] })
 
-    onCleanup(() => mo.disconnect());
-  });
+    onCleanup(() => mo.disconnect())
+  })
 
   return (
     // Thumb must be z-10 and tip must be z-20 (just above the thumb)
@@ -127,21 +127,21 @@ const SliderThumbWithTip = (
         </span>
       </Show>
     </SliderThumb>
-  );
-};
+  )
+}
 
 type SliderCompProps = SliderPrimitive.SliderRootProps & {
-  label?: JSX.Element;
-  class?: string;
+  label?: JSX.Element
+  class?: string
 
   // Personal touches
-  showLabels?: boolean;
-  thumbTip?: (value: number) => JSX.Element;
-};
+  showLabels?: boolean
+  thumbTip?: (value: number) => JSX.Element
+}
 
 const SliderComp = (props: SliderCompProps) => {
-  const [local, others] = splitProps(props, ['label', 'class', 'showLabels', 'thumbTip']);
-  const label = children(() => local.label);
+  const [local, others] = splitProps(props, ['label', 'class', 'showLabels', 'thumbTip'])
+  const label = children(() => local.label)
   return (
     <Slider
       minValue={props.minValue ?? 0}
@@ -168,7 +168,7 @@ const SliderComp = (props: SliderCompProps) => {
         <SliderThumbWithTip thumbTip={local.thumbTip} />
       </SliderTrack>
     </Slider>
-  );
-};
+  )
+}
 
-export { SliderComp };
+export { SliderComp }

@@ -1,21 +1,21 @@
-import { IconLoading } from '@/assets/icons';
-import { DropdownMenuComp } from '@/components/ui/dropdown-menu';
-import { useThemeContext } from '@/contexts/theme.context';
-import { getRoute } from '@/route-tree.gen';
-import { useAuthContext } from '@/stores/auth.context';
-import { cn } from '@/utils/cn';
-import { isLinkActive } from '@/utils/is-link-active';
-import { createMemo, For, Show, VoidProps } from 'solid-js';
-import { toast } from 'solid-sonner';
-import { usePageContext } from 'vike-solid/usePageContext';
-import { navigate } from 'vike/client/router';
+import { IconLoading } from '@/assets/icons'
+import { DropdownMenuComp } from '@/components/ui/dropdown-menu'
+import { useThemeContext } from '@/contexts/theme.context'
+import { getRoute } from '@/route-tree.gen'
+import { useAuthContext } from '@/stores/auth.context'
+import { cn } from '@/utils/cn'
+import { isLinkActive } from '@/utils/is-link-active'
+import { createMemo, For, Show, VoidProps } from 'solid-js'
+import { toast } from 'solid-sonner'
+import { usePageContext } from 'vike-solid/usePageContext'
+import { navigate } from 'vike/client/router'
 
-type VerticalNavProps = {};
+type VerticalNavProps = {}
 
 export default function VerticalNav(_props: VoidProps<VerticalNavProps>) {
-  const { user, loading, logout } = useAuthContext();
-  const pageContext = usePageContext();
-  const { toggleTheme, theme } = useThemeContext();
+  const { user, loading, logout } = useAuthContext()
+  const pageContext = usePageContext()
+  const { toggleTheme, theme } = useThemeContext()
 
   const navLinks = createMemo<{ name: string; href: string; visible: () => boolean }[]>(() => {
     return [
@@ -39,8 +39,8 @@ export default function VerticalNav(_props: VoidProps<VerticalNavProps>) {
         href: getRoute('/sign-up'),
         visible: () => !user() && !loading(),
       },
-    ];
-  });
+    ]
+  })
 
   return (
     <nav class="flex h-20 items-center justify-between gap-x-5 px-8">
@@ -90,15 +90,15 @@ export default function VerticalNav(_props: VoidProps<VerticalNavProps>) {
                 itemId: 'theme',
                 itemDisplay: `Theme: ${theme()}`,
                 itemOnSelect: () => {
-                  toggleTheme();
+                  toggleTheme()
                 },
               },
               {
                 itemId: 'logout',
                 itemDisplay: 'Logout',
                 itemOnSelect: () => {
-                  logout();
-                  toast.success('Logged out!');
+                  logout()
+                  toast.success('Logged out!')
                 },
               },
             ]}
@@ -115,5 +115,5 @@ export default function VerticalNav(_props: VoidProps<VerticalNavProps>) {
         </Show>
       </ul>
     </nav>
-  );
+  )
 }

@@ -96,20 +96,20 @@ I took care of the painstaking parts to help you develop easily on a SPA + SSR +
     - Getting Current User
 
       ```ts
-      import { useAuthContext } from '@/context/auth.context';
+      import { useAuthContext } from '@/context/auth.context'
 
       export default function MyComponent() {
-        const { user } = useAuthContext();
+        const { user } = useAuthContext()
       }
       ```
 
     - Login, Logout, Register
 
       ```tsx
-      import { useAuthContext } from '@/context/auth.context';
+      import { useAuthContext } from '@/context/auth.context'
 
       export default function MyComponent() {
-        const { login, logout, register } = useAuthContext();
+        const { login, logout, register } = useAuthContext()
       }
       ```
 
@@ -119,21 +119,21 @@ I took care of the painstaking parts to help you develop easily on a SPA + SSR +
 
       ```tsx
       // +data.ts
-      import { initTRPCSSRClient } from '@/lib/trpc-ssr-client';
-      import { PageContext } from 'vike/types';
+      import { initTRPCSSRClient } from '@/lib/trpc-ssr-client'
+      import { PageContext } from 'vike/types'
 
-      export type Data = ReturnType<Awaited<typeof data>>;
+      export type Data = ReturnType<Awaited<typeof data>>
 
       export async function data(pageContext: PageContext) {
-        const { request, response } = pageContext;
+        const { request, response } = pageContext
 
-        const trpcClient = initTRPCSSRClient(request.header(), response.headers); // Pass the headers here.
+        const trpcClient = initTRPCSSRClient(request.header(), response.headers) // Pass the headers here.
 
-        const result = await trpcClient.auth.currentUser.query();
+        const result = await trpcClient.auth.currentUser.query()
 
         return {
           user: result.user ?? null,
-        };
+        }
       }
       ```
 
@@ -158,14 +158,14 @@ I took care of the painstaking parts to help you develop easily on a SPA + SSR +
       ```ts
       // +guard.ts (If you don't have +data.ts in the same route).
       export async function guard(pageContext: PageContext) {
-        const { request, response } = pageContext;
+        const { request, response } = pageContext
 
-        const trpcClient = initTRPCSSRClient(request.header(), response.headers); // Pass the headers here.
+        const trpcClient = initTRPCSSRClient(request.header(), response.headers) // Pass the headers here.
 
-        const result = await trpcClient.auth.currentUser.query();
+        const result = await trpcClient.auth.currentUser.query()
 
         if (!result.user) {
-          throw redirect('/'); // Must be a public route.
+          throw redirect('/') // Must be a public route.
         }
       }
 
@@ -173,7 +173,7 @@ I took care of the painstaking parts to help you develop easily on a SPA + SSR +
       // ⚠️ I have not tested this. This depends on `+guard` being called after `+data` is resolved.
       export async function guard(pageContext: PageContext) {
         if (!pageContext.data?.user) {
-          throw redirect('/'); // Must be a public route.
+          throw redirect('/') // Must be a public route.
         }
       }
       ```

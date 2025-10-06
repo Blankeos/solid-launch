@@ -1,4 +1,4 @@
-import { dehydrate, QueryClient } from "@tanstack/solid-query";
+import { dehydrate, QueryClient } from '@tanstack/solid-query'
 
 /**
  * A function you can use on the server and pass the queries to be prefetched.
@@ -39,10 +39,10 @@ import { dehydrate, QueryClient } from "@tanstack/solid-query";
 export async function createDehydratedState(
   prefetchQueries: { queryKey: string[]; queryFn: () => Promise<any> }[]
 ) {
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient()
 
   if (prefetchQueries?.length) {
-    const queries: Promise<void>[] = [];
+    const queries: Promise<void>[] = []
 
     prefetchQueries?.forEach(({ queryKey, queryFn }) => {
       queries.push(
@@ -50,11 +50,11 @@ export async function createDehydratedState(
           queryKey,
           queryFn,
         })
-      );
-    });
+      )
+    })
 
-    await Promise.all(queries);
+    await Promise.all(queries)
   }
 
-  return dehydrate(queryClient);
+  return dehydrate(queryClient)
 }
