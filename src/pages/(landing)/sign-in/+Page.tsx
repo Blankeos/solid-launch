@@ -1,10 +1,9 @@
+import { TextField, useAppForm } from '@/components/form'
 import { Button } from '@/components/ui/button'
 import { getRoute } from '@/route-tree.gen'
 import { useAuthContext } from '@/stores/auth.context'
 import { useCounterContext } from '@/stores/counter.context'
 import getTitle from '@/utils/get-title'
-import { createForm } from '@felte/solid'
-import { validator } from '@felte/validator-zod'
 import { toast } from 'solid-sonner'
 import { useMetadata } from 'vike-metadata-solid'
 import { navigate } from 'vike/client/router'
@@ -20,16 +19,23 @@ export default function SignInPage() {
   const { login } = useAuthContext()
 
   const schema = z.object({
-    username: z.string(),
-    password: z.string(),
+    username: z.string().min(3),
+    password: z.string().min(6),
   })
 
-  const { form, data } = createForm({
-    extend: validator({ schema }),
-    onSubmit: async (values: z.infer<typeof schema>) => {
+  const form = useAppForm(() => ({
+    defaultValues: {
+      username: '123',
+      password: '',
+    },
+    validators: {
+      // onChange: schema,
+      onSubmit: schema,
+    },
+    onSubmit: async ({ formApi, value }) => {
       toast.promise(
         async () => {
-          const result = await login(values.username, values.password)
+          const result = await login(value.username, value.password)
 
           if (result) navigate(getRoute('/dashboard'))
         },
@@ -41,7 +47,8 @@ export default function SignInPage() {
         }
       )
     },
-  })
+  }))
+  const data = form.useStore()
 
   return (
     <div class="flex h-full flex-1 flex-col">
@@ -51,15 +58,20 @@ export default function SignInPage() {
           🌎 global count is {globalCount()}
         </Button>
 
-        <form use:form={form} class="flex flex-col gap-y-3">
-          <div class="flex flex-col">
-            <label>Username</label>
-            <input name="username" class="rounded border p-2" type="text" />
-          </div>
-          <div class="flex flex-col">
-            <label>Password</label>
-            <input name="password" class="rounded border p-2" type="password" />
-          </div>
+        <form
+          class="flex w-full max-w-xs flex-col gap-y-3"
+          onSubmit={(e) => {
+            e.preventDefault()
+            form.handleSubmit()
+          }}
+        >
+          <form.AppField name="username">
+            {(_field) => <TextField label="Username" />}
+          </form.AppField>
+
+          <form.AppField name="password">
+            {(_field) => <TextField label="Password" type="password" />}
+          </form.AppField>
 
           <Button
             type="submit"
@@ -70,7 +82,11 @@ export default function SignInPage() {
         </form>
 
         <pre class="rounded-md border border-gray-500 bg-gray-900 p-3 text-white">
-          {JSON.stringify(data(), null, 2)}
+          {JSON.stringify(data().values, null, 2)}
+        </pre>
+
+        <pre class="rounded-md border border-gray-500 bg-gray-900 p-3 text-white">
+          {JSON.stringify(data().errors, null, 2)}
         </pre>
       </div>
     </div>

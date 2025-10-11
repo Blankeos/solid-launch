@@ -139,6 +139,7 @@ export const authController = new Hono<{
 
     return c.redirect(redirectUrl)
   })
+
   // GitHub Login
   .get('/login/github', describeRoute({}), async (c) => {
     const { redirectUrl } = c.req.query()

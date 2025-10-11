@@ -366,19 +366,34 @@ export class AuthService {
     }
   }
 
-  async emailOTPLogin() {
-    // TODO: Implement email OTP
+  /** Base implementation for otp types (i.e. email, magic link, sms otp). But also two-factor. */
+  private async _baseOtpSend(params: {
+    onSendOtp: (onSendOtpOptions: {
+      userId: string
+      code: string
+      name: string
+      email: string
+    }) => void
+  }) {
+    // DAO to create an OTP
+    // Email Send
   }
 
-  async emailOTPCallback() {
-    // TODO: Implement email OTP
+  async emailOtpSend() {
+    // TODO: Implement _baseOtpSend but using email.
   }
 
-  async magicLinkLogin() {
-    // TODO: Implement magic link
+  async magicLinkSend() {
+    // TODO: Implement _baseOtpSend but using magic link.
   }
 
-  async magicLinkCallback() {
-    // TODO: Implement magic link callback
+  async smsOtpSend() {
+    // TODO: Implement _baseOtpsend but using sms provider (i.e. Semaphore or Twilio).
+  }
+
+  /** Applies for all _baseOtpSend implementations. */
+  async otpVerifyLogin(params: { userId: string; code: string }) {
+    // TODO: 1. Use the consume dao for it.
+    // TODO: 2. Get details based on userId, return the user dto to finish the login.
   }
 }

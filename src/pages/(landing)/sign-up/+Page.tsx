@@ -1,10 +1,9 @@
+import { TextField, useAppForm } from '@/components/form'
 import { Button } from '@/components/ui/button'
 import { getRoute } from '@/route-tree.gen'
 import { useAuthContext } from '@/stores/auth.context'
 import { useCounterContext } from '@/stores/counter.context'
 import getTitle from '@/utils/get-title'
-import { createForm } from '@felte/solid'
-import { validator } from '@felte/validator-zod'
 import { toast } from 'solid-sonner'
 import { useMetadata } from 'vike-metadata-solid'
 import { navigate } from 'vike/client/router'
@@ -24,9 +23,12 @@ export default function SignUpPage() {
     password: z.string(),
   })
 
-  const { form, data } = createForm({
-    extend: validator({ schema }),
-    onSubmit: async (values: z.infer<typeof schema>) => {
+  const form = useAppForm({
+    defaultValues: () => ({
+      username: '',
+      password: '',
+    }),
+    onSubmit: async (values) => {
       toast.promise(
         async () => {
           const result = await register(values.username, values.password)
@@ -52,15 +54,31 @@ export default function SignUpPage() {
           🌎 global count is {globalCount()}
         </Button>
 
-        <form use:form={form} class="flex flex-col gap-y-3">
-          <div class="flex flex-col">
-            <label>Username</label>
-            <input name="username" class="rounded border p-2" type="text" />
-          </div>
-          <div class="flex flex-col">
-            <label>Password</label>
-            <input name="password" class="rounded border p-2" type="password" />
-          </div>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            form.handleSubmit()
+          }}
+          class="flex flex-col gap-y-3"
+        >
+          <form.Field name="username">
+            {(field) => (
+              <TextField form={field} label="Username" placeholder="Enter your username" required />
+            )}
+          </form.Field>
+
+          <form.Field name="password">
+            {(field) => (
+              <TextField
+                form={field}
+                label="Password"
+                type="password"
+                placeholder="Enter your password"
+                required
+              />
+            )}
+          </form.Field>
 
           <button
             type="submit"
@@ -71,7 +89,7 @@ export default function SignUpPage() {
         </form>
 
         <pre class="rounded-md border border-gray-500 bg-gray-900 p-3 text-white">
-          {JSON.stringify(data(), null, 2)}
+          {JSON.stringify(form.state.values, null, 2)}
         </pre>
       </div>
     </div>

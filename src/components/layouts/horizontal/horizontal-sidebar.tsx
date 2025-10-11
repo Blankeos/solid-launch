@@ -11,7 +11,7 @@ export default function HorizontalSidebar(_props: VoidProps<HorizontalSidebarPro
   const { user, loading, logout } = useAuthContext()
 
   return (
-    <div class="flex h-full w-56 shrink-0 flex-col border-r px-8 py-8">
+    <div class="flex h-full shrink-0 flex-col border-r px-8 py-8">
       <div class="flex items-center gap-x-3">
         <a href={getRoute('/')} class="text-4xl text-gray-500">
           {'<'}
