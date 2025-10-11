@@ -23,10 +23,12 @@ You can also try my other starters:
 - [x] ☁️ **Selfhost-ready** - Crafted with simple hosting in mind that'll still probably scale to millions. Just spin up Docker container on a good'ol VPS without locking into serverless. DHH and Shayan influenced me on this. You can still host it on serverless tho. I think? lol
 - [x] **🔋 Batteries-included** - took care of the hard stuff for you. A well-thought-out folder structure from years of making projects: a design system, components, utilities, hooks, constants, an adequate backend DDD-inspired sliced architecture that isn't overkill, dockerizing your app, and most importantly---perfectly-crafted those pesky config files.
 - [x] 🔑 Authentication-Ready - One thing devs get stuck on. There's a practical auth implemented from scratch here that doesn't vendor-lock you into any auth provider.
-  - [x] Password
-  - [ ] Transactional Emails (Forgot Password, Email Verification)
-  - [ ] OAuth (Google, GitHub, extend as you wish)
+  - [x] Email & Password
+  - [x] Transactional Emails (Forgot Password, Email Verification)
+  - [x] OAuth (Google, GitHub, extend as you wish) w/ linking
   - [ ] Magic Link
+  - [ ] OTPs
+  - [ ] Organization Auth (easily opt-outable)
   - [ ] User Management Dashboard
 
 ### Tech Stack
@@ -37,6 +39,7 @@ You can also try my other starters:
 - [x] **Hono** - 2nd fastest Bun framework(?), run anywhere, uses easy-to-understand web-standard paradigms w/ typesafety and a bunch of QoLs built-in.
 - [x] **OpenAPI** - A standard doc that other clients can use for your API (i.e. on Flutter, etc.) w/ hono-openapi.
 - [x] **Tailwind** - Styling the web has been pretty pleasant with it. I even use it on React Native for work. It's amazing.
+- [x] **Tanstack Form & Tanstack Query** - No need to rebuild validation, caching, retries, etc.
 - [x] **Prisma** - Great _migrations_ workflow, but I want to maximize perf.
 - [x] **Kysely** - Great typesafe _query builder_ for SQL, minimally wraps around db connection.
 - [x] **SQLite/LibSQL (Turso)** - Cheapest database, easy to use.

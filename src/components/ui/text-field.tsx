@@ -1,10 +1,11 @@
-import type { ValidComponent } from 'solid-js'
-import { mergeProps, splitProps } from 'solid-js'
+import type { JSX, ValidComponent } from 'solid-js'
+import { createSignal, mergeProps, splitProps } from 'solid-js'
 
 import type { PolymorphicProps } from '@kobalte/core'
 import * as TextFieldPrimitive from '@kobalte/core/text-field'
 import { cva } from 'class-variance-authority'
 
+import { IconEye, IconEyeOff } from '@/assets/icons'
 import { cn } from '@/utils/cn'
 
 type TextFieldRootProps<T extends ValidComponent = 'div'> =
@@ -16,7 +17,7 @@ const TextField = <T extends ValidComponent = 'div'>(
   props: PolymorphicProps<T, TextFieldRootProps<T>>
 ) => {
   const [local, others] = splitProps(props as TextFieldRootProps, ['class'])
-  return <TextFieldPrimitive.Root class={cn('flex flex-col gap-1', local.class)} {...others} />
+  return <TextFieldPrimitive.Root class={cn('flex flex-col gap-1.5', local.class)} {...others} />
 }
 
 type TextFieldInputProps<T extends ValidComponent = 'input'> =
@@ -150,3 +151,66 @@ export {
   TextFieldLabel,
   TextFieldTextArea,
 }
+
+// ---
+
+export type TextFieldCompProps<T extends ValidComponent = 'div'> = TextFieldRootProps<T> & {
+  // input
+  type?: TextFieldInputProps['type']
+  // label
+  label?: string | undefined
+  // description
+  description?: string | undefined
+  // error
+  error?: string | undefined
+  // textarea
+  multiline?: boolean | undefined
+  // blur handler
+  onBlur?: JSX.EventHandlerUnion<HTMLInputElement | HTMLTextAreaElement, FocusEvent> | undefined
+}
+
+const TextFieldComp = <T extends ValidComponent = 'div'>(
+  props: PolymorphicProps<T, TextFieldCompProps<T>>
+) => {
+  const [isPasswordVisible, setIsPasswordVisible] = createSignal(false)
+  const [local, others] = splitProps(props as TextFieldCompProps, [
+    'class',
+    'type',
+    'label',
+    'description',
+    'error',
+    'multiline',
+    'onBlur',
+  ])
+
+  const isPassword = () => local.type === 'password'
+  const inputType = () => (isPassword() && isPasswordVisible() ? 'text' : local.type)
+
+  return (
+    <TextField class={local.class} {...others}>
+      <TextFieldLabel>{local.label}</TextFieldLabel>
+      {local.multiline ? (
+        <TextFieldTextArea onBlur={local.onBlur} />
+      ) : (
+        <div class="relative">
+          <TextFieldInput type={inputType()} onBlur={local.onBlur} />
+          {isPassword() && (
+            <button
+              tabIndex={-1}
+              type="button"
+              class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500"
+              onClick={() => setIsPasswordVisible((prev) => !prev)}
+              disabled={others.disabled}
+            >
+              {isPasswordVisible() ? <IconEyeOff /> : <IconEye />}
+            </button>
+          )}
+        </div>
+      )}
+      <TextFieldDescription>{local.description}</TextFieldDescription>
+      <TextFieldErrorMessage>{local.error}</TextFieldErrorMessage>
+    </TextField>
+  )
+}
+
+export { TextFieldComp }
