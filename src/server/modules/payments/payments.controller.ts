@@ -1,3 +1,4 @@
+import { privateEnv } from '@/env.private'
 import { createCheckout } from '@lemonsqueezy/lemonsqueezy.js'
 import { Hono } from 'hono'
 import { describeRoute, validator as zValidator } from 'hono-openapi'
@@ -19,7 +20,10 @@ export const paymentsController = new Hono()
       try {
         const validParam = c.req.valid('param')
 
-        const checkout = await createCheckout(111111, validParam.variantId)
+        const checkout = await createCheckout(
+          privateEnv.LEMONSQUEEZY_STORE_ID,
+          validParam.variantId
+        )
 
         const url = checkout.data?.data.attributes.url
         if (!url) {

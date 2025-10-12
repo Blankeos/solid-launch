@@ -39,6 +39,11 @@ export default function VerticalNav(_props: VoidProps<VerticalNavProps>) {
         href: getRoute('/sign-up'),
         visible: () => !user() && !loading(),
       },
+      {
+        name: 'Pricing',
+        href: getRoute('/pricing'),
+        visible: () => true,
+      },
     ]
   })
 

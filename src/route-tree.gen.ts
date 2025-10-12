@@ -17,6 +17,7 @@ const pageRoutes = [
   "/about",
   "/dashboard",
   "/dashboard/settings",
+  "/pricing",
   "/sign-in",
   "/sign-up"
 ] as const;

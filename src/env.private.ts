@@ -42,6 +42,8 @@ export const privateEnv = createEnv({
 
     // Payments
     /** Development|Prod. For payments. */
+    LEMONSQUEEZY_STORE_ID: z.string(),
+    /** Development|Prod. For payments. */
     LEMONSQUEEZY_API_KEY: z.string(),
 
     // SMTP
