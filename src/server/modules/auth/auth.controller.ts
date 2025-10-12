@@ -4,11 +4,11 @@ import { z } from 'zod'
 import { authMiddleware, requireAuthMiddleware } from './auth.middleware'
 import { deleteSessionTokenCookie, setSessionTokenCookie } from './auth.utilities'
 
+import { getCookie } from 'hono/cookie'
 import { AuthService } from './auth.service'
 const authService = new AuthService()
 
-import { AuthDAO } from '@/server/dao/auth.dao'
-import { getCookie } from 'hono/cookie'
+import { AuthDAO } from '@/server/modules/auth/auth.dao'
 const authDAO = new AuthDAO()
 
 export const authController = new Hono<{
@@ -176,3 +176,133 @@ export const authController = new Hono<{
 
     return c.redirect(redirectUrl)
   })
+
+  // Send Email OTP
+  .post(
+    '/login/otp',
+    zValidator(
+      'json',
+      z.object({
+        email: z.string().email(),
+      })
+    ),
+    describeRoute({}),
+    async (c) => {
+      const { email } = c.req.valid('json')
+
+      await authService.sendEmailOTP({ email })
+
+      return c.json({ success: true })
+    }
+  )
+
+  // Verify Login OTP
+  .post(
+    '/login/otp/verify',
+    zValidator(
+      'json',
+      z.object({
+        userId: z.string(),
+        code: z.string(),
+      })
+    ),
+    describeRoute({}),
+    async (c) => {
+      const { userId, code } = c.req.valid('json')
+
+      const { user, session } = await authService.verifyLoginOtp({ userId, code })
+
+      setSessionTokenCookie(c, session.id, session.expires_at)
+
+      return c.json({
+        user: {
+          id: user.id,
+          username: user.username,
+        },
+      })
+    }
+  )
+
+  // Send Magic Link
+  .post(
+    '/login/magic-link',
+    zValidator(
+      'json',
+      z.object({
+        email: z.email(),
+      })
+    ),
+    describeRoute({}),
+    async (c) => {
+      const { email } = c.req.valid('json')
+
+      await authService.sendMagicLink({ email })
+
+      return c.json({ success: true })
+    }
+  )
+
+  // Verify Login High Entropy (Magic Link)
+  .post(
+    '/login/magic-link/verify',
+    zValidator(
+      'json',
+      z.object({
+        token: z.string(),
+      })
+    ),
+    describeRoute({}),
+    async (c) => {
+      const { token } = c.req.valid('json')
+
+      const { user, session } = await authService.verifyLoginHighEntropy({ token })
+
+      setSessionTokenCookie(c, session.id, session.expires_at)
+
+      return c.json({
+        user: {
+          id: user.id,
+          username: user.username,
+        },
+      })
+    }
+  )
+
+  // Forgot Password Send
+  .post(
+    '/forgot-password',
+    zValidator(
+      'json',
+      z.object({
+        email: z.email(),
+      })
+    ),
+    describeRoute({}),
+    async (c) => {
+      const { email } = c.req.valid('json')
+
+      await authService.forgotPasswordSend({ email })
+
+      return c.json({ success: true })
+    }
+  )
+
+  // Forgot Password Verify
+  .post(
+    '/forgot-password/verify',
+    zValidator(
+      'json',
+      z.object({
+        token: z.string(),
+        newPassword: z.string().min(6).max(255),
+      })
+    ),
+    describeRoute({}),
+    async (c) => {
+      const { token, newPassword } = c.req.valid('json')
+
+      const result = await authService.forgotPasswordVerify({ token, newPassword })
+
+      return c.json(result)
+    }
+  )

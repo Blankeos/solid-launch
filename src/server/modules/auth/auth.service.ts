@@ -6,7 +6,7 @@ import { generateCodeVerifier, generateState, OAuth2RequestError } from 'arctic'
 
 import { privateEnv } from '@/env.private'
 import { publicEnv } from '@/env.public'
-import { AuthDAO } from '@/server/dao/auth.dao'
+import { AuthDAO } from '@/server/modules/auth/auth.dao'
 
 export class AuthService {
   public authDAO: AuthDAO
@@ -366,34 +366,136 @@ export class AuthService {
     }
   }
 
-  /** Base implementation for otp types (i.e. email, magic link, sms otp). But also two-factor. */
-  private async _baseOtpSend(params: {
-    onSendOtp: (onSendOtpOptions: {
-      userId: string
-      code: string
-      name: string
-      email: string
-    }) => void
-  }) {
-    // DAO to create an OTP
-    // Email Send
+  async sendEmailOTP(params: { email: string }) {
+    const user = await this.authDAO.getUserByEmail(params.email)
+    if (!user) throw ApiError.NotFound('User with this email not found.')
+
+    const token = await this.authDAO.createOneTimeToken({
+      userId: user.id,
+      tokenType: 'shortcode',
+      purpose: 'otp',
+    })
+    console.debug('🪙 [emailOtpSend] Token', token)
+
+    // IMPLEMENT SEND EMAIL
   }
 
-  async emailOtpSend() {
-    // TODO: Implement _baseOtpSend but using email.
+  async sendMagicLink(params: { email: string }) {
+    const user = await this.authDAO.getUserByEmail(params.email)
+    if (!user) throw ApiError.NotFound('User with this email not found.')
+
+    const token = await this.authDAO.createOneTimeToken({
+      userId: user.id,
+      purpose: 'otp',
+    })
+    console.debug('🪙 [magiclinkOtpSend] Token', token)
+
+    // IMPLEMENT SEND EMAIL
   }
 
-  async magicLinkSend() {
-    // TODO: Implement _baseOtpSend but using magic link.
+  async sendSmsOTP(params: { email: string }) {
+    const user = await this.authDAO.getUserByEmail(params.email)
+    if (!user) throw ApiError.NotFound('User with this email not found.')
+
+    const token = await this.authDAO.createOneTimeToken({
+      userId: user.id,
+      purpose: 'otp',
+    })
+    console.debug('🪙 [smsOtpSend] Token', token)
+
+    // IMPLEMENT SMS
   }
 
-  async smsOtpSend() {
-    // TODO: Implement _baseOtpsend but using sms provider (i.e. Semaphore or Twilio).
+  /** Applies for userId + code combinations (i.e. short codes) */
+  async verifyLoginOtp(params: { userId: string; code: string }) {
+    const { consumed } = await this.authDAO.consumeOneTimeToken({
+      token: params.code,
+      userId: params.userId,
+      purpose: 'otp',
+    })
+
+    if (!consumed) {
+      throw ApiError.BadRequest('Code for login is either invalid or expired.')
+    }
+
+    const user = await this.authDAO.getUserByUserId(params.userId)
+    const session = await this.authDAO.createSession(params.userId)
+
+    if (!user || !session) {
+      throw ApiError.InternalServerError('Login failed: user or session missing')
+    }
+
+    return {
+      user,
+      session,
+    }
   }
 
-  /** Applies for all _baseOtpSend implementations. */
-  async otpVerifyLogin(params: { userId: string; code: string }) {
-    // TODO: 1. Use the consume dao for it.
-    // TODO: 2. Get details based on userId, return the user dto to finish the login.
+  /** Applies for high entropy purposes where user id is hidden (i.e. magic_link, cross_domain) */
+  async verifyLoginHighEntropy(params: { token: string }) {
+    const { consumed, userId } = await this.authDAO.consumeOneTimeToken({
+      token: params.token,
+      purpose: 'otp',
+    })
+
+    if (!consumed || !userId) {
+      throw ApiError.BadRequest('Token for login is either invalid or expired.')
+    }
+
+    const user = await this.authDAO.getUserByUserId(userId)
+    const session = await this.authDAO.createSession(userId)
+
+    if (!user || !session) {
+      throw ApiError.InternalServerError('Login failed: user or session missing')
+    }
+
+    return {
+      user,
+      session,
+    }
+  }
+
+  async forgotPasswordSend(params: { email: string }) {
+    const user = await this.authDAO.getUserByEmail(params.email)
+    if (!user) throw ApiError.NotFound('User with this email not found.')
+
+    const token = await this.authDAO.createOneTimeToken({
+      userId: user.id,
+      purpose: 'reset_password',
+    })
+    console.debug('🔐 [forgotPasswordSend] Token', token)
+
+    // IMPLEMENT SEND EMAIL
+  }
+
+  async forgotPasswordVerify(params: { token: string; newPassword: string }) {
+    const { consumed, userId } = await this.authDAO.consumeOneTimeToken({
+      token: params.token,
+      purpose: 'reset_password',
+    })
+
+    if (!consumed || !userId) {
+      throw ApiError.BadRequest('Token for password reset is either invalid or expired.')
+    }
+
+    if (!params.newPassword || params.newPassword.length < 6 || params.newPassword.length > 255) {
+      throw ApiError.BadRequest('Invalid new password')
+    }
+
+    const passwordHash = await hash(params.newPassword, {
+      memoryCost: 19456,
+      timeCost: 2,
+      outputLen: 32,
+      parallelism: 1,
+    })
+
+    await this.authDAO.updateUserPassword({
+      userId,
+      passwordHash,
+    })
+
+    return {
+      success: true,
+    }
   }
 }

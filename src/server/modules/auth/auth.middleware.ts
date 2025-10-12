@@ -5,13 +5,15 @@ import { getCookie } from 'hono/cookie'
 import { createMiddleware } from 'hono/factory'
 import { deleteSessionTokenCookie, setSessionTokenCookie } from './auth.utilities'
 
-import { AuthDAO } from '@/server/dao/auth.dao'
+import { InternalSessionDTO, InternalUserDTO } from './auth.dto'
+
+import { AuthDAO } from '@/server/modules/auth/auth.dao'
 const authDAO = new AuthDAO()
 
 export type AuthMiddlewareBindings = Bindings & {
   Variables: {
-    user: User | null
-    session: Session | null
+    user: InternalUserDTO | null
+    session: InternalSessionDTO | null
   }
 }
 

@@ -1,6 +1,7 @@
 import { db } from '@/server/db/kysely'
-import { Session, User } from '../db/types'
-import { generateId } from '../modules/auth/auth.utilities'
+
+import { generateId } from '@/server/modules/auth/auth.utilities'
+import { InternalSessionDTO, InternalUserDTO } from './auth.dto'
 
 export class AuthDAO {
   // Sessions
@@ -22,7 +23,7 @@ export class AuthDAO {
 
   async getSessionAndUserBySessionId(
     sessionId: string
-  ): Promise<{ session?: Session; user?: User }> {
+  ): Promise<{ session?: InternalSessionDTO; user?: InternalUserDTO }> {
     const result = await db
       .selectFrom('session')
       .where('session.id', '=', sessionId)
@@ -39,7 +40,7 @@ export class AuthDAO {
 
     const { session_id, session_expires_at, session_user_id, ...joinedUser } = result
 
-    const session: Session = {
+    const session: InternalSessionDTO = {
       id: session_id,
       expires_at: session_expires_at,
       user_id: session_user_id,
@@ -49,12 +50,14 @@ export class AuthDAO {
       return { session: session, user: undefined }
     }
 
-    const _user: User = joinedUser as unknown as User
+    const _user: InternalUserDTO = joinedUser as unknown as InternalUserDTO
 
     return { session: session, user: _user }
   }
 
-  async validateSession(sessionId: string | null): Promise<{ session?: Session; user?: User }> {
+  async validateSession(
+    sessionId: string | null
+  ): Promise<{ session?: InternalSessionDTO; user?: InternalUserDTO }> {
     if (!sessionId) return { session: undefined, user: undefined }
 
     const { session, user } = await this.getSessionAndUserBySessionId(sessionId)
@@ -203,35 +206,94 @@ export class AuthDAO {
   }
 
   // - Magic Links, OTPs, Cross-Domain (OAuth Login), Forgot Password
-  async createOneTimeToken(userId: string, purpose: string) {
-    const token = generateId()
-    const expiresAt = new Date(Date.now() + 1000 * 60 * 2) // 2 minutes
+  async createOneTimeToken(params: {
+    userId: string
+    purpose: string
+    /** @defaultValue 300 (5 minutes) */
+    expiresInSeconds?: number
+    /** @defaultValue 'highentropy' ensures `token` uniqueness in the db. shortcode is a 6 digit token (number) so uniqueness is just based on `token+userId`. */
+    tokenType?: 'highentropy' | 'shortcode'
+  }) {
+    const tokenType = params.tokenType ?? 'highentropy'
+    const expiresAt = new Date(Date.now() + (params.expiresInSeconds ?? 300) * 1000)
 
-    await db
-      .insertInto('onetime_token')
-      .values({
-        token,
-        expires_at: expiresAt.toISOString(),
-        user_id: userId,
-        purpose,
-      })
-      .execute()
+    return await db.transaction().execute(async (trx) => {
+      let token: string = ''
+      if (tokenType === 'shortcode') {
+        // Simple shortcode; uniqueness not enforced
+        token = Math.floor(100000 + Math.random() * 900000).toString()
+      } else {
+        // High-entropy token; ensure uniqueness inside the transaction
+        let isUnique = false
+        while (!isUnique) {
+          const candidate = Array.from(crypto.getRandomValues(new Uint8Array(32)))
+            .map((b) => b.toString(36).padStart(2, '0'))
+            .join('')
 
-    return token
+          const exists = await trx
+            .selectFrom('onetime_token')
+            .select('token')
+            .where('onetime_token.token', '=', candidate)
+            .executeTakeFirst()
+
+          if (!exists) {
+            token = candidate
+            isUnique = true
+          }
+        }
+      }
+
+      await trx
+        .insertInto('onetime_token')
+        .values({
+          token,
+          expires_at: expiresAt.toISOString(),
+          user_id: params.userId,
+          purpose: params.purpose,
+        })
+        .execute()
+
+      return token
+    })
   }
 
-  async consumeOneTimeToken(token: string, purpose?: string) {
-    let query = db
-      .deleteFrom('onetime_token')
-      .where('onetime_token.token', '=', token)
-      .where('onetime_token.expires_at', '>', new Date().toISOString())
+  async consumeOneTimeToken(params: { token: string; userId?: string; purpose?: string }) {
+    // Using a transaction because it works for sqlite, mariadb, and postgres. (Returning a deleted only works in postgres atm)
+    return await db.transaction().execute(async (trx) => {
+      // First, select the token to get user_id
+      const tokenRow = await trx
+        .selectFrom('onetime_token')
+        .selectAll()
+        .where('onetime_token.token', '=', params.token)
+        .where('onetime_token.expires_at', '>', new Date().toISOString())
+        .$if(!!params.userId, (qb) => qb.where('onetime_token.user_id', '=', params.userId!))
+        .$if(!!params.purpose, (qb) => qb.where('onetime_token.purpose', '=', params.purpose!))
+        .executeTakeFirst()
 
-    if (purpose) {
-      query = query.where('onetime_token.purpose', '=', purpose)
-    }
+      if (!tokenRow) {
+        return { consumed: false, userId: undefined }
+      }
 
-    const [result] = await query.returningAll().execute()
+      // Delete the token
+      await trx
+        .deleteFrom('onetime_token')
+        .where('onetime_token.token', '=', params.token)
+        .execute()
 
-    return result
+      return { consumed: true, userId: tokenRow.user_id }
+    })
+  }
+
+  // --- Updates ---
+  async updateUserPassword(params: { userId: string; passwordHash: string }) {
+    await db
+      .updateTable('user')
+      .set({
+        password_hash: params.passwordHash,
+      })
+      .where('user.id', '=', params.userId)
+      .execute()
+
+    return { success: true }
   }
 }
