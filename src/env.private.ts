@@ -47,17 +47,24 @@ export const privateEnv = createEnv({
     LEMONSQUEEZY_API_KEY: z.string(),
 
     // SMTP
-    /** Development|Prod For emails. */
-    SMTP_HOST: z.string(),
-    /** Development|Prod For emails. */
-    SMTP_PORT: z.preprocess(Number, z.number()),
-    /** Development|Prod For emails. */
-    SMTP_SECURE: z.preprocess((val) => String(val).toLowerCase() === 'true', z.boolean()),
-    /** Development|Prod For emails. */
-    SMTP_USER: z.string(),
-    /** Development|Prod For emails. */
-    SMTP_PASS: z.string(),
-    /** Development|Prod For Emails (essentially the name of the sender i.e. Name <email@example.com>) */
-    SMTP_FROM: z.string(),
+    // /** Development|Prod For emails. */
+    // SMTP_HOST: z.string(),
+    // /** Development|Prod For emails. */
+    // SMTP_PORT: z.preprocess(Number, z.number()),
+    // /** Development|Prod For emails. */
+    // SMTP_SECURE: z.preprocess((val) => String(val).toLowerCase() === 'true', z.boolean()),
+    // /** Development|Prod For emails. */
+    // SMTP_USER: z.string(),
+    // /** Development|Prod For emails. */
+    // SMTP_PASS: z.string(),
+    // /** Development|Prod For Emails (essentially the name of the sender i.e. Name <email@example.com>) */
+    // SMTP_FROM: z.string(),
+
+    /** Development|Prod For emails (alternative to SMTP). */
+    ZEPTOMAIL_TOKEN: z.string(),
+    /** Development|Prod For emails. "Name <email@example.com>" format */
+    ZEPTOMAIL_FROM: z.string().refine((val) => /^[^<]*\s<[^>]+>$/.test(val), {
+      message: 'Must be in "Name <email@example.com>" format',
+    }),
   },
 })

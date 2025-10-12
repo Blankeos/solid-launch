@@ -26,8 +26,8 @@ You can also try my other starters:
   - [x] Email & Password
   - [x] Transactional Emails (Forgot Password, Email Verification)
   - [x] OAuth (Google, GitHub, extend as you wish) w/ linking
-  - [ ] Magic Link
-  - [ ] OTPs
+  - [x] Magic Link
+  - [x] OTPs
   - [ ] Organization Auth (easily opt-outable)
   - [ ] User Management Dashboard
 
@@ -44,7 +44,7 @@ You can also try my other starters:
 - [x] **Kysely** - Great typesafe _query builder_ for SQL, minimally wraps around db connection.
 - [x] **SQLite/LibSQL (Turso)** - Cheapest database, easy to use.
 - [x] **Lucia Book + Arctic** - Makes self-rolling auth easy, and not dependent on any third-party. (You may learn a thing or two with this low-level implementation as well). I chose not to use better-auth, everything is custom built.
-- [x] **Nodemailer** - Emails w/ any SMTP-compatible provider (Amazon SES, Resend, etc.). Amazon is the cheapest.
+- [x] **Nodemailer or any API** - Send emails w/ any API, SMTP or SDK-specific (Amazon SES, Resend, Zeptomail, etc.). Amazon SES is the cheapest. Just customize `email-client.ts`. I personally use Zeptomail. Tip: SDK-specific is preferred because SMTP is unreliable for some services because of the handshake requirement.
 - [ ] **Backblaze** - Cheap blob object storage with an S3-compatible API.
 - [ ] **LemonSqueezy** - Accept payments and pay foreign taxes.
 

@@ -2,7 +2,7 @@ import { publicEnv } from '@/env.public'
 import { Hono } from 'hono'
 import { validator as zValidator } from 'hono-openapi'
 import { z } from 'zod'
-import { sendEmail } from './nodemailer'
+import { sendEmail } from './email-client'
 
 export function renderTestEmail(email: string): string {
   return `

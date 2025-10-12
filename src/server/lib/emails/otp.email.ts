@@ -1,87 +1,44 @@
 export function renderOtpEmail(params: { email: string; otp: string }): string {
   const { email, otp } = params
   return `
-    <html>
-      <head>
-        <meta charset="utf-8" />
-        <title>Your Solid Launch OTP</title>
-        <style>
-          body {
-            margin: 0;
-            padding: 0;
-            background-color: #f5f7fa;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            color: oklch(0.27 0 0);
-          }
-          .container {
-            max-width: 480px;
-            margin: 40px auto;
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            overflow: hidden;
-          }
-          .header {
-            background: linear-gradient(135deg, oklch(62.3% 0.214 259.815) 0%, oklch(62.3% 0.214 259.815) 100%);
-            padding: 32px 24px;
-            text-align: center;
-          }
-          .header h1 {
-            margin: 0;
-            font-size: 24px;
-            color: #ffffff;
-            font-weight: 600;
-          }
-          .content {
-            padding: 32px 24px;
-            text-align: center;
-          }
-          .content p {
-            margin: 0 0 16px;
-            font-size: 16px;
-            line-height: 1.6;
-          }
-          .otp-box {
-            display: inline-block;
-            background-color: oklch(0.98 0 247.84);
-            border: 1px solid oklch(0.93 0.01 264.53);
-            border-radius: 8px;
-            padding: 12px 20px;
-            margin: 20px 0;
-            font-size: 28px;
-            font-weight: 700;
-            letter-spacing: 4px;
-            color: oklch(62.3% 0.214 259.815);
-          }
-          .footer {
-            padding: 24px;
-            background-color: oklch(0.97 0 264.54);
-            font-size: 14px;
-            color: oklch(0.55 0.02 264.36);
-            text-align: center;
-          }
-          .footer a {
-            color: oklch(62.3% 0.214 259.815);
-            text-decoration: none;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h1>Solid Launch</h1>
-          </div>
-          <div class="content">
-            <p>Hi there,</p>
-            <p>We received a request to sign in to your Solid Launch account (${email}). Use the one-time code below to continue.</p>
-            <div class="otp-box">${otp}</div>
-            <p>This code will expire in 2 minutes. If you didn't request this, you can safely ignore this email.</p>
-          </div>
-          <div class="footer">
-            <p>Need help? <a href="https://docs.solidlaunch.app" target="_blank">Visit our docs</a>.</p>
-          </div>
-        </div>
-      </body>
-    </html>
+  <html>
+    <head>
+      <title>Your Solid Launch OTP</title>
+    </head>
+    <body style="margin:0;padding:0;background-color:#f5f7fa;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#454545;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f7fa;">
+        <tr>
+          <td align="center" valign="top">
+            <table width="480" cellpadding="0" cellspacing="0" style="margin:40px auto;background-color:#ffffff;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.08);overflow:hidden;">
+              <tr>
+                <td style="background-color:#2b7fff;padding:32px 24px;text-align:center;">
+                  <h1 style="margin:0;font-size:24px;color:#ffffff;font-weight:600;">Solid Launch</h1>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:32px 24px;text-align:center;">
+                  <p style="margin:0 0 16px;font-size:16px;line-height:1.6;">Hi there,</p>
+                  <p style="margin:0 0 16px;font-size:16px;line-height:1.6;">We received a request to sign in to your Solid Launch account (${email}). Use the one-time code below to continue.</p>
+                  <table cellpadding="0" cellspacing="0" style="margin:20px auto;">
+                    <tr>
+                      <td style="background-color:#f7f9ff;border:1px solid #e8ecff;border-radius:8px;padding:12px 20px;font-size:28px;font-weight:700;letter-spacing:4px;color:#2b7fff;">
+                        ${otp}
+                      </td>
+                    </tr>
+                  </table>
+                  <p style="margin:0 0 16px;font-size:16px;line-height:1.6;">This code will expire in 5 minutes. If you didn't request this, you can safely ignore this email.</p>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:24px;background-color:#f8f9fc;font-size:14px;color:#71738a;text-align:center;">
+                  <p>Need help? <a href="https://docs.solidlaunch.app" target="_blank" style="color:#2b7fff;text-decoration:none;">Visit our docs</a>.</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+  </html>
   `
 }

@@ -6,6 +6,7 @@ import { generateCodeVerifier, generateState, OAuth2RequestError } from 'arctic'
 
 import { privateEnv } from '@/env.private'
 import { publicEnv } from '@/env.public'
+import { sendEmail } from '@/server/lib/emails/email-client'
 import { renderMagicLinkEmail } from '@/server/lib/emails/magic-link.email'
 import { renderOtpEmail } from '@/server/lib/emails/otp.email'
 import { AuthDAO } from '@/server/modules/auth/auth.dao'
@@ -391,8 +392,8 @@ export class AuthService {
 
     // IMPLEMENT SEND EMAIL
     try {
-      const _html = renderOtpEmail({ email: user.email, otp: token })
-      // await sendEmail({ html, subject: 'Your Solid Launch OTP', to: user.email })
+      const html = renderOtpEmail({ email: user.email, otp: token })
+      await sendEmail({ html, subject: 'Your Solid Launch OTP', to: user.email })
     } catch (_err) {
       console.error('[emailOtpSend] error', _err)
     }
