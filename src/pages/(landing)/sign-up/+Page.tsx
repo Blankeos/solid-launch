@@ -1,3 +1,4 @@
+import { IconGitHub, IconGoogle } from '@/assets/icons'
 import { TextField, useAppForm } from '@/components/form'
 import { Button } from '@/components/ui/button'
 import { getRoute } from '@/route-tree.gen'
@@ -14,28 +15,32 @@ export default function SignUpPage() {
     title: getTitle('Sign Up'),
   })
 
-  const { count: globalCount, setCount: setGlobalCount } = useCounterContext()
+  const { count, setCount } = useCounterContext()
 
-  const { register } = useAuthContext()
+  const { register, githubLogin, googleLogin } = useAuthContext()
 
   const schema = z.object({
-    username: z.string(),
-    password: z.string(),
+    username: z.string().min(3),
+    password: z.string().min(6),
   })
 
-  const form = useAppForm({
-    defaultValues: () => ({
+  const form = useAppForm(() => ({
+    defaultValues: {
       username: '',
       password: '',
-    }),
-    onSubmit: async (values) => {
+    },
+    validators: {
+      onSubmit: schema,
+    },
+    onSubmit: async ({ value }) => {
       toast.promise(
         async () => {
-          const result = await register(values.username, values.password)
+          const result = await register.run({
+            username: value.username,
+            password: value.password,
+          })
 
-          if (result) {
-            navigate(getRoute('/dashboard'))
-          }
+          if (result) navigate(getRoute('/dashboard'))
         },
         {
           error: 'Failed to register',
@@ -44,52 +49,88 @@ export default function SignUpPage() {
         }
       )
     },
-  })
+  }))
+  const data = form.useStore()
+
+  const handleGithubLogin = () => {
+    toast.promise(
+      async () => {
+        const result = await githubLogin.run()
+        if (result) navigate(getRoute('/dashboard'))
+      },
+      {
+        error: 'Failed to login with GitHub',
+        success: 'Logged in with GitHub',
+        loading: 'Logging in with GitHub...',
+      }
+    )
+  }
+
+  const handleGoogleLogin = () => {
+    toast.promise(
+      async () => {
+        const result = await googleLogin.run()
+        if (result) navigate(getRoute('/dashboard'))
+      },
+      {
+        error: 'Failed to login with Google',
+        success: 'Logged in with Google',
+        loading: 'Logging in with Google...',
+      }
+    )
+  }
 
   return (
     <div class="flex h-full flex-1 flex-col">
       <div class="mx-auto flex w-full max-w-5xl flex-col items-center gap-y-5">
         <h1 class="text-3xl font-medium">Sign Up</h1>
-        <Button class="rounded border border-blue-300 bg-blue-500 px-5 py-2 text-white">
-          🌎 global count is {globalCount()}
-        </Button>
+        <Button onClick={() => setCount((count) => count + 1)}>🌎 global count is {count()}</Button>
 
         <form
+          class="flex w-full max-w-xs flex-col gap-y-3"
           onSubmit={(e) => {
             e.preventDefault()
-            e.stopPropagation()
             form.handleSubmit()
           }}
-          class="flex flex-col gap-y-3"
         >
-          <form.Field name="username">
-            {(field) => (
-              <TextField form={field} label="Username" placeholder="Enter your username" required />
-            )}
-          </form.Field>
+          <form.AppField name="username">
+            {(_field) => <TextField label="Username" />}
+          </form.AppField>
 
-          <form.Field name="password">
-            {(field) => (
-              <TextField
-                form={field}
-                label="Password"
-                type="password"
-                placeholder="Enter your password"
-                required
-              />
-            )}
-          </form.Field>
+          <form.AppField name="password">
+            {(_field) => <TextField label="Password" type="password" />}
+          </form.AppField>
 
-          <button
+          <Button
             type="submit"
             class="rounded border border-blue-300 bg-blue-500 px-5 py-2 text-white"
+            loading={register.loading()}
           >
             Register
-          </button>
+          </Button>
         </form>
 
+        <div class="flex gap-x-3">
+          <Button
+            onClick={handleGithubLogin}
+            loading={githubLogin.loading()}
+            variant="outline"
+            class="bg-white"
+          >
+            <IconGitHub />
+          </Button>
+
+          <Button onClick={handleGoogleLogin} loading={googleLogin.loading()} variant="outline">
+            <IconGoogle />
+          </Button>
+        </div>
+
         <pre class="rounded-md border border-gray-500 bg-gray-900 p-3 text-white">
-          {JSON.stringify(form.state.values, null, 2)}
+          {JSON.stringify(data().values, null, 2)}
+        </pre>
+
+        <pre class="rounded-md border border-gray-500 bg-gray-900 p-3 text-white">
+          {JSON.stringify(data().errors, null, 2)}
         </pre>
       </div>
     </div>
