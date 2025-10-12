@@ -48,7 +48,7 @@ export type RequireAuthMiddlewareBindings = Bindings & {
 export const requireAuthMiddleware = createMiddleware<RequireAuthMiddlewareBindings>(
   async (c, next) => {
     if (!c?.var?.session) {
-      throw ApiError.InternalServerError('Unauthorized. Please login.')
+      throw ApiError.InternalServerError('Unauthorized. Please login')
     }
 
     return next()

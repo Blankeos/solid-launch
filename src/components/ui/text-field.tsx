@@ -167,6 +167,7 @@ export type TextFieldCompProps<T extends ValidComponent = 'div'> = TextFieldRoot
   multiline?: boolean | undefined
   // blur handler
   onBlur?: JSX.EventHandlerUnion<HTMLInputElement | HTMLTextAreaElement, FocusEvent> | undefined
+  placeholder?: string
 }
 
 const TextFieldComp = <T extends ValidComponent = 'div'>(
@@ -181,6 +182,7 @@ const TextFieldComp = <T extends ValidComponent = 'div'>(
     'error',
     'multiline',
     'onBlur',
+    'placeholder',
   ])
 
   const isPassword = () => local.type === 'password'
@@ -193,7 +195,11 @@ const TextFieldComp = <T extends ValidComponent = 'div'>(
         <TextFieldTextArea onBlur={local.onBlur} />
       ) : (
         <div class="relative">
-          <TextFieldInput type={inputType()} onBlur={local.onBlur} />
+          <TextFieldInput
+            type={inputType()}
+            onBlur={local.onBlur}
+            placeholder={local.placeholder}
+          />
           {isPassword() && (
             <button
               tabIndex={-1}

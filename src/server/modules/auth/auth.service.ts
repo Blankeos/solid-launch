@@ -6,6 +6,8 @@ import { generateCodeVerifier, generateState, OAuth2RequestError } from 'arctic'
 
 import { privateEnv } from '@/env.private'
 import { publicEnv } from '@/env.public'
+import { renderMagicLinkEmail } from '@/server/lib/emails/magic-link.email'
+import { renderOtpEmail } from '@/server/lib/emails/otp.email'
 import { AuthDAO } from '@/server/modules/auth/auth.dao'
 
 export class AuthService {
@@ -34,7 +36,7 @@ export class AuthService {
 
     if (!existingUser) {
       // Lie for extra security.
-      throw ApiError.BadRequest('Incorrect username or password.')
+      throw ApiError.BadRequest('Incorrect username or password')
     }
 
     const validPassword = await verify(existingUser.password_hash, password, {
@@ -46,13 +48,13 @@ export class AuthService {
 
     if (!validPassword) {
       // Vague for extra security.
-      throw ApiError.BadRequest('Incorrect username or password.')
+      throw ApiError.BadRequest('Incorrect username or password')
     }
 
     const session = await this.authDAO.createSession(existingUser.id)
     if (!session) {
       throw ApiError.InternalServerError(
-        'Something went wrong, no session was created. Try refreshing or logging in again.'
+        'Something went wrong, no session was created. Try refreshing or logging in again'
       )
     }
 
@@ -62,8 +64,8 @@ export class AuthService {
     }
   }
 
-  async register(params: { username: string; password: string }) {
-    const { username, password } = params
+  async register(params: { username: string; password: string; email: string }) {
+    const { username, password, email } = params
 
     if (
       !username ||
@@ -78,10 +80,20 @@ export class AuthService {
       throw ApiError.BadRequest('Invalid password')
     }
 
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      throw ApiError.BadRequest('Invalid email')
+    }
+
     const existingUsername = await this.authDAO.getUserByUsername(username)
 
     if (existingUsername) {
       throw ApiError.BadRequest(`Username ${username} already exists.`)
+    }
+
+    const existingEmail = await this.authDAO.getUserByEmail(email)
+
+    if (existingEmail) {
+      throw ApiError.BadRequest(`Email ${email} already exists.`)
     }
 
     const passwordHash = await hash(password, {
@@ -93,7 +105,7 @@ export class AuthService {
     })
 
     const { userId } = await this.authDAO.createUserFromUsernameEmailAndPassword({
-      email: '',
+      email,
       username,
       passwordHash,
     })
@@ -101,7 +113,7 @@ export class AuthService {
     const session = await this.authDAO.createSession(userId)
     if (!session) {
       throw ApiError.InternalServerError(
-        'Something went wrong, no session was created. Try refreshing or logging in again.'
+        'Something went wrong, no session was created. Try refreshing or logging in again'
       )
     }
 
@@ -116,7 +128,7 @@ export class AuthService {
     const url = github.createAuthorizationURL(state, ['user:email', 'read:user'])
 
     const stateCookie = `github_oauth_state=${state}; HttpOnly; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}; Path=/; ${privateEnv.NODE_ENV === 'production' ? 'Secure;' : ''}`
-    const redirectUrlCookie = `github_oauth_redirect_url=${params.redirectUrl ?? '/'}; HttpOnly; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}; Path=/; ${privateEnv.NODE_ENV === 'production' ? 'Secure;' : ''}`
+    const redirectUrlCookie = `github_oauth_redirect_url=${params.redirectUrl ?? publicEnv.PUBLIC_BASE_URL}; HttpOnly; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}; Path=/; ${privateEnv.NODE_ENV === 'production' ? 'Secure;' : ''}`
 
     return {
       stateCookie,
@@ -132,7 +144,7 @@ export class AuthService {
     storedRedirectUrl?: string
     useOneTimeToken?: boolean
   }) {
-    const redirectUrl = new URL(params.storedRedirectUrl ?? `${publicEnv.PUBLIC_BASE_URL}/app`)
+    const redirectUrl = new URL(params.storedRedirectUrl ?? `${publicEnv.PUBLIC_BASE_URL}`)
 
     if (
       !params.code ||
@@ -252,7 +264,7 @@ export class AuthService {
 
     const stateCookie = `google_oauth_state=${state}; HttpOnly; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}; Path=/; ${privateEnv.NODE_ENV === 'production' ? 'Secure;' : ''}`
     const codeVerifierCookie = `google_oauth_codeverifier=${codeVerifier}; HttpOnly; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}; Path=/; ${privateEnv.NODE_ENV === 'production' ? 'Secure;' : ''}`
-    const redirectUrlCookie = `google_oauth_redirect_url=${params.redirectUrl ?? '/'}; HttpOnly; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}; Path=/; ${privateEnv.NODE_ENV === 'production' ? 'Secure;' : ''}`
+    const redirectUrlCookie = `google_oauth_redirect_url=${params.redirectUrl ?? `${publicEnv.PUBLIC_BASE_URL}`}; HttpOnly; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}; Path=/; ${privateEnv.NODE_ENV === 'production' ? 'Secure;' : ''}`
 
     url.searchParams.append('prompt', 'select_account')
 
@@ -272,7 +284,7 @@ export class AuthService {
     storedRedirectUrl?: string
     useOneTimeToken?: boolean
   }) {
-    const redirectUrl = new URL(params.storedRedirectUrl ?? `${publicEnv.PUBLIC_BASE_URL}/app`)
+    const redirectUrl = new URL(params.storedRedirectUrl ?? `${publicEnv.PUBLIC_BASE_URL}`)
 
     if (
       !params.code ||
@@ -368,7 +380,7 @@ export class AuthService {
 
   async sendEmailOTP(params: { email: string }) {
     const user = await this.authDAO.getUserByEmail(params.email)
-    if (!user) throw ApiError.NotFound('User with this email not found.')
+    if (!user) throw ApiError.NotFound('User with this email not found')
 
     const token = await this.authDAO.createOneTimeToken({
       userId: user.id,
@@ -378,11 +390,19 @@ export class AuthService {
     console.debug('🪙 [emailOtpSend] Token', token)
 
     // IMPLEMENT SEND EMAIL
+    try {
+      const _html = renderOtpEmail({ email: user.email, otp: token })
+      // await sendEmail({ html, subject: 'Your Solid Launch OTP', to: user.email })
+    } catch (_err) {
+      console.error('[emailOtpSend] error', _err)
+    }
+
+    return { userId: user.id }
   }
 
   async sendMagicLink(params: { email: string }) {
     const user = await this.authDAO.getUserByEmail(params.email)
-    if (!user) throw ApiError.NotFound('User with this email not found.')
+    if (!user) throw ApiError.NotFound('User with this email not found')
 
     const token = await this.authDAO.createOneTimeToken({
       userId: user.id,
@@ -391,11 +411,19 @@ export class AuthService {
     console.debug('🪙 [magiclinkOtpSend] Token', token)
 
     // IMPLEMENT SEND EMAIL
+    try {
+      const _html = renderMagicLinkEmail({ token: token })
+      // await sendEmail({ html, subject: 'Your Solid Launch Magic Link', to: user.email })
+    } catch (_err) {
+      console.error('[magiclinkOtpSend] error', _err)
+    }
+
+    return { userId: user.id }
   }
 
   async sendSmsOTP(params: { email: string }) {
     const user = await this.authDAO.getUserByEmail(params.email)
-    if (!user) throw ApiError.NotFound('User with this email not found.')
+    if (!user) throw ApiError.NotFound('User with this email not found')
 
     const token = await this.authDAO.createOneTimeToken({
       userId: user.id,
@@ -404,10 +432,18 @@ export class AuthService {
     console.debug('🪙 [smsOtpSend] Token', token)
 
     // IMPLEMENT SMS
+    try {
+      console.log(`[smsOtpSend] SMS placeholder for token ${token}`)
+      // await sendSms({ phone: user.phone, message: `Your OTP is: ${token}` })
+    } catch (_err) {
+      console.error('[smsOtpSend] error', _err)
+    }
+
+    return { userId: user.id }
   }
 
   /** Applies for userId + code combinations (i.e. short codes) */
-  async verifyLoginOtp(params: { userId: string; code: string }) {
+  async verifyLoginShortcode(params: { userId: string; code: string }) {
     const { consumed } = await this.authDAO.consumeOneTimeToken({
       token: params.code,
       userId: params.userId,
@@ -415,7 +451,7 @@ export class AuthService {
     })
 
     if (!consumed) {
-      throw ApiError.BadRequest('Code for login is either invalid or expired.')
+      throw ApiError.BadRequest('Code for login is either invalid or expired')
     }
 
     const user = await this.authDAO.getUserByUserId(params.userId)
@@ -439,7 +475,7 @@ export class AuthService {
     })
 
     if (!consumed || !userId) {
-      throw ApiError.BadRequest('Token for login is either invalid or expired.')
+      throw ApiError.BadRequest('Token for login is either invalid or expired')
     }
 
     const user = await this.authDAO.getUserByUserId(userId)
@@ -457,7 +493,7 @@ export class AuthService {
 
   async forgotPasswordSend(params: { email: string }) {
     const user = await this.authDAO.getUserByEmail(params.email)
-    if (!user) throw ApiError.NotFound('User with this email not found.')
+    if (!user) throw ApiError.NotFound('User with this email not found')
 
     const token = await this.authDAO.createOneTimeToken({
       userId: user.id,
@@ -475,7 +511,7 @@ export class AuthService {
     })
 
     if (!consumed || !userId) {
-      throw ApiError.BadRequest('Token for password reset is either invalid or expired.')
+      throw ApiError.BadRequest('Token for password reset is either invalid or expired')
     }
 
     if (!params.newPassword || params.newPassword.length < 6 || params.newPassword.length > 255) {

@@ -21,12 +21,14 @@ export default function SignUpPage() {
 
   const schema = z.object({
     username: z.string().min(3),
+    email: z.email(),
     password: z.string().min(6),
   })
 
   const form = useAppForm(() => ({
     defaultValues: {
       username: '',
+      email: '',
       password: '',
     },
     validators: {
@@ -37,6 +39,7 @@ export default function SignUpPage() {
         async () => {
           const result = await register.run({
             username: value.username,
+            email: value.email,
             password: value.password,
           })
 
@@ -95,6 +98,10 @@ export default function SignUpPage() {
         >
           <form.AppField name="username">
             {(_field) => <TextField label="Username" />}
+          </form.AppField>
+
+          <form.AppField name="email">
+            {(_field) => <TextField label="Email" type="email" />}
           </form.AppField>
 
           <form.AppField name="password">

@@ -78,16 +78,22 @@ export const authController = new Hono<{
     zValidator(
       'json',
       z.object({
-        username: z.string(),
+        email: z.email(),
+        username: z
+          .string()
+          .min(3)
+          .max(30)
+          .regex(/^[a-zA-Z0-9_-]+$/),
         password: z.string(),
       })
     ),
     async (c) => {
-      const { username, password } = c.req.valid('json')
+      const validJson = c.req.valid('json')
 
       const { userId, session } = await authService.register({
-        username: username,
-        password: password,
+        email: validJson.email,
+        username: validJson.username,
+        password: validJson.password,
       })
 
       setSessionTokenCookie(c, session.id, session.expires_at)
@@ -95,7 +101,7 @@ export const authController = new Hono<{
       return c.json({
         user: {
           id: userId,
-          username: username,
+          username: validJson.username,
         },
       })
     }
@@ -183,16 +189,16 @@ export const authController = new Hono<{
     zValidator(
       'json',
       z.object({
-        email: z.string().email(),
+        email: z.email(),
       })
     ),
     describeRoute({}),
     async (c) => {
       const { email } = c.req.valid('json')
 
-      await authService.sendEmailOTP({ email })
+      const { userId } = await authService.sendEmailOTP({ email })
 
-      return c.json({ success: true })
+      return c.json({ success: true, userId })
     }
   )
 
@@ -210,7 +216,7 @@ export const authController = new Hono<{
     async (c) => {
       const { userId, code } = c.req.valid('json')
 
-      const { user, session } = await authService.verifyLoginOtp({ userId, code })
+      const { user, session } = await authService.verifyLoginShortcode({ userId, code })
 
       setSessionTokenCookie(c, session.id, session.expires_at)
 

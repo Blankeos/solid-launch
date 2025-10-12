@@ -56,10 +56,10 @@ export type AuthContextValue = {
   // Auth functions
   login: MutationState<{ username: string; password: string }, UserDTO | null>
   logout: MutationState<undefined, { success: boolean }>
-  register: MutationState<{ username: string; password: string }, UserDTO | null>
+  register: MutationState<{ email: string; username: string; password: string }, UserDTO | null>
   magicLinkSend: MutationState<{ email: string }, { success: boolean }>
   magicLinkVerify: MutationState<{ token: string }, UserDTO | null>
-  otpSend: MutationState<{ email: string }, { success: boolean }>
+  otpSend: MutationState<{ email: string }, { success: boolean; userId?: string }>
   otpVerify: MutationState<{ userId: string; code: string }, UserDTO | null>
   googleLogin: MutationState<undefined, void>
   githubLogin: MutationState<undefined, void>
@@ -94,24 +94,26 @@ export const AuthContextProvider: FlowComponent = (props) => {
   const [user, setUser] = createSignal<ReturnType<AuthContextValue['user']>>(data?.user ?? null)
   const [loading, setLoading] = createSignal<boolean>(data?.user ? false : true)
 
-  const register = createMutation<{ username: string; password: string }, UserDTO | null>(
-    async ({ username, password }) => {
-      const response = await honoClient.auth.register.$post({
-        json: {
-          username: username,
-          password: password,
-        },
-      })
-      const result = await response.json()
+  const register = createMutation<
+    { email: string; username: string; password: string },
+    UserDTO | null
+  >(async ({ email, username, password }) => {
+    const response = await honoClient.auth.register.$post({
+      json: {
+        email,
+        username,
+        password,
+      },
+    })
+    const result = await response.json()
 
-      if (result.user) {
-        setUser(result.user)
-        return result.user
-      }
-
-      return null
+    if (result.user) {
+      setUser(result.user)
+      return result.user
     }
-  )
+
+    return null
+  })
 
   const login = createMutation<{ username: string; password: string }, UserDTO | null>(
     async ({ username, password }) => {
@@ -182,14 +184,16 @@ export const AuthContextProvider: FlowComponent = (props) => {
     return null
   })
 
-  const otpSend = createMutation<{ email: string }, { success: boolean }>(async ({ email }) => {
-    const response = await honoClient.auth.login.otp.$post({
-      json: { email },
-    })
-    const result = await response.json()
-    if (result.success) return { success: true }
-    return { success: false }
-  })
+  const otpSend = createMutation<{ email: string }, { success: boolean; userId?: string }>(
+    async ({ email }) => {
+      const response = await honoClient.auth.login.otp.$post({
+        json: { email },
+      })
+      const result = await response.json()
+      if (result.success) return { success: true, userId: result.userId }
+      return { success: false }
+    }
+  )
 
   const otpVerify = createMutation<{ userId: string; code: string }, UserDTO | null>(
     async ({ userId, code }) => {
