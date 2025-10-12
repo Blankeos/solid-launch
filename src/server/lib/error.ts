@@ -1,3 +1,20 @@
+// Doc.
+//
+// Carlo's Principles in Good Error Management:
+// 1. Standard Practices:
+//  - a. A standard error lib to define all usual error types.
+//     - message - must be readable and easily put into a frontend UI.
+//     - code - must conform to HTTP code semantics
+//     - cause - for debugging
+//  - b. A standard throwing practice using the lib. (The key is that it's pleasant to use)
+//  - c. A standard error response shape.
+//     - Two choices: A utility OR a centralized handler that processes (I prefer centralized handler i.e. Hono's app.onError in server.ts)
+//     - This makes it easy for frontend to parse and display it. (Just make sure to follow the lib definition of 'message', 'code', and 'cause')
+//     - With centralized handler, we also get the benefits of adding in:
+//        - 1. The opt-in sentry monitoring
+//        - 2. The logger for debugging during development
+//        - 3. Then finally the standard response shape
+
 import { HTTPException } from 'hono/http-exception'
 
 export class ApiError {
@@ -23,6 +40,16 @@ export class ApiError {
 
   static Unauthorized(msg: string, cause?: Error) {
     return new HTTPException(401, { message: msg, cause })
+  }
+}
+
+/** The standard type returned by the central handler. */
+export type ApiErrorResponse = {
+  error: {
+    message: string
+    code: number
+    cause?: string
+    stack?: string
   }
 }
 

@@ -20,21 +20,24 @@ app.route('/api', appRouter)
 
 // For OpenAPI
 import { openAPIRouteHandler } from 'hono-openapi'
-app.get(
-  '/api/docs/json',
-  openAPIRouteHandler(app, {
-    documentation: {
-      info: {
-        title: 'Solid Launch API',
-        version: '1.0.0',
-        description: 'API in Hono',
+import { HTTPException } from 'hono/http-exception'
+import { ApiErrorResponse } from './lib/error'
+if (privateEnv.NODE_ENV === 'development') {
+  app.get(
+    '/api/docs/json',
+    openAPIRouteHandler(app, {
+      documentation: {
+        info: {
+          title: 'Solid Launch API',
+          version: '1.0.0',
+          description: 'API in Hono',
+        },
+        servers: [{ url: 'http://localhost:3000', description: 'Local Server' }],
       },
-      servers: [{ url: 'http://localhost:3000', description: 'Local Server' }],
-    },
-  })
-)
-app.get('/api/docs', (c) => {
-  return c.html(`<!doctype html>
+    })
+  )
+  app.get('/api/docs', (c) => {
+    return c.html(`<!doctype html>
 <html>
   <head>
     <title>Solid Launch API Reference</title>
@@ -59,7 +62,8 @@ app.get('/api/docs', (c) => {
     </script>
   </body>
 </html>`)
-})
+  })
+}
 
 // Vike
 apply(app, {
@@ -74,26 +78,34 @@ apply(app, {
   },
 })
 
-// Returning errors.
+// Standard Errors
 app.onError((error, c) => {
-  // Sentry.captureException(error); // Add sentry here or any monitoring service.
+  // Sentry or any monitoring service capture
+  // Sentry.captureException(error);
 
-  console.error({
-    cause: error.cause,
-    message: error.message,
-    stack: error.stack,
-  })
+  // 1. Parse into a standard shape.
+  const {
+    status = 500,
+    message = 'Internal Server Error',
+    cause,
+  } = error instanceof HTTPException
+    ? error
+    : { status: 500, message: 'Internal Server Error', cause: error }
 
-  return c.json(
-    {
-      error: {
-        cause: error.cause,
-        message: c.error?.message ?? 'Something went wrong.',
-        stack: privateEnv.NODE_ENV === 'production' ? undefined : error.stack,
-      },
+  // 2. Create a standard error response shape.
+  const errorResponse = {
+    error: {
+      message,
+      code: status,
+      cause: privateEnv.NODE_ENV === 'production' ? undefined : cause,
+      stack: privateEnv.NODE_ENV === 'production' ? undefined : error.stack,
     },
-    error.cause ?? 500
-  )
+  } as ApiErrorResponse
+
+  // 3. Log and return for debugging and frontend displaying.
+  console.error(errorResponse)
+
+  return c.json(errorResponse, status)
 })
 
 // No need to export default (especially Bun).

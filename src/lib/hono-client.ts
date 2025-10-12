@@ -1,4 +1,5 @@
 import type { AppRouter } from '@/server/_app'
+import type { ApiErrorResponse } from '@/server/lib/error'
 import { hc } from 'hono/client'
 import { HTTPException } from 'hono/http-exception'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
@@ -17,8 +18,11 @@ export const initHonoClient = (
       const response = await fetch(input, { ...init, cache: 'no-store' })
 
       if (!response.ok) {
+        const json: ApiErrorResponse = await response.json()
+
         throw new HTTPException(response.status as ContentfulStatusCode, {
-          message: response.statusText,
+          message: json.error.message || response.statusText,
+          cause: json.error.cause,
           res: response,
         })
       }
