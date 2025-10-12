@@ -1,3 +1,4 @@
+import { IconGitHub, IconGoogle } from '@/assets/icons'
 import { TextField, useAppForm } from '@/components/form'
 import { Button } from '@/components/ui/button'
 import { getRoute } from '@/route-tree.gen'
@@ -16,7 +17,7 @@ export default function SignInPage() {
 
   const { count: globalCount, setCount: setGlobalCount } = useCounterContext()
 
-  const { login } = useAuthContext()
+  const { login, githubLogin, googleLogin } = useAuthContext()
 
   const schema = z.object({
     username: z.string().min(3),
@@ -25,17 +26,20 @@ export default function SignInPage() {
 
   const form = useAppForm(() => ({
     defaultValues: {
-      username: '123',
+      username: '',
       password: '',
     },
     validators: {
       // onChange: schema,
       onSubmit: schema,
     },
-    onSubmit: async ({ formApi, value }) => {
+    onSubmit: async ({ value }) => {
       toast.promise(
         async () => {
-          const result = await login(value.username, value.password)
+          const result = await login.run({
+            username: value.username,
+            password: value.password,
+          })
 
           if (result) navigate(getRoute('/dashboard'))
         },
@@ -49,6 +53,34 @@ export default function SignInPage() {
     },
   }))
   const data = form.useStore()
+
+  const handleGithubLogin = () => {
+    toast.promise(
+      async () => {
+        const result = await githubLogin.run()
+        if (result) navigate(getRoute('/dashboard'))
+      },
+      {
+        error: 'Failed to login with GitHub',
+        success: 'Logged in with GitHub',
+        loading: 'Logging in with GitHub...',
+      }
+    )
+  }
+
+  const handleGoogleLogin = () => {
+    toast.promise(
+      async () => {
+        const result = await googleLogin.run()
+        if (result) navigate(getRoute('/dashboard'))
+      },
+      {
+        error: 'Failed to login with Google',
+        success: 'Logged in with Google',
+        loading: 'Logging in with Google...',
+      }
+    )
+  }
 
   return (
     <div class="flex h-full flex-1 flex-col">
@@ -76,10 +108,26 @@ export default function SignInPage() {
           <Button
             type="submit"
             class="rounded border border-blue-300 bg-blue-500 px-5 py-2 text-white"
+            loading={login.loading()}
           >
             Login
           </Button>
         </form>
+
+        <div class="flex gap-x-3">
+          <Button
+            onClick={handleGithubLogin}
+            loading={githubLogin.loading()}
+            variant="outline"
+            class="bg-white"
+          >
+            <IconGitHub />
+          </Button>
+
+          <Button onClick={handleGoogleLogin} loading={googleLogin.loading()} variant="outline">
+            <IconGoogle />
+          </Button>
+        </div>
 
         <pre class="rounded-md border border-gray-500 bg-gray-900 p-3 text-white">
           {JSON.stringify(data().values, null, 2)}
