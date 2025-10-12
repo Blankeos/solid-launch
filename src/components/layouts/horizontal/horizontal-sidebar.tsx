@@ -35,7 +35,7 @@ export default function HorizontalSidebar(_props: VoidProps<HorizontalSidebarPro
                 itemId: 'logout',
                 itemDisplay: 'Logout',
                 itemOnSelect: () => {
-                  logout()
+                  logout.run()
                   toast.success('Logged out!')
                 },
               },

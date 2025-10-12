@@ -12,7 +12,7 @@ export default function SettingsPage() {
 
   return (
     <ProtectedRoute>
-      <div class="flex flex-col gap-y-4 py-8">Settings Page: {user()?.username}</div>
+      <div class="flex flex-col gap-y-4 py-8">Settings Page: {user()?.id}</div>
     </ProtectedRoute>
   )
 }

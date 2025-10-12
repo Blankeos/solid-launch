@@ -97,7 +97,7 @@ export default function VerticalNav(_props: VoidProps<VerticalNavProps>) {
                 itemId: 'logout',
                 itemDisplay: 'Logout',
                 itemOnSelect: () => {
-                  logout()
+                  logout.run()
                   toast.success('Logged out!')
                 },
               },
