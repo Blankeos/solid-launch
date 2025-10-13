@@ -2,7 +2,7 @@ import { FlowProps } from 'solid-js'
 
 import { Toaster } from 'solid-sonner'
 
-import { AuthContextProvider } from '@/stores/auth.context'
+import { AuthContextProvider } from '@/features/auth/auth.context'
 import { CounterContextProvider } from '@/stores/counter.context'
 
 import { ThemeContextProvider, useThemeContext } from '@/contexts/theme.context'

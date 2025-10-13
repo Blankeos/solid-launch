@@ -1,7 +1,8 @@
 import { db } from '@/server/db/kysely'
 
 import { generateId } from '@/server/modules/auth/auth.utilities'
-import { InternalSessionDTO, InternalUserDTO, UserMetaDTO } from './auth.dto'
+import { assertDTO } from '@/server/utils/assert-dto'
+import { InternalSessionDTO, InternalUserDTO, userMetaDTO, UserMetaDTO } from './auth.dto'
 
 export class AuthDAO {
   // Sessions
@@ -118,6 +119,48 @@ export class AuthDAO {
       .executeTakeFirst()
 
     return user
+  }
+
+  async getUserDetails(userId: string) {
+    const user = await db
+      .selectFrom('user')
+      .selectAll()
+      .where('user.id', '=', userId)
+      .executeTakeFirst()
+
+    if (!user) return null
+
+    const [oauthAccounts, sessions] = await Promise.all([
+      db
+        .selectFrom('oauth_account')
+        .select(['provider_id', 'provider_user_id'])
+        .where('oauth_account.user_id', '=', userId)
+        .execute(),
+      db
+        .selectFrom('session')
+        .select(['id', 'expires_at'])
+        .where('session.user_id', '=', userId)
+        .execute(),
+    ])
+
+    return {
+      id: user.id,
+      email: user.email,
+      email_verified: Boolean(user.email_verified),
+      metadata: user.metadata
+        ? assertDTO(JSON.parse(user.metadata as string), userMetaDTO)
+        : undefined,
+      joined_at: user.joined_at,
+      updated_at: user.updated_at,
+      oauth_accounts: oauthAccounts.map((acc) => ({
+        provider: acc.provider_id,
+        provider_user_id: acc.provider_user_id,
+      })),
+      active_sessions: sessions.map((s) => ({
+        id: '***' + s.id.slice(-4),
+        expires_at: s.expires_at,
+      })),
+    }
   }
 
   // --- Auth Strategies ---

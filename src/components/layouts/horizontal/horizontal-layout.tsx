@@ -37,7 +37,7 @@ function _HorizontalLayoutContextProvider(props: FlowProps) {
       </Panel>
       <Show when={sidebarState.isOpen}>
         <ResizeHandle class="group relative flex bg-transparent!">
-          <div class="group-active:bg-primary bg-sidebar-ring h-full w-[1px]" />
+          <div class="group-active:bg-primary bg-sidebar-accent h-full w-[1px]" />
         </ResizeHandle>
       </Show>
       <Panel id="main-content-panel">

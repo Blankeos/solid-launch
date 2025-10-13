@@ -1,6 +1,6 @@
 import { IconLoading } from '@/assets/icons'
+import { useAuthContext } from '@/features/auth/auth.context'
 import { getRoute } from '@/route-tree.gen'
-import { useAuthContext } from '@/stores/auth.context'
 import { createEffect, createSignal, FlowProps, Match, mergeProps, Show, Switch } from 'solid-js'
 import { navigate } from 'vike/client/router'
 

@@ -1,5 +1,5 @@
-import ProtectedRoute from '@/components/common/protected-route'
-import { useAuthContext } from '@/stores/auth.context'
+import { useAuthContext } from '@/features/auth/auth.context'
+import ProtectedRoute from '@/features/auth/protected-route'
 import getTitle from '@/utils/get-title'
 import { useMetadata } from 'vike-metadata-solid'
 
