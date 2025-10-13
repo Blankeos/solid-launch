@@ -31,6 +31,7 @@ export const authController = new Hono<{
   .use('/login/magic-link', rateLimit({ ...RATE_LIMIT_EMAIL_SEND }))
   .use('/forgot-password', rateLimit({ ...RATE_LIMIT_EMAIL_SEND }))
   .use('/verify-email', rateLimit({ ...RATE_LIMIT_EMAIL_SEND }))
+
   // Get current user
   .get('/', authMiddleware, async (c) => {
     const user = c.get('user')
@@ -39,6 +40,16 @@ export const authController = new Hono<{
     return c.json({
       user: user ? getUserResponseDTO(user) : null,
       session: session,
+    })
+  })
+
+  // Get authenticated user profile
+  .get('/profile', authMiddleware, requireAuthMiddleware, describeRoute({}), async (c) => {
+    const user = c.var.user
+    const userDetails = await authService.getUserDetails(user.id)
+
+    return c.json({
+      user: userDetails,
     })
   })
 

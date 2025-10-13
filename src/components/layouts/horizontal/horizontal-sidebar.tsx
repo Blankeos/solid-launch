@@ -1,6 +1,7 @@
 import { DropdownMenuComp } from '@/components/ui/dropdown-menu'
+import { useThemeContext } from '@/contexts/theme.context'
+import { useAuthContext } from '@/features/auth/auth.context'
 import { getRoute } from '@/route-tree.gen'
-import { useAuthContext } from '@/stores/auth.context'
 import { Show, VoidProps } from 'solid-js'
 import { toast } from 'solid-sonner'
 import { navigate } from 'vike/client/router'
@@ -8,10 +9,11 @@ import { navigate } from 'vike/client/router'
 type HorizontalSidebarProps = {}
 
 export default function HorizontalSidebar(_props: VoidProps<HorizontalSidebarProps>) {
+  const { theme, toggleTheme } = useThemeContext()
   const { user, loading, logout } = useAuthContext()
 
   return (
-    <div class="flex h-full shrink-0 flex-col border-r px-8 py-8">
+    <div class="bg-sidebar flex h-full shrink-0 flex-col border-r px-8 py-8">
       <div class="flex items-center gap-x-3">
         <a href={getRoute('/')} class="text-4xl text-gray-500">
           {'<'}
@@ -31,6 +33,13 @@ export default function HorizontalSidebar(_props: VoidProps<HorizontalSidebarPro
                 itemOnSelect: () => navigate(getRoute('/dashboard/settings')),
               },
               { separator: true },
+              {
+                itemId: 'theme',
+                itemDisplay: `Theme: ${theme()}`,
+                itemOnSelect: () => {
+                  toggleTheme()
+                },
+              },
               {
                 itemId: 'logout',
                 itemDisplay: 'Logout',
