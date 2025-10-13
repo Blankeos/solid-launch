@@ -33,7 +33,7 @@ You can also try my other starters:
   - [ ] 2FA
   - [ ] Organization Auth (easily opt-outable)
   - [ ] User Management Dashboard
-  - [x] Rate Limits
+  - [x] Rate Limits + Global Rate Limits
 
 ### Tech Stack
 
@@ -48,8 +48,8 @@ You can also try my other starters:
 - [x] **Kysely** - Great typesafe _query builder_ for SQL, minimally wraps around db connection.
 - [x] **SQLite/LibSQL (Turso)** - Cheapest database, easy to use.
 - [x] **Lucia Book + Arctic** - Makes self-rolling auth easy, and not dependent on any third-party. (You may learn a thing or two with this low-level implementation as well). I chose not to use better-auth, everything is custom built.
-- [x] **Nodemailer or any API** - Just customize `email-client.ts`. Send emails w/ any API: SMTP or SDK-specific (Amazon SES, Resend, Zeptomail, etc.). Amazon SES is the cheapest. I personally use Zeptomail. Tip: SDK-specific is preferred because SMTP is unreliable for some services because of the handshake requirement.
-- [ ] **Backblaze** - Cheap blob object storage with an S3-compatible API.
+- [x] **Nodemailer (or any email API/SDK)** - Just customize `email-client.ts`. Send emails w/ any API: SMTP or SDK-specific (Amazon SES, Resend, Zeptomail, etc.). Amazon SES is the cheapest. I personally use Zeptomail. Tip: SDK-specific is preferred because SMTP is unreliable for some services because of the handshake requirement.
+- [x] **Backblaze (or any S3)** - Cheap blob object storage with an S3-compatible API.
 - [x] **Dodo Payments** - Accept payments and pay foreign taxes, cool new payment tech I found.
 
 ### QuickStart
