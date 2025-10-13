@@ -1,36 +1,16 @@
-import { FlowProps } from 'solid-js';
+import { FlowProps } from 'solid-js'
 
-import { Toaster } from 'solid-sonner';
+import { Toaster } from 'solid-sonner'
 
-import { AuthContextProvider } from '@/stores/auth.context';
-import { CounterContextProvider } from '@/stores/counter.context';
+import { AuthContextProvider } from '@/stores/auth.context'
+import { CounterContextProvider } from '@/stores/counter.context'
 
-import { QueryClient } from '@tanstack/query-core';
-import { QueryClientProvider } from '@tanstack/solid-query';
-import { SolidQueryDevtools } from '@tanstack/solid-query-devtools';
-import { useMetadata } from 'vike-metadata-solid';
+import { ThemeContextProvider, useThemeContext } from '@/contexts/theme.context'
+import { QueryClient } from '@tanstack/query-core'
+import { QueryClientProvider } from '@tanstack/solid-query'
+import { SolidQueryDevtools } from '@tanstack/solid-query-devtools'
 
-const queryClient = new QueryClient();
-
-useMetadata.setGlobalDefaults({
-  title: 'Home | Solid Launch',
-  description: 'An awesome app template by Carlo Taleon.',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-  },
-  twitter: {
-    card: 'summary_large_image',
-    creator: '@carlo_taleon',
-  },
-  otherJSX: () => {
-    return (
-      <>
-        <link rel="icon" href="/icon-logo.svg" />
-      </>
-    );
-  },
-});
+const queryClient = new QueryClient()
 
 export default function Wrapper(props: FlowProps) {
   return (
@@ -39,17 +19,21 @@ export default function Wrapper(props: FlowProps) {
         <QueryClientProvider client={queryClient}>
           <SolidQueryDevtools initialIsOpen={false} />
           <CounterContextProvider>
-            {/* <button
-              class="rounded bg-yellow-500 px-5 py-1"
-              onClick={() => setCounter(counter() + 1)}
-            >
-              Root Wrapper Signal: {counter()} (If this resets to 0, the layout re-mounted)
-            </button> */}
-            {props.children}
+            <ThemeContextProvider>
+              {/* */}
+              {props.children}
+              {/* */}
+              <_Toaster />
+            </ThemeContextProvider>
           </CounterContextProvider>
         </QueryClientProvider>
       </AuthContextProvider>
-      <Toaster />
     </>
-  );
+  )
+}
+
+function _Toaster() {
+  const { inferredTheme } = useThemeContext()
+
+  return <Toaster theme={inferredTheme()} richColors />
 }

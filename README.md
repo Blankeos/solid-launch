@@ -1,12 +1,12 @@
 ## 💙 Solid Launch
 
-> An sophisticated boiler-plate built for **simplicity**.
+> A sophisticated and opinionated boiler-plate built for **simplicity** and **readiness**.
 
 ![Image](https://assets.solidjs.com/banner?type=Starter%20Kit&background=tiles&project=Solid%20Launch)
 
 [Carlo](https://carlo.vercel.app/)'s starter for making a Vike + Solid app with batteries included on stuff I like after experimenting for years.
 
-This is handcrafted from my own research. This might not work for you, but it works for me. 🤓
+This is handcrafted from my own research and experience. My goal for this is almost like Rails where **opinions > flexibility**. This might not work for you, but it works for me. 🤓
 
 You can also try my other starters:
 
@@ -15,35 +15,42 @@ You can also try my other starters:
 
 ### Benefits
 
-- [x] 🐭 **Handcrafted and minimal** - picked and chose "do one thing, do it well" libraries that are just enough to get the job done. Just looks a bit bloated at a glance. (I kinda made my own NextJS from scatch here)
+- [x] 🐭 **Handcrafted and minimal** - picked and chose "do one thing, do it well" libraries that are just enough to get the job done. Just looks a bit bloated at a glance. (I kinda made my own NextJS from scatch here). But it's a minimal Rails-like experience that won't need you to sign up for 5 different unnecessary third-party services just because you can't waste time building your own. I spent hours handcrafting it so you won't have to.
 - [x] ⚡️ **Super-fast dev server** - way faster than NextJS thanks to Vite. You need to feel it to believe it! It can also literally build your app in seconds.
 - [x] 🦋 **Type-safe Routing** - Inspired by TanStack Router, I'm the author of [`vike-routegen`](https://github.com/blankeos/vike-routegen) which codegens typesafe page routing for you, and it's a breeze!
 - [x] 💨 **Fast, efficient, fine-grained Reactivity** - thanks to Solid, it's possibly the most enjoyable framework I used that uses JSX. Has state management primitives out-of-the-box and keeps the experience a breeze.
 - [x] 🐍 **Extremely customizable** - you're not at the mercy of limited APIs and paradigms set by big frameworks or third-party services. Swap with your preferred JS backend framework/runtime if you want. Vike is just a middleware. Most of the tech I use here are open-source and roll-your-own type of thing. Hack it up! You're a dev aren't you?
 - [x] ☁️ **Selfhost-ready** - Crafted with simple hosting in mind that'll still probably scale to millions. Just spin up Docker container on a good'ol VPS without locking into serverless. DHH and Shayan influenced me on this. You can still host it on serverless tho. I think? lol
 - [x] **🔋 Batteries-included** - took care of the hard stuff for you. A well-thought-out folder structure from years of making projects: a design system, components, utilities, hooks, constants, an adequate backend DDD-inspired sliced architecture that isn't overkill, dockerizing your app, and most importantly---perfectly-crafted those pesky config files.
-- [x] 🔑 Authentication-Ready - One thing devs get stuck on. There's a practical auth implemented from scratch here that doesn't vendor-lock you into any auth provider.
-  - [x] Password
-  - [ ] Transactional Emails (Forgot Password, Email Verification)
-  - [ ] OAuth
-  - [ ] Magic Link
+- [x] **🥊 Robust Error Practices** - I thoughtfully made sure there's a best practice for errors here already. You can throw errors in a consistent manner in the backend and display them consistently in the frontend.
+- [x] **📝 Documented** - OpenAPI docs + Scalar. Aside from that, you'll find most my practices well documented here. It's an accumulation of my dev experience.
+- [x] **🔑 Authentication-Ready** - One thing devs get stuck on. There's a practical auth implemented from scratch here that doesn't vendor-lock you into any auth provider.
+  - [x] Email & Password
+  - [x] Transactional Emails (Forgot Password, Email Verification)
+  - [x] OAuth (Google, GitHub, extend as you wish) w/ linking
+  - [x] Magic Link
+  - [x] OTPs
+  - [ ] 2FA
+  - [ ] Organization Auth (easily opt-outable)
   - [ ] User Management Dashboard
+  - [x] Rate Limits
 
 ### Tech Stack
 
 - [x] **Bun** - Runtime and package manager. You can always switch to Node and PNPM if you wish.
-- [x] **SolidJS** - Frontend framework that I like. Pretty underrated, but awesome!
+- [x] **SolidJS** - Frontend framework that I like. Pretty underrated, but devx is superior than any other framework I tried!
 - [x] **Vike** - Like NextJS, but just a middleware. SSR library on-top of Vite. Use on any JS backend. Flexible, Simple, and Fast!
-- [x] **Hono** - 2nd fastest Bun framework(?), run anywhere, uses easy-to-understand web-standard paradigms.
-- [x] **tRPC** - E2E typesafety without context switching. Just amazing DevX.
+- [x] **Hono** - 2nd fastest Bun framework(?), run anywhere, uses easy-to-understand web-standard paradigms w/ typesafety and a bunch of QoLs built-in.
+- [x] **OpenAPI** - A standard doc that other clients can use for your API (i.e. on Flutter, etc.) w/ hono-openapi.
 - [x] **Tailwind** - Styling the web has been pretty pleasant with it. I even use it on React Native for work. It's amazing.
+- [x] **Tanstack Form & Tanstack Query** - No need to rebuild validation, caching, retries, etc.
 - [x] **Prisma** - Great _migrations_ workflow, but I want to maximize perf.
 - [x] **Kysely** - Great typesafe _query builder_ for SQL, minimally wraps around db connection.
 - [x] **SQLite/LibSQL (Turso)** - Cheapest database, easy to use.
-- [x] **Lucia Book + Arctic** - Makes self-rolling auth easy, and not dependent on any third-party. (You may learn a thing or two with this low-level implementation as well!)
-- [ ] **SES or MimePost** - Emails
+- [x] **Lucia Book + Arctic** - Makes self-rolling auth easy, and not dependent on any third-party. (You may learn a thing or two with this low-level implementation as well). I chose not to use better-auth, everything is custom built.
+- [x] **Nodemailer or any API** - Just customize `email-client.ts`. Send emails w/ any API: SMTP or SDK-specific (Amazon SES, Resend, Zeptomail, etc.). Amazon SES is the cheapest. I personally use Zeptomail. Tip: SDK-specific is preferred because SMTP is unreliable for some services because of the handshake requirement.
 - [ ] **Backblaze** - Cheap blob object storage with an S3-compatible API.
-- [ ] **LemonSqueezy** - Accept payments and pay foreign taxes.
+- [x] **Dodo Payments** - Accept payments and pay foreign taxes, cool new payment tech I found.
 
 ### QuickStart
 
@@ -96,20 +103,20 @@ I took care of the painstaking parts to help you develop easily on a SPA + SSR +
     - Getting Current User
 
       ```ts
-      import { useAuthContext } from '@/context/auth.context';
+      import { useAuthContext } from '@/context/auth.context'
 
       export default function MyComponent() {
-        const { user } = useAuthContext();
+        const { user } = useAuthContext()
       }
       ```
 
     - Login, Logout, Register
 
       ```tsx
-      import { useAuthContext } from '@/context/auth.context';
+      import { useAuthContext } from '@/context/auth.context'
 
       export default function MyComponent() {
-        const { login, logout, register } = useAuthContext();
+        const { login, logout, register } = useAuthContext()
       }
       ```
 
@@ -119,21 +126,25 @@ I took care of the painstaking parts to help you develop easily on a SPA + SSR +
 
       ```tsx
       // +data.ts
-      import { initTRPCSSRClient } from '@/lib/trpc-ssr-client';
-      import { PageContext } from 'vike/types';
+      import { initHonoClient } from '@/lib/hono-client'
+      import { PageContext } from 'vike/types'
 
-      export type Data = ReturnType<Awaited<typeof data>>;
+      export type Data = ReturnType<Awaited<typeof data>>
 
       export async function data(pageContext: PageContext) {
-        const { request, response } = pageContext;
+        const { urlParsed, request, response } = pageContext
 
-        const trpcClient = initTRPCSSRClient(request.header(), response.headers); // Pass the headers here.
+        const hc = initHonoClient(urlParsed.origin!, {
+          requestHeaders: request.header(),
+          responseHeaders: response.headers,
+        })
 
-        const result = await trpcClient.auth.currentUser.query();
+        const apiResponse = await hc.auth.$get()
+        const result = await apiResponse.json()
 
         return {
-          user: result.user ?? null,
-        };
+          user: result?.user ?? null,
+        }
       }
       ```
 
@@ -158,14 +169,18 @@ I took care of the painstaking parts to help you develop easily on a SPA + SSR +
       ```ts
       // +guard.ts (If you don't have +data.ts in the same route).
       export async function guard(pageContext: PageContext) {
-        const { request, response } = pageContext;
+        const { urlParsed, request, response } = pageContext
 
-        const trpcClient = initTRPCSSRClient(request.header(), response.headers); // Pass the headers here.
+        const hc = initHonoClient(urlParsed.origin!, {
+          requestHeaders: request.header(),
+          responseHeaders: response.headers,
+        })
 
-        const result = await trpcClient.auth.currentUser.query();
+        const apiResponse = await hc.auth.$get()
+        const result = await apiResponse.json()
 
-        if (!result.user) {
-          throw redirect('/'); // Must be a public route.
+        if (!result?.user) {
+          throw redirect('/') // Must be a public route.
         }
       }
 
@@ -173,14 +188,14 @@ I took care of the painstaking parts to help you develop easily on a SPA + SSR +
       // ⚠️ I have not tested this. This depends on `+guard` being called after `+data` is resolved.
       export async function guard(pageContext: PageContext) {
         if (!pageContext.data?.user) {
-          throw redirect('/'); // Must be a public route.
+          throw redirect('/') // Must be a public route.
         }
       }
       ```
 
 4.  Dataloading Practices - Also have these out-of-the-box for most usecases since they're tricky to do if you're clueless:
-    - Tanstack Query (Client-only) - Use `trpc-client.ts`
-    - Hydrated Tanstack Query (SSR) - Use `create-dehydrated-state.ts` + `trpc-ssr-client.ts`
+    - Tanstack Query (Client-only) - Use `honoClient` from `@/lib/hono-client.ts`
+    - Hydrated Tanstack Query (SSR) - Use `create-dehydrated-state.ts` + `initHonoClient`
 
 ### Backend Architecture
 
@@ -194,9 +209,10 @@ apps I make aren't too business-logic-heavy.
     │   └── *.dao.ts
     ├── modules/
     │   └── <module>/
-    │       ├── services/
-    │       │   └── *.service.ts # 1 service usecase
-    │       └── <module>.controller.ts
+    │       ├── <module>.dao.ts # Plain JS classes with functions for purely reading/writing to database. Like db utils.
+    │       ├── <module>.dto.ts # Zod objects or pure typescript types.
+    │       ├── <module>.service.ts # Plain JS classes with business logic. (Throw api errors, use DAOs, call other services).
+    │       └── <module>.controller.ts # In charge of validators, REST (GET, POST, etc.), and setting to headers.
     └── _app.ts # - root TRPC router.
 ```
 
@@ -216,6 +232,7 @@ Here are some guides on how to deploy.
 
 - [ ] Dokku (self-host VPS - I recommend this)
 - [ ] Kamal (self-host VPS)
+- [ ] Railway
 - [ ] Caprover (self-host VPS)
 - [ ] Cloudflare (serverless + static)
 - [ ] Vercel (serverless + static)
@@ -229,6 +246,19 @@ Here are some guides on how to deploy.
   - Bun Workaround: Having a separate process to run the Websocket server and your HTTP Server. Just make sure to use the same pubsub across these two processes (You can do this using Redis). Also make sure to combine them in a single process in production.
   - Alternative recommendation: Use Node instead as it's possible to use `Connect.Server` middlewares in their `http` server: [PoC](https://github.com/Blankeos/realtime-user-status-node).
 
+### Supplements: My suggestions for third-party services
+
+- Cron jobs, scheduled tasks, heavy background processing, eventual consistency - [QStash](https://upstash.com/docs/qstash/overall/getstarted) or [Trigger.dev](https://trigger.dev)
+- Multiplayer and Realtime - [Rivet.dev](https://www.rivet.dev) or [Convex.dev](https://www.convex.dev)
+- Image optimization pipeline - [Sharp](https://sharp.pixelplumbing.com) for resizing, WebP/AVIF conversion, and caching. Pair with a CDN for global delivery.
+- Search that scales - [MeiliSearch](https://www.meilisearch.com) (self-host) or [Algolia](https://www.algolia.com) (managed). Both have instant search UIs you can drop in.
+- Customer Feedback - [Userjot](https://userjot.com)
+- Customer Support - [Chatwoot](https://www.chatwoot.com)
+- Analytics - [PostHog](https://posthog.com) or [umami.sh](http://umami.sh)
+- Feature flags & A/B tests - [Unleash](https://www.getunleash.io) (self-host) or [PostHog](https://posthog.com) (product analytics + flags). Roll out safely without redeploys.
+- Error & uptime monitoring - [Sentry](https://sentry.io) for exceptions, [Uptime Kuma](https://uptime.kuma.pet) for pings. Both can be self-hosted. [Glitchtip](https://glitchtip.com)
+- Affiliate Tracker - [Refref](https://github.com/refrefhq/refref)
+
 ### Future Plans
 
 > I'll probably make a swapping guide soon. To replace to these:
@@ -238,31 +268,14 @@ Here are some guides on how to deploy.
 > - ORM: Prisma -> Drizzle
 > - Database: SQLite -> PostgreSQL, CockroachDB, MongoDB
 
-<!-- ## Usage
+### FAQs
 
-```bash
-$ npm install # or pnpm install or yarn install
-```
+- Why not better-auth?
 
-### Learn more on the [Solid Website](https://solidjs.com) and come chat with us on our [Discord](https://discord.com/invite/solidjs)
-
-## Available Scripts
-
-In the project directory, you can run:
-
-### `npm run dev`
-
-Runs the app in the development mode.<br>
-Open [http://localhost:5173](http://localhost:5173) to view it in the browser.
-
-### `npm run build`
-
-Builds the app for production to the `dist` folder.<br>
-It correctly bundles Solid in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
-
-## Deployment
-
-Learn more about deploying your application with the [documentations](https://vitejs.dev/guide/static-deploy.html) -->
+  - I thought long and hard about this, and I'm foreseeing a lot of pushback on this so I'll document it here.
+  - I completely understand the extreme strawman argument of "I want to build an app, so here's the entire OAuth spec to implement it". In almost 99% of usecases, you will choose better-auth to save time, it will be better tested, and will give you more flexibility for easier auth flows for 99% of apps. This Lucia implementation is for that extra flexibility for harder auth flows in 1% of apps--which your next SaaS and mine most likely won't be, so why??
+  - I initially wrote the template when better-auth wasn't the standard solution, while Lucia was the up and coming one. Lucia actually made me learn about auth more than any resource in my career, so I started to prefer it. Better auth will save you time, but I already spent that time, and this is the flywheel I wrote to save just as much time as using better auth.
+  - I genuinely believe simple auth isn't so complicated that you'd need a library to abstract it. And for complex auth, you will almost always need a custom solution eventually.
+  - But for flexibility i.e. changing my server framework, database, etc... This approach won't save me time. Better auth wins there.
+  - But it will save me time if I want to support an extremely custom auth flow that better auth doesn't support yet. (I have no examples)
+  - I also save time if I want to implement auth in other languages other than javascript i.e. Rust because the structure and architecture can be done in other languages too.

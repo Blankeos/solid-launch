@@ -1,18 +1,49 @@
 model User {
-  id       String    @id
-  username String
-  passwordHash String
+  id             String  @id
+  email          String  @unique
+  email_verified Boolean @default(false)
+  password_hash  String
+  metadata       Json?
 
-  createdTimestamp DateTime @default(now())
-  updatedTimestamp DateTime @updatedAt @default(now())
+  joined_at  DateTime @default(now())
+  updated_at DateTime @default(now()) @updatedAt
 
-  sessions Session[]
+  sessions       Session[]
+  oauth_accounts OAuthAccount[]
+  onetime_tokens OneTimeToken[]
+
+  @@map("user")
 }
 
 model Session {
-  id        String   @id
-  userId    String
-  expiresAt DateTime
-  user      User     @relation(references: [id], fields: [userId], onDelete: Cascade)
+  id         String   @id
+  user_id    String
+  expires_at DateTime
+  user       User     @relation(references: [id], fields: [user_id], onDelete: Cascade)
+
+  @@map("session")
 }
 
+model OAuthAccount {
+  provider_id      String /// i.e. 'google', 'github' (managed in application layer)
+  provider_user_id String
+  user_id          String
+
+  user User @relation(references: [id], fields: [user_id], onDelete: Cascade)
+
+  @@id([provider_user_id, user_id])
+  @@map("oauth_account")
+}
+
+/// For magic links, OTPs, password‐reset tokens, and other one-time secrets that expire.
+model OneTimeToken {
+  token      String
+  expires_at DateTime
+  user_id    String
+  purpose    String // e.g. 'password_reset', 'magic_link', 'otp', etc. (managed in application layer)
+
+  user User @relation(references: [id], fields: [user_id], onDelete: Cascade)
+
+  @@id([token, user_id])
+  @@map("onetime_token")
+}
