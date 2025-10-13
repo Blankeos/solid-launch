@@ -24,7 +24,7 @@ export default function Page() {
         when={is404}
         fallback={
           <ErrorDisplay
-            code={abortStatusCode ?? '500'}
+            code={abortStatusCode?.toString() ?? '500'}
             title={
               ERROR_MAP[abortStatusCode as unknown as keyof typeof ERROR_MAP] ?? 'Server Error'
             }

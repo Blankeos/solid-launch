@@ -1,7 +1,7 @@
 import { db } from '@/server/db/kysely'
 
 import { generateId } from '@/server/modules/auth/auth.utilities'
-import { InternalSessionDTO, InternalUserDTO } from './auth.dto'
+import { InternalSessionDTO, InternalUserDTO, UserMetaDTO } from './auth.dto'
 
 export class AuthDAO {
   // Sessions
@@ -93,17 +93,13 @@ export class AuthDAO {
     return { success: true }
   }
 
-  // User
-  async getUserByUsername(username: string) {
-    const user = await db
-      .selectFrom('user')
-      .selectAll()
-      .where('user.username', '=', username)
-      .executeTakeFirst()
+  async invalidateAllSessionsByUser(userId: string) {
+    await db.deleteFrom('session').where('session.user_id', '=', userId).execute()
 
-    return user
+    return { success: true }
   }
 
+  // User
   async getUserByUserId(userId: string) {
     const user = await db
       .selectFrom('user')
@@ -124,33 +120,35 @@ export class AuthDAO {
     return user
   }
 
-  async createUserFromUsernameEmailAndPassword(params: {
-    username: string
-    passwordHash: string
+  // --- Auth Strategies ---
+  // - Email and Password
+  async createUserFromEmailAndPassword(params: {
     email: string
+    passwordHash: string
+    metadata?: UserMetaDTO
   }) {
     const userId = generateId()
 
-    await db
+    const user = await db
       .insertInto('user')
       .values({
         id: userId,
         password_hash: params.passwordHash,
-        username: params.username,
         email: params.email,
+        metadata: params.metadata ? JSON.stringify(params.metadata) : undefined,
       })
-      .execute()
+      .returningAll()
+      .executeTakeFirst()
 
-    return { userId }
+    return user
   }
 
-  // --- Auth Strategies ---
   // - OAuth
   async createUserFromOAuth(params: {
     provider: string
     providerUserId: string
     email: string
-    username?: string
+    metadata?: UserMetaDTO
   }) {
     const userId = generateId()
 
@@ -159,9 +157,10 @@ export class AuthDAO {
         .insertInto('user')
         .values({
           id: userId,
-          username: params.username ?? params.email,
           email: params.email,
+          email_verified: 1, // oAuth users are always really verified
           password_hash: generateId(), // Just a random password, that's never guessable usually.
+          metadata: params.metadata ? JSON.stringify(params.metadata) : undefined,
         })
         .returningAll()
         .execute()
@@ -290,6 +289,18 @@ export class AuthDAO {
       .updateTable('user')
       .set({
         password_hash: params.passwordHash,
+      })
+      .where('user.id', '=', params.userId)
+      .execute()
+
+    return { success: true }
+  }
+
+  async updateUserVerifiedEmail(params: { userId: string }) {
+    await db
+      .updateTable('user')
+      .set({
+        email_verified: 1,
       })
       .where('user.id', '=', params.userId)
       .execute()

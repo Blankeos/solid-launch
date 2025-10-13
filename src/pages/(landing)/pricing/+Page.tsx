@@ -16,7 +16,7 @@ export default function PricingPage() {
       interval: '/mo',
       features: ['3 Projects', '1 GB Storage', 'Email Support'],
       popular: false,
-      variantId: '1036199', // Replace with actual variant ID
+      variantId: 'pdt_123', // Replace with actual variant ID
     },
     {
       name: 'Professional',
@@ -24,7 +24,7 @@ export default function PricingPage() {
       interval: '/mo',
       features: ['10 Projects', '10 GB Storage', 'Priority Support', 'Team Collaboration'],
       popular: true,
-      variantId: '1036199', // Replace with actual variant ID
+      variantId: 'pdt_123', // Replace with actual variant ID
     },
     {
       name: 'Enterprise',
@@ -38,7 +38,7 @@ export default function PricingPage() {
         'Custom Integrations',
       ],
       popular: false,
-      variantId: '1036199', // Replace with actual variant ID
+      variantId: 'pdt_123', // Replace with actual variant ID
     },
   ]
 
@@ -46,7 +46,7 @@ export default function PricingPage() {
     try {
       const url = honoClient.payments.checkout[':variantId']
         .$url({
-          param: { variantId },
+          param: { variantId: variantId },
         })
         .toString()
       window.location.href = url

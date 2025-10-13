@@ -17,17 +17,15 @@ export default function SignUpPage() {
 
   const { count, setCount } = useCounterContext()
 
-  const { register, githubLogin, googleLogin } = useAuthContext()
+  const { emailRegister: register, githubLogin, googleLogin } = useAuthContext()
 
   const schema = z.object({
-    username: z.string().min(3),
     email: z.email(),
     password: z.string().min(6),
   })
 
   const form = useAppForm(() => ({
     defaultValues: {
-      username: '',
       email: '',
       password: '',
     },
@@ -38,7 +36,6 @@ export default function SignUpPage() {
       toast.promise(
         async () => {
           const result = await register.run({
-            username: value.username,
             email: value.email,
             password: value.password,
           })
@@ -96,10 +93,6 @@ export default function SignUpPage() {
             form.handleSubmit()
           }}
         >
-          <form.AppField name="username">
-            {(_field) => <TextField label="Username" />}
-          </form.AppField>
-
           <form.AppField name="email">
             {(_field) => <TextField label="Email" type="email" />}
           </form.AppField>

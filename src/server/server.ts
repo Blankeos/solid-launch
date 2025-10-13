@@ -1,14 +1,13 @@
 import { privateEnv } from '@/env.private'
 import { Hono } from 'hono'
 import { appRouter } from './_app'
+import { ApiErrorResponse } from './lib/error'
+import { RATE_LIMIT_GLOBAL, rateLimit } from './lib/rate-limit'
 
 import { apply } from 'vike-server/hono'
 import { serve } from 'vike-server/hono/serve'
 
 const app = new Hono()
-
-import { lemonSqueezyInit } from '@/lib/lemonsqueezy'
-lemonSqueezyInit()
 
 // Health checks
 app.get('/up', async (c) => {
@@ -16,12 +15,12 @@ app.get('/up', async (c) => {
 })
 
 // For the Backend APIs
+app.use('/api/*', rateLimit({ ...RATE_LIMIT_GLOBAL }))
 app.route('/api', appRouter)
 
 // For OpenAPI
 import { openAPIRouteHandler } from 'hono-openapi'
 import { HTTPException } from 'hono/http-exception'
-import { ApiErrorResponse } from './lib/error'
 if (privateEnv.NODE_ENV === 'development') {
   app.get(
     '/api/docs/json',

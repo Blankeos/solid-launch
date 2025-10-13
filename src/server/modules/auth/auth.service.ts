@@ -10,6 +10,21 @@ import { sendEmail } from '@/server/lib/emails/email-client'
 import { renderMagicLinkEmail } from '@/server/lib/emails/magic-link.email'
 import { renderOtpEmail } from '@/server/lib/emails/otp.email'
 import { AuthDAO } from '@/server/modules/auth/auth.dao'
+import { InternalSessionDTO, InternalUserDTO } from './auth.dto'
+
+type UserSessionResponse = Promise<{ user: InternalUserDTO; session: InternalSessionDTO }>
+
+/**
+ * Note: OAuth Callbacks should not throw errors
+ * - for cross-domain compatibility, so they don't get stuck in the endpoint and still redirect back to the desired url, in case.
+ * - Instead, an error message can be given so the redirectedUrl can know about it.
+ */
+type OAuthCallbackResponse = Promise<{
+  user?: InternalUserDTO
+  session?: InternalSessionDTO
+  statusText?: string
+  redirectUrl: string
+}>
 
 export class AuthService {
   public authDAO: AuthDAO
@@ -17,27 +32,22 @@ export class AuthService {
     this.authDAO = new AuthDAO()
   }
 
-  async login(params: { username: string; password: string }) {
-    const { username, password } = params
+  async emailLogin(params: { email: string; password: string }): UserSessionResponse {
+    const { email, password } = params
 
-    if (
-      !username ||
-      username.length < 3 ||
-      username.length > 31 ||
-      !/^[a-z0-9_-]+$/.test(username)
-    ) {
-      throw ApiError.BadRequest('Invalid username')
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      throw ApiError.BadRequest('Invalid email')
     }
 
     if (!password || password.length < 6 || password.length > 255) {
       throw ApiError.BadRequest('Invalid password')
     }
 
-    const existingUser = await this.authDAO.getUserByUsername(username)
+    const existingUser = await this.authDAO.getUserByEmail(email)
 
     if (!existingUser) {
       // Lie for extra security.
-      throw ApiError.BadRequest('Incorrect username or password')
+      throw ApiError.BadRequest('Incorrect email or password')
     }
 
     const validPassword = await verify(existingUser.password_hash, password, {
@@ -46,10 +56,9 @@ export class AuthService {
       outputLen: 32,
       parallelism: 1,
     })
-
     if (!validPassword) {
       // Vague for extra security.
-      throw ApiError.BadRequest('Incorrect username or password')
+      throw ApiError.BadRequest('Incorrect email or password')
     }
 
     const session = await this.authDAO.createSession(existingUser.id)
@@ -60,22 +69,13 @@ export class AuthService {
     }
 
     return {
-      userId: existingUser.id,
-      session: session,
+      user: existingUser,
+      session,
     }
   }
 
-  async register(params: { username: string; password: string; email: string }) {
-    const { username, password, email } = params
-
-    if (
-      !username ||
-      username.length < 3 ||
-      username.length > 31 ||
-      !/^[a-z0-9_-]+$/.test(username)
-    ) {
-      throw ApiError.BadRequest('Invalid username')
-    }
+  async emailRegister(params: { email: string; password: string }): UserSessionResponse {
+    const { email, password } = params
 
     if (!password || password.length < 6 || password.length > 255) {
       throw ApiError.BadRequest('Invalid password')
@@ -83,12 +83,6 @@ export class AuthService {
 
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       throw ApiError.BadRequest('Invalid email')
-    }
-
-    const existingUsername = await this.authDAO.getUserByUsername(username)
-
-    if (existingUsername) {
-      throw ApiError.BadRequest(`Username ${username} already exists.`)
     }
 
     const existingEmail = await this.authDAO.getUserByEmail(email)
@@ -105,13 +99,15 @@ export class AuthService {
       parallelism: 1,
     })
 
-    const { userId } = await this.authDAO.createUserFromUsernameEmailAndPassword({
+    const user = await this.authDAO.createUserFromEmailAndPassword({
       email,
-      username,
       passwordHash,
     })
+    if (!user) {
+      throw ApiError.InternalServerError('Something went wrong while creating your user')
+    }
 
-    const session = await this.authDAO.createSession(userId)
+    const session = await this.authDAO.createSession(user.id)
     if (!session) {
       throw ApiError.InternalServerError(
         'Something went wrong, no session was created. Try refreshing or logging in again'
@@ -119,7 +115,7 @@ export class AuthService {
     }
 
     return {
-      userId,
+      user,
       session,
     }
   }
@@ -144,7 +140,7 @@ export class AuthService {
     storedState?: string
     storedRedirectUrl?: string
     useOneTimeToken?: boolean
-  }) {
+  }): OAuthCallbackResponse {
     const redirectUrl = new URL(params.storedRedirectUrl ?? `${publicEnv.PUBLIC_BASE_URL}`)
 
     if (
@@ -221,8 +217,11 @@ export class AuthService {
           const user = await this.authDAO.createUserFromOAuth({
             provider: 'github',
             email: githubUser.email!,
-            username: githubUser.login,
             providerUserId: githubUser.id.toString(),
+            metadata: {
+              name: githubUser.name,
+              avatar_url: githubUser.avatar_url,
+            },
           })
 
           return user.id
@@ -284,7 +283,7 @@ export class AuthService {
     storedCodeVerifier?: string
     storedRedirectUrl?: string
     useOneTimeToken?: boolean
-  }) {
+  }): OAuthCallbackResponse {
     const redirectUrl = new URL(params.storedRedirectUrl ?? `${publicEnv.PUBLIC_BASE_URL}`)
 
     if (
@@ -342,8 +341,11 @@ export class AuthService {
           const user = await this.authDAO.createUserFromOAuth({
             provider: 'google',
             email: googleUser.email,
-            username: googleUser.name,
             providerUserId: googleUser.sub,
+            metadata: {
+              avatar_url: googleUser.picture,
+              name: googleUser.name,
+            },
           })
 
           return user.id
@@ -444,7 +446,7 @@ export class AuthService {
   }
 
   /** Applies for userId + code combinations (i.e. short codes) */
-  async verifyLoginShortcode(params: { userId: string; code: string }) {
+  async verifyLoginShortcode(params: { userId: string; code: string }): UserSessionResponse {
     const { consumed } = await this.authDAO.consumeOneTimeToken({
       token: params.code,
       userId: params.userId,
@@ -469,7 +471,7 @@ export class AuthService {
   }
 
   /** Applies for high entropy purposes where user id is hidden (i.e. magic_link, cross_domain) */
-  async verifyLoginHighEntropy(params: { token: string }) {
+  async verifyLoginHighEntropy(params: { token: string }): UserSessionResponse {
     const { consumed, userId } = await this.authDAO.consumeOneTimeToken({
       token: params.token,
       purpose: 'otp',
@@ -530,6 +532,46 @@ export class AuthService {
       userId,
       passwordHash,
     })
+
+    await this.authDAO.invalidateAllSessionsByUser(userId)
+
+    return {
+      success: true,
+    }
+  }
+
+  async emailVerificationSend(params: { email: string }) {
+    const user = await this.authDAO.getUserByEmail(params.email)
+    if (!user) throw ApiError.NotFound('User with this email not found')
+
+    const token = await this.authDAO.createOneTimeToken({
+      userId: user.id,
+      purpose: 'email_verification',
+    })
+    console.debug('📧 [emailVerificationSend] Token', token)
+
+    // IMPLEMENT SEND EMAIL
+    try {
+      const html = renderMagicLinkEmail({ token: token })
+      await sendEmail({ html, subject: 'Verify your email address', to: user.email })
+    } catch (_err) {
+      console.error('[emailVerificationSend] error', _err)
+    }
+
+    return { userId: user.id }
+  }
+
+  async emailVerificationVerify(params: { token: string }) {
+    const { consumed, userId } = await this.authDAO.consumeOneTimeToken({
+      token: params.token,
+      purpose: 'email_verification',
+    })
+
+    if (!consumed || !userId) {
+      throw ApiError.BadRequest('Token for email verification is either invalid or expired')
+    }
+
+    await this.authDAO.updateUserVerifiedEmail({ userId })
 
     return {
       success: true,

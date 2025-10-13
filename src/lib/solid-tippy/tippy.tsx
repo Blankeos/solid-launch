@@ -137,6 +137,7 @@ export function useTippy<T extends Element>(
     }
   })
 
+  // eslint-disable-next-line solid/reactivity
   return () => current()
 }
 
@@ -184,6 +185,7 @@ export function useTippyHeadless<T extends Element>(
     }
   })
 
+  // eslint-disable-next-line solid/reactivity
   return () => current()
 }
 

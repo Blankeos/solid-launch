@@ -1,16 +1,16 @@
 model User {
-  id            String @id
-  username      String
-  email         String @unique
-  password_hash String
+  id             String  @id
+  email          String  @unique
+  email_verified Boolean @default(false)
+  password_hash  String
+  metadata       Json?
 
-  created_timestamp DateTime @default(now())
-  updated_timestamp DateTime @default(now()) @updatedAt
+  joined_at  DateTime @default(now())
+  updated_at DateTime @default(now()) @updatedAt
 
-  sessions     Session[]
+  sessions       Session[]
   oauth_accounts OAuthAccount[]
   onetime_tokens OneTimeToken[]
-
 
   @@map("user")
 }
@@ -40,7 +40,7 @@ model OneTimeToken {
   token      String
   expires_at DateTime
   user_id    String
-  purpose    String   // e.g. 'password_reset', 'magic_link', 'otp', etc. (managed in application layer)
+  purpose    String // e.g. 'password_reset', 'magic_link', 'otp', etc. (managed in application layer)
 
   user User @relation(references: [id], fields: [user_id], onDelete: Cascade)
 

@@ -6,7 +6,7 @@
 
 [Carlo](https://carlo.vercel.app/)'s starter for making a Vike + Solid app with batteries included on stuff I like after experimenting for years.
 
-This is handcrafted from my own research. My goal for this is almost like Rails where **opinions > flexibility**. This might not work for you, but it works for me. 🤓
+This is handcrafted from my own research and experience. My goal for this is almost like Rails where **opinions > flexibility**. This might not work for you, but it works for me. 🤓
 
 You can also try my other starters:
 
@@ -15,21 +15,25 @@ You can also try my other starters:
 
 ### Benefits
 
-- [x] 🐭 **Handcrafted and minimal** - picked and chose "do one thing, do it well" libraries that are just enough to get the job done. Just looks a bit bloated at a glance. (I kinda made my own NextJS from scatch here)
+- [x] 🐭 **Handcrafted and minimal** - picked and chose "do one thing, do it well" libraries that are just enough to get the job done. Just looks a bit bloated at a glance. (I kinda made my own NextJS from scatch here). But it's a minimal Rails-like experience that won't need you to sign up for 5 different unnecessary third-party services just because you can't waste time building your own. I spent hours handcrafting it so you won't have to.
 - [x] ⚡️ **Super-fast dev server** - way faster than NextJS thanks to Vite. You need to feel it to believe it! It can also literally build your app in seconds.
 - [x] 🦋 **Type-safe Routing** - Inspired by TanStack Router, I'm the author of [`vike-routegen`](https://github.com/blankeos/vike-routegen) which codegens typesafe page routing for you, and it's a breeze!
 - [x] 💨 **Fast, efficient, fine-grained Reactivity** - thanks to Solid, it's possibly the most enjoyable framework I used that uses JSX. Has state management primitives out-of-the-box and keeps the experience a breeze.
 - [x] 🐍 **Extremely customizable** - you're not at the mercy of limited APIs and paradigms set by big frameworks or third-party services. Swap with your preferred JS backend framework/runtime if you want. Vike is just a middleware. Most of the tech I use here are open-source and roll-your-own type of thing. Hack it up! You're a dev aren't you?
 - [x] ☁️ **Selfhost-ready** - Crafted with simple hosting in mind that'll still probably scale to millions. Just spin up Docker container on a good'ol VPS without locking into serverless. DHH and Shayan influenced me on this. You can still host it on serverless tho. I think? lol
 - [x] **🔋 Batteries-included** - took care of the hard stuff for you. A well-thought-out folder structure from years of making projects: a design system, components, utilities, hooks, constants, an adequate backend DDD-inspired sliced architecture that isn't overkill, dockerizing your app, and most importantly---perfectly-crafted those pesky config files.
-- [x] 🔑 Authentication-Ready - One thing devs get stuck on. There's a practical auth implemented from scratch here that doesn't vendor-lock you into any auth provider.
+- [x] **🥊 Robust Error Practices** - I thoughtfully made sure there's a best practice for errors here already. You can throw errors in a consistent manner in the backend and display them consistently in the frontend.
+- [x] **📝 Documented** - OpenAPI docs + Scalar. Aside from that, you'll find most my practices well documented here. It's an accumulation of my dev experience.
+- [x] **🔑 Authentication-Ready** - One thing devs get stuck on. There's a practical auth implemented from scratch here that doesn't vendor-lock you into any auth provider.
   - [x] Email & Password
   - [x] Transactional Emails (Forgot Password, Email Verification)
   - [x] OAuth (Google, GitHub, extend as you wish) w/ linking
   - [x] Magic Link
   - [x] OTPs
+  - [ ] 2FA
   - [ ] Organization Auth (easily opt-outable)
   - [ ] User Management Dashboard
+  - [x] Rate Limits
 
 ### Tech Stack
 
@@ -44,9 +48,9 @@ You can also try my other starters:
 - [x] **Kysely** - Great typesafe _query builder_ for SQL, minimally wraps around db connection.
 - [x] **SQLite/LibSQL (Turso)** - Cheapest database, easy to use.
 - [x] **Lucia Book + Arctic** - Makes self-rolling auth easy, and not dependent on any third-party. (You may learn a thing or two with this low-level implementation as well). I chose not to use better-auth, everything is custom built.
-- [x] **Nodemailer or any API** - Send emails w/ any API, SMTP or SDK-specific (Amazon SES, Resend, Zeptomail, etc.). Amazon SES is the cheapest. Just customize `email-client.ts`. I personally use Zeptomail. Tip: SDK-specific is preferred because SMTP is unreliable for some services because of the handshake requirement.
+- [x] **Nodemailer or any API** - Just customize `email-client.ts`. Send emails w/ any API: SMTP or SDK-specific (Amazon SES, Resend, Zeptomail, etc.). Amazon SES is the cheapest. I personally use Zeptomail. Tip: SDK-specific is preferred because SMTP is unreliable for some services because of the handshake requirement.
 - [ ] **Backblaze** - Cheap blob object storage with an S3-compatible API.
-- [ ] **LemonSqueezy** - Accept payments and pay foreign taxes.
+- [x] **Dodo Payments** - Accept payments and pay foreign taxes, cool new payment tech I found.
 
 ### QuickStart
 
@@ -205,9 +209,10 @@ apps I make aren't too business-logic-heavy.
     │   └── *.dao.ts
     ├── modules/
     │   └── <module>/
-    │       ├── services/
-    │       │   └── *.service.ts # 1 service usecase
-    │       └── <module>.controller.ts
+    │       ├── <module>.dao.ts # Plain JS classes with functions for purely reading/writing to database. Like db utils.
+    │       ├── <module>.dto.ts # Zod objects or pure typescript types.
+    │       ├── <module>.service.ts # Plain JS classes with business logic. (Throw api errors, use DAOs, call other services).
+    │       └── <module>.controller.ts # In charge of validators, REST (GET, POST, etc.), and setting to headers.
     └── _app.ts # - root TRPC router.
 ```
 
@@ -227,6 +232,7 @@ Here are some guides on how to deploy.
 
 - [ ] Dokku (self-host VPS - I recommend this)
 - [ ] Kamal (self-host VPS)
+- [ ] Railway
 - [ ] Caprover (self-host VPS)
 - [ ] Cloudflare (serverless + static)
 - [ ] Vercel (serverless + static)
@@ -239,6 +245,19 @@ Here are some guides on how to deploy.
   - This is because Bun doesn't work with `Connect.Server` middlewares (which Vite uses). [[Source 1]](https://github.com/oven-sh/bun/issues/12212) [[Source 2]](https://github.com/honojs/vite-plugins/issues/140#issuecomment-2200134094)
   - Bun Workaround: Having a separate process to run the Websocket server and your HTTP Server. Just make sure to use the same pubsub across these two processes (You can do this using Redis). Also make sure to combine them in a single process in production.
   - Alternative recommendation: Use Node instead as it's possible to use `Connect.Server` middlewares in their `http` server: [PoC](https://github.com/Blankeos/realtime-user-status-node).
+
+### Supplements: My suggestions for third-party services
+
+- Cron jobs, scheduled tasks, heavy background processing, eventual consistency - [QStash](https://upstash.com/docs/qstash/overall/getstarted) or [Trigger.dev](https://trigger.dev)
+- Multiplayer and Realtime - [Rivet.dev](https://www.rivet.dev) or [Convex.dev](https://www.convex.dev)
+- Image optimization pipeline - [Sharp](https://sharp.pixelplumbing.com) for resizing, WebP/AVIF conversion, and caching. Pair with a CDN for global delivery.
+- Search that scales - [MeiliSearch](https://www.meilisearch.com) (self-host) or [Algolia](https://www.algolia.com) (managed). Both have instant search UIs you can drop in.
+- Customer Feedback - [Userjot](https://userjot.com)
+- Customer Support - [Chatwoot](https://www.chatwoot.com)
+- Analytics - [PostHog](https://posthog.com) or [umami.sh](http://umami.sh)
+- Feature flags & A/B tests - [Unleash](https://www.getunleash.io) (self-host) or [PostHog](https://posthog.com) (product analytics + flags). Roll out safely without redeploys.
+- Error & uptime monitoring - [Sentry](https://sentry.io) for exceptions, [Uptime Kuma](https://uptime.kuma.pet) for pings. Both can be self-hosted. [Glitchtip](https://glitchtip.com)
+- Affiliate Tracker - [Refref](https://github.com/refrefhq/refref)
 
 ### Future Plans
 
@@ -257,6 +276,6 @@ Here are some guides on how to deploy.
   - I completely understand the extreme strawman argument of "I want to build an app, so here's the entire OAuth spec to implement it". In almost 99% of usecases, you will choose better-auth to save time, it will be better tested, and will give you more flexibility for easier auth flows for 99% of apps. This Lucia implementation is for that extra flexibility for harder auth flows in 1% of apps--which your next SaaS and mine most likely won't be, so why??
   - I initially wrote the template when better-auth wasn't the standard solution, while Lucia was the up and coming one. Lucia actually made me learn about auth more than any resource in my career, so I started to prefer it. Better auth will save you time, but I already spent that time, and this is the flywheel I wrote to save just as much time as using better auth.
   - I genuinely believe simple auth isn't so complicated that you'd need a library to abstract it. And for complex auth, you will almost always need a custom solution eventually.
-  - But it won't save me time if I change my server framework, my database, etc. Better auth wins there.
-  - It will save me time if I want to support a custom auth flow that better auth doesn't support yet. (I have no examples)
-  - It will save me time if I want to implement auth in other languages other than javascript.
+  - But for flexibility i.e. changing my server framework, database, etc... This approach won't save me time. Better auth wins there.
+  - But it will save me time if I want to support an extremely custom auth flow that better auth doesn't support yet. (I have no examples)
+  - I also save time if I want to implement auth in other languages other than javascript i.e. Rust because the structure and architecture can be done in other languages too.

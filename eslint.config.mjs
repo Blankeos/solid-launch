@@ -5,7 +5,7 @@ import globals from 'globals'
 
 export default [
   {
-    ignores: ['dist/**/*', '**/*.js', '**/*.cjs', '**/*.mjs'],
+    ignores: ['dist/**/*', '**/*.js', '**/*.cjs', '**/*.mjs', 'src/route-tree.gen.ts'],
   },
   {
     files: ['**/*.{ts,tsx}'],

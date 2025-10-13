@@ -41,6 +41,10 @@ export class ApiError {
   static Unauthorized(msg: string, cause?: Error) {
     return new HTTPException(401, { message: msg, cause })
   }
+
+  static TooManyRequests(msg: string, cause?: Error) {
+    return new HTTPException(429, { message: msg, cause })
+  }
 }
 
 /** The standard type returned by the central handler. */
@@ -59,3 +63,4 @@ export type ApiErrorResponse = {
 // throw ApiError.InternalError('Server error');
 // throw ApiError.BusinessLogicError('Business rule violation');
 // throw ApiError.Unauthorized('Access denied');
+// throw ApiError.TooManyRequests('Rate limit exceeded');

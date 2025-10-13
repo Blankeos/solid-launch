@@ -22,6 +22,6 @@ export { default as IconEyeOff } from './lucide:eye-off.svg'
 export { default as IconChevronsUpDown } from './lucide:chevrons-up-down.svg'
 export { default as IconArrowUp } from './lucide:arrow-up.svg'
 export { default as IconArrowDown } from './lucide:arrow-down.svg'
-export { default as IconEye } from './lucide:eye.svg';
-export { default as IconGoogle } from './devicon:google.svg';
-export { default as IconGitHub } from './devicon:github.svg';
+export { default as IconEye } from './lucide:eye.svg'
+export { default as IconGoogle } from './devicon:google.svg'
+export { default as IconGitHub } from './devicon:github.svg'

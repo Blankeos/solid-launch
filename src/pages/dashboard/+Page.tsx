@@ -20,7 +20,7 @@ export default function DashboardPage() {
     <>
       <ProtectedRoute>
         <div class="flex flex-col gap-y-4 py-8">
-          Dashboard: {user()?.username}
+          Dashboard: {user()?.metadata?.name}
           <div>
             Window Size: {width()} x {height()}
           </div>

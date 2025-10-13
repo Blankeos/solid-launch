@@ -21,6 +21,7 @@ function OTPForm(props: { onBack: () => void }) {
 
   const handleOTPSend = () => {
     toast.promise(
+      // eslint-disable-next-line solid/reactivity
       async () => {
         const result = await otpSend.run({ email: email() })
         console.log('result', result)
@@ -40,6 +41,7 @@ function OTPForm(props: { onBack: () => void }) {
 
   const handleOTPVerify = () => {
     toast.promise(
+      // eslint-disable-next-line solid/reactivity
       async () => {
         const result = await otpVerify.run({ userId: userId(), code: code() })
         if (result) navigate(getRoute('/dashboard'))
@@ -82,18 +84,18 @@ export default function SignInPage() {
 
   const { count: globalCount, setCount: setGlobalCount } = useCounterContext()
 
-  const { login, githubLogin, googleLogin } = useAuthContext()
+  const { emailLogin: login, githubLogin, googleLogin } = useAuthContext()
 
   const [showOtpForm, setShowOtpForm] = createSignal(false)
 
   const schema = z.object({
-    username: z.string().min(3),
+    email: z.string().min(3),
     password: z.string().min(6),
   })
 
   const form = useAppForm(() => ({
     defaultValues: {
-      username: '',
+      email: '',
       password: '',
     },
     validators: {
@@ -104,14 +106,14 @@ export default function SignInPage() {
       toast.promise(
         async () => {
           const result = await login.run({
-            username: value.username,
+            email: value.email,
             password: value.password,
           })
 
           if (result) navigate(getRoute('/dashboard'))
         },
         {
-          error: 'Failed to login',
+          error: (err) => `Failed to login: ${err.message}`,
 
           success: 'Logged in',
           loading: 'Logging in...',
@@ -172,8 +174,8 @@ export default function SignInPage() {
                   form.handleSubmit()
                 }}
               >
-                <form.AppField name="username">
-                  {(_field) => <TextField label="Username" />}
+                <form.AppField name="email">
+                  {(_field) => <TextField label="Email" />}
                 </form.AppField>
 
                 <form.AppField name="password">

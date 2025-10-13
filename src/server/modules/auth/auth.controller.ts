@@ -8,7 +8,14 @@ import { getCookie } from 'hono/cookie'
 import { AuthService } from './auth.service'
 const authService = new AuthService()
 
+import {
+  RATE_LIMIT_EMAIL_SEND,
+  RATE_LIMIT_LOGIN,
+  RATE_LIMIT_REGISTER,
+  rateLimit,
+} from '@/server/lib/rate-limit'
 import { AuthDAO } from '@/server/modules/auth/auth.dao'
+import { getUserResponseDTO } from './auth.dto'
 const authDAO = new AuthDAO()
 
 export const authController = new Hono<{
@@ -18,13 +25,19 @@ export const authController = new Hono<{
   }
 }>()
   .use(describeRoute({ tags: ['Auth'] }))
+  .use('/login', rateLimit({ ...RATE_LIMIT_LOGIN }))
+  .use('/register', rateLimit({ ...RATE_LIMIT_REGISTER }))
+  .use('/login/otp', rateLimit({ ...RATE_LIMIT_EMAIL_SEND }))
+  .use('/login/magic-link', rateLimit({ ...RATE_LIMIT_EMAIL_SEND }))
+  .use('/forgot-password', rateLimit({ ...RATE_LIMIT_EMAIL_SEND }))
+  .use('/verify-email', rateLimit({ ...RATE_LIMIT_EMAIL_SEND }))
   // Get current user
   .get('/', authMiddleware, async (c) => {
     const user = c.get('user')
     const session = c.get('session')
 
     return c.json({
-      user: user,
+      user: user ? getUserResponseDTO(user) : null,
       session: session,
     })
   })
@@ -35,26 +48,23 @@ export const authController = new Hono<{
     zValidator(
       'json',
       z.object({
-        username: z.string(),
+        email: z.string(),
         password: z.string(),
       })
     ),
     authMiddleware,
     async (c) => {
-      const { username, password } = c.req.valid('json')
+      const { email, password } = c.req.valid('json')
 
-      const { userId, session } = await authService.login({
-        username: username,
+      const { user, session } = await authService.emailLogin({
+        email: email,
         password: password,
       })
 
       setSessionTokenCookie(c, session.id, session.expires_at)
 
       return c.json({
-        user: {
-          id: userId,
-          username: username,
-        },
+        user: getUserResponseDTO(user),
       })
     }
   )
@@ -79,30 +89,21 @@ export const authController = new Hono<{
       'json',
       z.object({
         email: z.email(),
-        username: z
-          .string()
-          .min(3)
-          .max(30)
-          .regex(/^[a-zA-Z0-9_-]+$/),
         password: z.string(),
       })
     ),
     async (c) => {
       const validJson = c.req.valid('json')
 
-      const { userId, session } = await authService.register({
+      const { user, session } = await authService.emailRegister({
         email: validJson.email,
-        username: validJson.username,
         password: validJson.password,
       })
 
       setSessionTokenCookie(c, session.id, session.expires_at)
 
       return c.json({
-        user: {
-          id: userId,
-          username: validJson.username,
-        },
+        user: getUserResponseDTO(user),
       })
     }
   )
@@ -221,10 +222,7 @@ export const authController = new Hono<{
       setSessionTokenCookie(c, session.id, session.expires_at)
 
       return c.json({
-        user: {
-          id: user.id,
-          username: user.username,
-        },
+        user: getUserResponseDTO(user),
       })
     }
   )
@@ -266,10 +264,7 @@ export const authController = new Hono<{
       setSessionTokenCookie(c, session.id, session.expires_at)
 
       return c.json({
-        user: {
-          id: user.id,
-          username: user.username,
-        },
+        user: getUserResponseDTO(user),
       })
     }
   )
@@ -308,6 +303,42 @@ export const authController = new Hono<{
       const { token, newPassword } = c.req.valid('json')
 
       const result = await authService.forgotPasswordVerify({ token, newPassword })
+
+      return c.json(result)
+    }
+  )
+
+  // Email Verification Send
+  .post(
+    '/verify-email',
+    zValidator(
+      'json',
+      z.object({
+        email: z.email(),
+      })
+    ),
+    async (c) => {
+      const { email } = c.req.valid('json')
+
+      await authService.emailVerificationSend({ email })
+
+      return c.json({ success: true })
+    }
+  )
+
+  // Email Verification Verify
+  .post(
+    '/verify-email/verify',
+    zValidator(
+      'json',
+      z.object({
+        token: z.string(),
+      })
+    ),
+    async (c) => {
+      const { token } = c.req.valid('json')
+
+      const result = await authService.emailVerificationVerify({ token })
 
       return c.json(result)
     }

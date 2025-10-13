@@ -206,18 +206,18 @@ export function SelectComp(props: SelectCompProps) {
 
   const placeholderText = createMemo(() => local.placeholder ?? 'Select an option')
 
-  const labelsMap = createMemo(() => {
-    if (!local.options) {
-      return {}
-    }
-    return local.options.reduce(
-      (acc: Record<string, JSX.Element>, option: { value: string; label?: JSX.Element }) => {
-        acc[option.value] = option.label ?? option.value
-        return acc
-      },
-      {} as Record<string, JSX.Element>
-    )
-  })
+  // const labelsMap = createMemo(() => {
+  //   if (!local.options) {
+  //     return {}
+  //   }
+  //   return local.options.reduce(
+  //     (acc: Record<string, JSX.Element>, option: { value: string; label?: JSX.Element }) => {
+  //       acc[option.value] = option.label ?? option.value
+  //       return acc
+  //     },
+  //     {} as Record<string, JSX.Element>
+  //   )
+  // })
 
   function renderItemLabel(rawValue: { value: string; label?: JSX.Element }) {
     const label = children(() => rawValue.label)

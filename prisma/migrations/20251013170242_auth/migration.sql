@@ -1,11 +1,12 @@
 -- CreateTable
 CREATE TABLE "user" (
     "id" TEXT NOT NULL PRIMARY KEY,
-    "username" TEXT NOT NULL,
     "email" TEXT NOT NULL,
+    "email_verified" BOOLEAN NOT NULL DEFAULT false,
     "password_hash" TEXT NOT NULL,
-    "created_timestamp" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_timestamp" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    "metadata" JSONB,
+    "joined_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- CreateTable
