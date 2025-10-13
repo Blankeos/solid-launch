@@ -23,6 +23,9 @@ export default defineConfig({
   plugins: [vike(), vikeSolid(), vikeRoutegen(), solidSvg(), tailwindcss()],
   server: {
     port: 3000,
+    allowedHosts: [
+      '*', // So payment webhooks work (or just replace this with the actual domain). This is only in dev anyway.
+    ],
   },
   preview: {
     port: 3000,

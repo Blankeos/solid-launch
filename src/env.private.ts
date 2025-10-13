@@ -42,9 +42,11 @@ export const privateEnv = createEnv({
 
     // Payments
     /** Development|Prod. For payments. */
-    LEMONSQUEEZY_STORE_ID: z.string(),
+    DODO_PAYMENTS_API_KEY: z.string(),
     /** Development|Prod. For payments. */
-    LEMONSQUEEZY_API_KEY: z.string(),
+    DODO_PAYMENTS_WEBOOK_SECRET: z.string(),
+    /** Development|Prod. For payments. */
+    DODO_PAYMENTS_ENV: z.enum(['test_mode', 'live_mode']).default('test_mode'),
 
     // SMTP
     // /** Development|Prod For emails. */
