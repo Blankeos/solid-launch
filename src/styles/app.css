@@ -15,6 +15,41 @@ input::-ms-clear {
   display: none;
 }
 
+/** Force every scrollbar to inherit the themed thin scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+/** But exclude the root / viewport scrollbar */
+:root {
+  scrollbar-width: auto;
+  scrollbar-color: auto;
+}
+*::-webkit-scrollbar:not(:root) {
+  width: 6px;
+  height: 6px;
+  background-color: transparent;
+}
+*::-webkit-scrollbar-thumb:not(:root) {
+  background-color: var(--color-border);
+  border-radius: 9999px;
+}
+*::-webkit-scrollbar-track:not(:root) {
+  background-color: transparent;
+}
+&::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+  background-color: transparent;
+}
+&::-webkit-scrollbar-thumb {
+  background-color: var(--color-border);
+  border-radius: 9999px;
+}
+&::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
 /* -- Tailwind Defaults (Removed in V4, so manually set) -- */
 
 @layer base {
