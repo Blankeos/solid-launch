@@ -262,55 +262,120 @@ export {
 // ---
 
 type OptionItem = {
-  itemId: string
+  type: 'item'
+  itemId?: string
   itemDisplay?: JSX.Element
-  itemOnSelect?: (id: string) => void
+  itemOnSelect?: (id?: string) => void
   itemTip?: JSX.Element
+  hide?: boolean
+} & DropdownMenuItemProps
+
+type OptionSeparator = { type: 'separator'; hide?: boolean }
+
+type OptionLabel = { type: 'label'; label: JSX.Element; hide?: boolean }
+
+type OptionSub = {
+  type: 'sub'
+  subTrigger: JSX.Element
+  subOptions: DropdownMenuOption[]
   hide?: boolean
 }
 
-type OptionSeparator = { separator: true }
-
-type OptionLabel = { label: JSX.Element }
-
-type OptionSub = {
-  subTrigger: JSX.Element
-  subOptions: DropdownMenuOption[]
+type OptionCheckboxItem = {
+  type: 'checkbox'
+  checked?: boolean
+  onChange?: (checked: boolean) => void
+  children?: JSX.Element
+  label?: JSX.Element
+  hide?: boolean
 }
 
-export type DropdownMenuOption = OptionItem | OptionSeparator | OptionLabel | OptionSub
+type OptionRadioGroup = {
+  type: 'radio'
+  value?: string
+  onChange?: (value: string) => void
+  options: OptionRadioItem[]
+  hide?: boolean
+}
+
+type OptionRadioItem = {
+  value: string
+  label?: JSX.Element
+  hide?: boolean
+}
+
+export type DropdownMenuOption =
+  | OptionLabel
+  | OptionItem
+  | OptionSeparator
+  | OptionSub
+  | OptionCheckboxItem
+  | OptionRadioGroup
 
 const _DropdownMenuSubComp: Component<{ options: DropdownMenuOption[] }> = (props) => {
   return (
     <For each={props.options}>
       {(option) => {
-        if ('separator' in option && option.separator === true) {
-          return <DropdownMenuSeparator />
-        } else if ('label' in option) {
-          return <DropdownMenuLabel>{option.label}</DropdownMenuLabel>
-        } else if ('subTrigger' in option && 'subOptions' in option) {
-          const sub = option as OptionSub
-          return (
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger>{sub.subTrigger}</DropdownMenuSubTrigger>
-              <DropdownMenuPortal>
-                <DropdownMenuSubContent>
-                  <_DropdownMenuSubComp options={sub.subOptions} />
-                </DropdownMenuSubContent>
-              </DropdownMenuPortal>
-            </DropdownMenuSub>
-          )
-        } else {
-          const item = option as OptionItem
-          if (item.hide) return null
-          return (
-            <DropdownMenuItem onSelect={() => item.itemOnSelect?.(item.itemId)}>
-              {item.itemDisplay}
-              {item.itemTip && (
-                <DropdownMenuShortcut class="pl-2">{item.itemTip}</DropdownMenuShortcut>
-              )}
-            </DropdownMenuItem>
-          )
+        if (option.hide) return null
+
+        switch (option.type) {
+          case 'separator':
+            return <DropdownMenuSeparator />
+          case 'label':
+            return <DropdownMenuLabel>{option.label}</DropdownMenuLabel>
+          case 'sub': {
+            const sub = option as OptionSub
+            return (
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>{sub.subTrigger}</DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent>
+                    <_DropdownMenuSubComp options={sub.subOptions} />
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
+            )
+          }
+          case 'item': {
+            const item = option as OptionItem
+            return (
+              <DropdownMenuItem onSelect={() => item.itemOnSelect?.(item.itemId)} {...item}>
+                {item.itemDisplay}
+                {item.itemTip && (
+                  <DropdownMenuShortcut class="pl-2">{item.itemTip}</DropdownMenuShortcut>
+                )}
+              </DropdownMenuItem>
+            )
+          }
+          case 'checkbox': {
+            const item = option as OptionCheckboxItem
+            return (
+              <DropdownMenuCheckboxItem checked={item.checked} onChange={item.onChange}>
+                {item.children || item.label}
+              </DropdownMenuCheckboxItem>
+            )
+          }
+          case 'radio': {
+            const group = option as OptionRadioGroup
+            return (
+              <DropdownMenuGroup>
+                <DropdownMenuRadioGroup value={group.value} onChange={group.onChange}>
+                  <For each={group.options}>
+                    {(radioOption) => {
+                      if (radioOption.hide) return null
+                      return (
+                        <DropdownMenuRadioItem value={radioOption.value}>
+                          {radioOption.label || radioOption.value}
+                        </DropdownMenuRadioItem>
+                      )
+                    }}
+                  </For>
+                </DropdownMenuRadioGroup>
+              </DropdownMenuGroup>
+            )
+          }
+          default:
+            return null
         }
       }}
     </For>

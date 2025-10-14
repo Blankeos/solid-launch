@@ -63,6 +63,7 @@ export type AuthContextValue = {
   otpVerify: MutationState<{ userId: string; code: string }, UserResponseDTO | null>
   googleLogin: MutationState<{ newWindow?: boolean }, { success: boolean }>
   githubLogin: MutationState<{ newWindow?: boolean }, { success: boolean }>
+  revokeSession: MutationState<{ revokeId: string }, { success: boolean }>
 }
 
 const AuthContext = createContext({
@@ -77,6 +78,7 @@ const AuthContext = createContext({
   otpVerify: { loading: () => false, error: () => null, run: async () => null },
   googleLogin: { loading: () => false, error: () => null, run: async () => ({ success: false }) },
   githubLogin: { loading: () => false, error: () => null, run: async () => ({ success: false }) },
+  revokeSession: { loading: () => false, error: () => null, run: async () => ({ success: false }) },
 } as AuthContextValue)
 
 // ===========================================================================
@@ -105,6 +107,17 @@ export const AuthContextProvider: FlowComponent = (props) => {
 
     return { success: false }
   })
+
+  const revokeSession = createMutation<{ revokeId: string }, { success: boolean }>(
+    async ({ revokeId }) => {
+      const resp = await honoClient.auth.revoke.$post({
+        json: { revokeId },
+      })
+      const _result = await resp.json()
+      _fetchCurrentUser()
+      return { success: true }
+    }
+  )
 
   const emailRegister = createMutation<{ email: string; password: string }, UserResponseDTO | null>(
     async ({ email, password }) => {
@@ -221,17 +234,19 @@ export const AuthContextProvider: FlowComponent = (props) => {
     }
   )
 
+  // FIXME I have not specially tested this yet.
   const magicLinkVerify = createMutation<{ token: string }, UserResponseDTO | null>(
     async ({ token }) => {
-      const response = await honoClient.auth.login['magic-link']['verify'].$post({
-        json: { token },
+      const response = await honoClient.auth.login['magic-link']['verify'].$get({
+        query: { token },
       })
-      const result = await response.json()
-      if (result.user) {
-        setUser(result.user)
-        return result.user
-      }
       return null
+      // const result = await response.json()
+      // if (result.user) {
+      //   setUser(result.user)
+      //   return result.user
+      // }
+      // return null
     }
   )
 
@@ -308,6 +323,7 @@ export const AuthContextProvider: FlowComponent = (props) => {
         otpVerify,
         googleLogin,
         githubLogin,
+        revokeSession,
       }}
     >
       {props.children}

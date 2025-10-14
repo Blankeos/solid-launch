@@ -1,22 +1,27 @@
 import { db } from '@/server/db/kysely'
 
-import { generateId } from '@/server/modules/auth/auth.utilities'
+import { generateId, getSimpleDeviceName } from '@/server/modules/auth/auth.utilities'
 import { assertDTO } from '@/server/utils/assert-dto'
+import { AUTH_CONFIG } from './auth.config'
 import { InternalSessionDTO, InternalUserDTO, userMetaDTO, UserMetaDTO } from './auth.dto'
 
 export class AuthDAO {
   // Sessions
   async createSession(userId: string) {
     const sessionId = generateId()
+    const revokeId = generateId()
 
     const session = await db
       .insertInto('session')
       .values({
         id: sessionId,
+        revoke_id: revokeId,
         user_id: userId,
-        expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString(), // 7 days
+        expires_at: new Date(
+          Date.now() + AUTH_CONFIG.session.expiresInDays * 24 * 60 * 60 * 1000
+        ).toISOString(),
       })
-      .returning(['session.expires_at', 'session.id', 'session.user_id'])
+      .returningAll()
       .executeTakeFirst()
 
     return session
@@ -31,20 +36,34 @@ export class AuthDAO {
       .leftJoin('user', 'session.user_id', 'user.id')
       .select([
         'session.id as session_id',
+        'revoke_id as session_revoke_id',
         'session.expires_at as session_expires_at',
         'session.user_id as session_user_id',
+        'session.ip_address as session_ip_address',
+        'session.user_agent_hash as session_user_agent_hash',
       ])
       .selectAll('user')
       .executeTakeFirst()
 
     if (!result) return { session: undefined, user: undefined }
 
-    const { session_id, session_expires_at, session_user_id, ...joinedUser } = result
+    const {
+      session_id,
+      session_expires_at,
+      session_user_id,
+      session_revoke_id,
+      session_ip_address,
+      session_user_agent_hash,
+      ...joinedUser
+    } = result
 
     const session: InternalSessionDTO = {
       id: session_id,
+      revoke_id: session_revoke_id,
       expires_at: session_expires_at,
       user_id: session_user_id,
+      ip_address: session_ip_address,
+      user_agent_hash: session_user_agent_hash,
     }
 
     if (!joinedUser.id) {
@@ -72,9 +91,14 @@ export class AuthDAO {
       return { session: undefined, user: undefined }
     }
 
-    // Extend if about to expire.
-    if (Date.now() >= expiresAt.getTime() - 1000 * 60 * 60 * 24 * 15) {
-      session.expires_at = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toUTCString()
+    // Extend if about to expire
+    if (
+      Date.now() >=
+      expiresAt.getTime() - 1000 * 60 * 60 * 24 * AUTH_CONFIG.session.renewWithinDays
+    ) {
+      session.expires_at = new Date(
+        Date.now() + 1000 * 60 * 60 * 24 * AUTH_CONFIG.session.expiresInDays
+      ).toISOString()
 
       await db
         .updateTable('session')
@@ -89,13 +113,58 @@ export class AuthDAO {
   }
 
   async invalidateSession(sessionId: string) {
-    await db.deleteFrom('session').where('session.id', '=', sessionId).execute()
+    const result = await db
+      .deleteFrom('session')
+      .where('session.id', '=', sessionId)
+      .executeTakeFirst()
+
+    if (Number(result.numDeletedRows) === 0) {
+      return { success: false }
+    }
 
     return { success: true }
   }
 
   async invalidateAllSessionsByUser(userId: string) {
     await db.deleteFrom('session').where('session.user_id', '=', userId).execute()
+
+    return { success: true }
+  }
+
+  async revokeSessionByRevokeId(params: { revokeId: string; userId: string }) {
+    const result = await db
+      .deleteFrom('session')
+      .where('session.revoke_id', '=', params.revokeId)
+      .where('session.user_id', '=', params.userId)
+      .executeTakeFirst()
+
+    if (Number(result.numDeletedRows) === 0) {
+      return { success: false }
+    }
+
+    return { success: true }
+  }
+
+  async updateSessionIP(params: { sessionId: string; ipAddress: string | null }) {
+    await db
+      .updateTable('session')
+      .set({
+        ip_address: params.ipAddress,
+      })
+      .where('session.id', '=', params.sessionId)
+      .execute()
+
+    return { success: true }
+  }
+
+  async updateSessionUserAgent(params: { sessionId: string; userAgentHash: string | null }) {
+    await db
+      .updateTable('session')
+      .set({
+        user_agent_hash: params.userAgentHash,
+      })
+      .where('session.id', '=', params.sessionId)
+      .execute()
 
     return { success: true }
   }
@@ -138,7 +207,7 @@ export class AuthDAO {
         .execute(),
       db
         .selectFrom('session')
-        .select(['id', 'expires_at'])
+        .select(['id', 'revoke_id', 'expires_at', 'ip_address', 'session.user_agent_hash'])
         .where('session.user_id', '=', userId)
         .execute(),
     ])
@@ -157,8 +226,11 @@ export class AuthDAO {
         provider_user_id: acc.provider_user_id,
       })),
       active_sessions: sessions.map((s) => ({
-        id: '***' + s.id.slice(-4),
+        display_id: '***' + s.id.slice(-4),
+        revoke_id: s.revoke_id,
         expires_at: s.expires_at,
+        ip_address: s.ip_address,
+        device_name: getSimpleDeviceName(s.user_agent_hash),
       })),
     }
   }

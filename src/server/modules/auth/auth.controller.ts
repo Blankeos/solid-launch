@@ -8,6 +8,8 @@ import { getCookie } from 'hono/cookie'
 import { AuthService } from './auth.service'
 const authService = new AuthService()
 
+import { publicEnv } from '@/env.public'
+import { ApiError } from '@/server/lib/error'
 import {
   RATE_LIMIT_EMAIL_SEND,
   RATE_LIMIT_LOGIN,
@@ -82,7 +84,7 @@ export const authController = new Hono<{
 
   // Logout
   .get('/logout', authMiddleware, requireAuthMiddleware, describeRoute({}), async (c) => {
-    const session = c.get('session')
+    const session = c.var.session
 
     await authDAO.invalidateSession(session.id)
 
@@ -92,6 +94,31 @@ export const authController = new Hono<{
       success: true,
     })
   })
+
+  .post(
+    '/revoke',
+    authMiddleware,
+    requireAuthMiddleware,
+    zValidator(
+      'json',
+      z.object({
+        revokeId: z.string(),
+      })
+    ),
+    async (c) => {
+      const { revokeId } = c.req.valid('json')
+      const user = c.var.user
+
+      const result = await authDAO.revokeSessionByRevokeId({ userId: user.id, revokeId })
+      if (!result.success) {
+        throw ApiError.NotFound('Session not found or does not belong to user')
+      }
+
+      if (c.var.session.revoke_id === revokeId) deleteSessionTokenCookie(c)
+
+      return c.json({ success: true })
+    }
+  )
 
   // Register
   .post(
@@ -258,25 +285,30 @@ export const authController = new Hono<{
   )
 
   // Verify Login High Entropy (Magic Link)
-  .post(
+  .get(
     '/login/magic-link/verify',
     zValidator(
-      'json',
+      'query',
       z.object({
         token: z.string(),
+        redirect: z.string().optional(),
       })
     ),
     describeRoute({}),
     async (c) => {
-      const { token } = c.req.valid('json')
+      const { token, redirect } = c.req.valid('query')
 
-      const { user, session } = await authService.verifyLoginHighEntropy({ token })
+      try {
+        const { user, session } = await authService.verifyLoginHighEntropy({ token })
 
-      setSessionTokenCookie(c, session.id, session.expires_at)
+        setSessionTokenCookie(c, session.id, session.expires_at)
+      } catch (error: any) {
+        const redirectUrl = new URL(redirect || '/', publicEnv.PUBLIC_BASE_URL)
+        redirectUrl.searchParams.set('error', error.message || 'Magic link verification failed')
+        return c.redirect(redirectUrl.toString())
+      }
 
-      return c.json({
-        user: getUserResponseDTO(user),
-      })
+      return c.redirect(redirect || '/')
     }
   )
 
@@ -338,19 +370,26 @@ export const authController = new Hono<{
   )
 
   // Email Verification Verify
-  .post(
+  .get(
     '/verify-email/verify',
     zValidator(
-      'json',
+      'query',
       z.object({
         token: z.string(),
+        redirect: z.string().optional(),
       })
     ),
     async (c) => {
-      const { token } = c.req.valid('json')
+      const { token, redirect } = c.req.valid('query')
 
-      const result = await authService.emailVerificationVerify({ token })
+      try {
+        await authService.emailVerificationVerify({ token })
+      } catch (error: any) {
+        const redirectUrl = new URL(redirect || '/', publicEnv.PUBLIC_BASE_URL)
+        redirectUrl.searchParams.set('error', error.message || 'Email verification failed')
+        return c.redirect(redirectUrl.toString())
+      }
 
-      return c.json(result)
+      return c.redirect(redirect || '/')
     }
   )

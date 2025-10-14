@@ -3,7 +3,12 @@ import type { Bindings } from '@/server/lib/context'
 import { ApiError } from '@/server/lib/error'
 import { getCookie } from 'hono/cookie'
 import { createMiddleware } from 'hono/factory'
-import { deleteSessionTokenCookie, setSessionTokenCookie } from './auth.utilities'
+import {
+  deleteSessionTokenCookie,
+  getClientIP,
+  getUserAgentHash,
+  setSessionTokenCookie,
+} from './auth.utilities'
 
 import { InternalSessionDTO, InternalUserDTO } from './auth.dto'
 
@@ -31,13 +36,30 @@ export const authMiddleware = createMiddleware<AuthMiddlewareBindings>(async (c,
     deleteSessionTokenCookie(c)
   }
 
-  // 4. Set context values.
+  // 4. Update session metadata (fire-and-forget, non-blocking)
+  if (session) {
+    const clientIP = getClientIP(c)
+    const userAgent = c.req.header('user-agent')
+
+    // Only update if we got valid data AND it changed
+    if (clientIP && session.ip_address !== clientIP) {
+      authDAO.updateSessionIP({ ipAddress: clientIP, sessionId: session.id }).catch(() => {}) // Silent fail
+    }
+
+    const uaHash = userAgent ? getUserAgentHash(userAgent) : null
+    if (uaHash && session.user_agent_hash !== uaHash) {
+      authDAO
+        .updateSessionUserAgent({ sessionId: session.id, userAgentHash: uaHash })
+        .catch(() => {}) // Silent fail
+    }
+  }
+
+  // 5. Set context values.
   c.set('user', user ?? null)
   c.set('session', session ?? null)
 
   return next()
 })
-
 export type RequireAuthMiddlewareBindings = Bindings & {
   Variables: {
     user: User

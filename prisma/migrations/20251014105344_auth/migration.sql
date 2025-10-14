@@ -14,6 +14,9 @@ CREATE TABLE "session" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "user_id" TEXT NOT NULL,
     "expires_at" DATETIME NOT NULL,
+    "revoke_id" TEXT NOT NULL,
+    "ip_address" TEXT,
+    "user_agent_hash" TEXT,
     CONSTRAINT "session_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -40,3 +43,6 @@ CREATE TABLE "onetime_token" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "user_email_key" ON "user"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "session_revoke_id_key" ON "session"("revoke_id");

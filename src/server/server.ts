@@ -102,7 +102,12 @@ app.onError((error, c) => {
   } as ApiErrorResponse
 
   // 3. Log and return for debugging and frontend displaying.
-  console.error(errorResponse)
+  const log = {
+    ...errorResponse,
+    endpoint: c.req.path,
+    method: c.req.method,
+  }
+  console.error(log)
 
   return c.json(errorResponse, status)
 })

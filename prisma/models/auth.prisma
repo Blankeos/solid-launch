@@ -16,10 +16,15 @@ model User {
 }
 
 model Session {
-  id         String   @id
+  id         String   @id /// Never send this to the frontend (except http-only cookie)
   user_id    String
   expires_at DateTime
-  user       User     @relation(references: [id], fields: [user_id], onDelete: Cascade)
+  revoke_id  String   @unique /// an alternative id strictly for revoking (not validating) so it's safe to send to frontend
+
+  // Some meta
+  ip_address      String? /// For "new device login" emails
+  user_agent_hash String? ///
+  user            User    @relation(references: [id], fields: [user_id], onDelete: Cascade)
 
   @@map("session")
 }

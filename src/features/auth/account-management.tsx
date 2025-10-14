@@ -5,28 +5,49 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Skeleton } from '@/components/ui/skeleton'
 import { honoClient } from '@/lib/hono-client'
 import { cn } from '@/utils/cn'
-import { useQuery } from '@tanstack/solid-query'
+import { useMutation, useQuery } from '@tanstack/solid-query'
 import { Index, Show, VoidProps } from 'solid-js'
+import { toast } from 'solid-sonner'
 import { useAuthContext } from './auth.context'
 
 export function AccountManagement(props: VoidProps<{ class?: string }>) {
-  const { user } = useAuthContext()
+  const { user, revokeSession } = useAuthContext()
 
   const profileQuery = useQuery(() => ({
     queryKey: ['auth.profile'],
     queryFn: async () => {
+      console.log('YOOO!!', user())
+
       const resp = await honoClient.auth.profile.$get()
-      if (!resp.ok) throw new Error('Failed to fetch profile')
       return resp.json()
     },
     enabled: !!user(),
   }))
 
+  const sendVerificationEmailMut = useMutation(() => ({
+    mutationKey: ['auth.verify-email'],
+    mutationFn: async () => {
+      const resp = await honoClient.auth['verify-email'].$post({ json: { email: user()!.email } })
+      return resp.json()
+    },
+    onError: (err) => {
+      toast.error(`Could not send email: ${err.message}`)
+    },
+  }))
+
+  function handleRevokeSession(revokeId: string) {
+    toast.promise(revokeSession.run({ revokeId }), {
+      loading: 'Revoking session…',
+      success: 'Session revoked',
+      error: (err) => `Could not revoke session: ${err.message}`,
+    })
+  }
+
   return (
     <div class={cn('mx-auto w-full max-w-2xl', props.class)}>
       <h2 class="mb-6 text-2xl font-semibold">Account</h2>
 
-      <Card class="mb-4">
+      <Card class="mb-4 overflow-hidden">
         <CardHeader>
           <CardTitle class="text-base">Profile</CardTitle>
           <CardDescription>Your basic account information</CardDescription>
@@ -36,11 +57,29 @@ export function AccountManagement(props: VoidProps<{ class?: string }>) {
             <span class="text-muted-foreground text-sm">Email address</span>
             <span class="text-sm font-medium">{user()?.email}</span>
           </div>
-          <div class="flex items-center justify-between">
+          <div class="flex items-start justify-between">
             <span class="text-muted-foreground text-sm">Email status</span>
-            <Badge variant={user()?.email_verified ? 'default' : 'warning'}>
-              {user()?.email_verified ? 'Verified' : 'Unverified'}
-            </Badge>
+
+            <div class="flex items-center gap-1.5">
+              <Show when={!user()?.email_verified}>
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  onClick={() => sendVerificationEmailMut.mutate()}
+                  disabled={sendVerificationEmailMut.isPending || !!sendVerificationEmailMut.data}
+                >
+                  📩{' '}
+                  {sendVerificationEmailMut.data
+                    ? 'Check your email'
+                    : sendVerificationEmailMut.isPending
+                      ? 'Sending...'
+                      : 'Send verification email'}
+                </Button>
+              </Show>
+              <Badge variant={user()?.email_verified ? 'success' : 'warning'}>
+                {user()?.email_verified ? 'Verified' : 'Unverified'}
+              </Badge>
+            </div>
           </div>
           <div class="flex items-center justify-between">
             <span class="text-muted-foreground text-sm">Name</span>
@@ -69,7 +108,7 @@ export function AccountManagement(props: VoidProps<{ class?: string }>) {
       </Card>
 
       <Show when={profileQuery.data}>
-        <Card class="mb-4">
+        <Card class="mb-4 overflow-hidden">
           <CardHeader>
             <CardTitle class="text-base">Connected accounts</CardTitle>
             <CardDescription>Manage your social logins</CardDescription>
@@ -94,9 +133,9 @@ export function AccountManagement(props: VoidProps<{ class?: string }>) {
                           </p>
                         </div>
                       </div>
-                      <Button variant="ghost" size="sm">
+                      {/*<Button variant="ghost" size="sm">
                         Remove
-                      </Button>
+                      </Button>*/}
                     </li>
                   )}
                 </Index>
@@ -118,33 +157,11 @@ export function AccountManagement(props: VoidProps<{ class?: string }>) {
               <ul class="divide-y">
                 <Index each={profileQuery.data!.user.active_sessions}>
                   {(s) => (
-                    <li class="flex items-center justify-between py-3 first:pt-0 last:pb-0">
-                      <div class="flex items-center gap-3">
-                        <svg
-                          class="text-muted-foreground h-4 w-4"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                          viewBox="0 0 24 24"
-                          aria-hidden="true"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10c0-2.21-.72-4.23-1.91-5.82"
-                          />
-                        </svg>
-                        <div>
-                          <p class="text-sm font-medium">Session {s().id}</p>
-                          <p class="text-muted-foreground text-xs">
-                            Expires {new Date(s().expires_at).toLocaleString()}
-                          </p>
-                        </div>
-                      </div>
-                      <Button variant="ghost" size="sm">
-                        Revoke
-                      </Button>
-                    </li>
+                    <SessionItem
+                      session={s()}
+                      onRevoke={handleRevokeSession}
+                      loading={revokeSession.loading()}
+                    />
                   )}
                 </Index>
               </ul>
@@ -154,7 +171,7 @@ export function AccountManagement(props: VoidProps<{ class?: string }>) {
       </Show>
 
       <Show when={profileQuery.isLoading}>
-        <Card class="mb-4">
+        <Card class="mb-4 overflow-hidden">
           <CardHeader>
             <Skeleton class="h-4 w-24" />
             <Skeleton class="h-3 w-40" />
@@ -166,5 +183,55 @@ export function AccountManagement(props: VoidProps<{ class?: string }>) {
         </Card>
       </Show>
     </div>
+  )
+}
+
+function SessionItem(props: {
+  // Can be improved (get from the server via a type)
+  session: {
+    device_name?: string | null
+    display_id?: string | null
+    expires_at: string
+    ip_address?: string | null
+    revoke_id: string
+  }
+  onRevoke: (id: string) => void
+  loading: boolean
+}) {
+  const deviceEmoji = () => {
+    const name = (props.session.device_name || '').toLowerCase()
+    if (name.includes('mac') || name.includes('apple') || name.includes('os x')) return '🍎'
+    if (name.includes('windows')) return '🪟'
+    if (name.includes('linux')) return '🐧'
+    if (name.includes('mobile') || name.includes('android') || name.includes('ios')) return '📱'
+    return '💻'
+  }
+
+  return (
+    <li class="flex items-center justify-between py-3 first:pt-0 last:pb-0">
+      <div class="flex items-center gap-3">
+        <span class="text-muted-foreground text-lg">{deviceEmoji()}</span>
+        <div>
+          <p class="text-sm font-medium">{props.session.display_id || 'Unknown Device'}</p>
+          <p class="text-muted-foreground text-xs">
+            {props.session.device_name} · Expires{' '}
+            {new Date(props.session.expires_at).toLocaleString(undefined, {
+              dateStyle: 'medium',
+              timeStyle: 'short',
+            })}
+            {/*{new Date(props.session.expires_at).toLocaleString()}*/}
+            {props.session.ip_address && <span> · {props.session.ip_address}</span>}
+          </p>
+        </div>
+      </div>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => props.onRevoke(props.session.revoke_id)}
+        disabled={props.loading}
+      >
+        {props.loading ? 'Revoking…' : 'Revoke'}
+      </Button>
+    </li>
   )
 }

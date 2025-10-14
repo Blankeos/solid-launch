@@ -16,6 +16,9 @@ export interface RateLimitOptions {
   message?: string
 }
 
+/**
+ * NOTE: in localhost, keyGenerator doesn't exist.
+ */
 export function rateLimit(options: RateLimitOptions = {}) {
   return rateLimiter({
     handler: () => {
@@ -28,10 +31,20 @@ export function rateLimit(options: RateLimitOptions = {}) {
     limit: options.limit ?? 100,
     keyGenerator:
       options.keyGenerator ??
-      ((c) =>
-        c.req.header('CF-Connecting-IP') ||
-        c.req.header('X-Forwarded-For')?.split(',')[0] ||
-        'anonymous'),
+      ((c) => {
+        // If authMiddleware ran, prefer authenticated user id over IP
+        const user = (c as any).get('user')
+        if (user?.id) return `user:${user.id}`
+
+        const ip =
+          c.req.header('CF-Connecting-IP') ||
+          c.req.header('X-Real-IP') ||
+          c.req.header('X-Forwarded-For')?.split(',')[0]?.trim() ||
+          (c.req as any).ip ||
+          'unknown'
+
+        return ip
+      }),
   })
 }
 

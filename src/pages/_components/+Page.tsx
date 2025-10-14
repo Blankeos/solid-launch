@@ -69,44 +69,40 @@ export default function ComponentsPage() {
       <ComponentCard label="Dropdown">
         <DropdownMenuComp
           options={[
+            { type: 'item', itemDisplay: 'Commit', itemTip: '⌘+K' },
+            { type: 'item', itemDisplay: 'Push', itemTip: '⇧+⌘+K' },
+            { type: 'item', itemDisplay: 'Update Project', itemTip: '⌘+T' },
             {
-              itemId: 'commit',
-              itemDisplay: 'Commit',
-              itemTip: '⌘+K',
-            },
-            {
-              itemId: 'push',
-              itemDisplay: 'Push',
-              itemTip: '⇧+⌘+K',
-            },
-            {
-              itemId: 'update',
-              itemDisplay: 'Update Project',
-              itemTip: '⌘+T',
-            },
-            {
+              type: 'sub',
               subTrigger: 'GitHub',
               subOptions: [
+                { type: 'item', itemDisplay: 'Create Pull Request…' },
+                { type: 'item', itemDisplay: 'View Pull Requests' },
+                { type: 'item', itemDisplay: 'Sync Forks' },
+                { type: 'separator' },
                 {
-                  itemId: 'create-pr',
-                  itemDisplay: 'Create Pull Request…',
+                  type: 'sub',
+                  subTrigger: 'itlog',
+                  subOptions: [
+                    {
+                      type: 'item',
+                      itemDisplay: '123',
+                    },
+                    { type: 'separator' },
+                  ],
                 },
                 {
-                  itemId: 'view-pr',
-                  itemDisplay: 'View Pull Requests',
-                },
-                {
-                  itemId: 'sync-fork',
-                  itemDisplay: 'Sync Fork',
-                },
-                { separator: true },
-                {
-                  itemId: 'open-github',
+                  type: 'item',
                   itemDisplay: 'Open on GitHub',
                 },
               ],
             },
-            { separator: true },
+            { type: 'separator' },
+            { type: 'checkbox', label: 'Show Git log' },
+            { type: 'checkbox', label: 'Show History' },
+            { type: 'separator' },
+            { type: 'label', label: 'Radio Group' },
+            { type: 'radio', options: [{ value: 'main' }, { value: 'develop' }] },
           ]}
         >
           <Button as="div">Open options</Button>
