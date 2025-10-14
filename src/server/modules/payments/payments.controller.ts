@@ -1,4 +1,5 @@
 import { privateEnv } from '@/env.private'
+import { publicEnv } from '@/env.public'
 import { dodoClient } from '@/server/lib/payments-client'
 import { Hono } from 'hono'
 import { describeRoute, validator as zValidator } from 'hono-openapi'
@@ -20,6 +21,8 @@ export const paymentsController = new Hono()
       })
     ),
     async (c) => {
+      const referer = c.req.header('referer') || publicEnv.PUBLIC_BASE_URL
+
       const user = c.var.user
 
       try {
@@ -36,16 +39,21 @@ export const paymentsController = new Hono()
         const url = session.checkout_url
 
         if (!url) {
-          throw new Error('Invalid checkout URL')
+          return c.redirect(
+            `${referer}?error=We could not create a valid checkout link. Please try again.`
+          )
         }
 
         return c.redirect(url)
       } catch (error) {
         console.error('Error creating checkout:', error)
-        return c.text('Internal Server Error', 500)
+        return c.redirect(
+          `${referer}?error=Something went wrong while setting up your payment. Please try again.`
+        )
       }
     }
   )
+
   // Webhook handler
   .post('/webhook', describeRoute({}), async (c) => {
     console.log('💌 Webhook received')
