@@ -126,8 +126,8 @@ export default function SignInPage() {
   const handleGithubLogin = () => {
     toast.promise(
       async () => {
-        const result = await githubLogin.run()
-        if (result) navigate(getRoute('/dashboard'))
+        const result = await githubLogin.run({})
+        if (result?.success) navigate(getRoute('/dashboard'))
       },
       {
         error: 'Failed to login with GitHub',
@@ -140,8 +140,8 @@ export default function SignInPage() {
   const handleGoogleLogin = () => {
     toast.promise(
       async () => {
-        const result = await googleLogin.run()
-        if (result) navigate(getRoute('/dashboard'))
+        const result = await googleLogin.run({})
+        if (result?.success) navigate(getRoute('/dashboard'))
       },
       {
         error: 'Failed to login with Google',

@@ -550,6 +550,10 @@ export class AuthService {
     const user = await this.authDAO.getUserByEmail(params.email)
     if (!user) throw ApiError.NotFound('User with this email not found')
 
+    if (user.email_verified) {
+      throw ApiError.BadRequest('Email already verified')
+    }
+
     const token = await this.authDAO.createOneTimeToken({
       userId: user.id,
       purpose: 'email_verification',

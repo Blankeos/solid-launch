@@ -1,6 +1,7 @@
 import { IconLoading } from '@/assets/icons'
 import { useAuthContext } from '@/features/auth/auth.context'
 import { getRoute } from '@/route-tree.gen'
+import type { UserResponseDTO } from '@/server/modules/auth/auth.dto'
 import { createEffect, createSignal, FlowProps, Match, mergeProps, Show, Switch } from 'solid-js'
 import { navigate } from 'vike/client/router'
 
@@ -9,37 +10,48 @@ type ProtectedRouteProps = {
   redirect?: string
   /** Fallback when not authed. @defaultValue /sign-in */
   fallback?: string
+  /** Callback to determine if the authenticated user is allowed. Defaults to `() => true`. */
+  isAllowed?: (user: UserResponseDTO) => boolean
 }
 
+/**
+ * A component with side-effects, so make sure to only use it once per page. Like a wrapper.
+ */
 export default function ProtectedRoute(props: FlowProps<ProtectedRouteProps>) {
   const { user, loading } = useAuthContext()
 
-  const defaultProps = mergeProps({ fallback: getRoute('/sign-in') }, props)
+  const defaultProps = mergeProps({ fallback: getRoute('/sign-in'), isAllowed: () => true }, props)
 
   const [showProtector, setShowProtector] = createSignal(!Boolean(user()))
 
   createEffect(() => {
     if (loading()) return // Still fetching. Don't do anything.
 
-    // Stopped fetching. User Exists.
-    if (user()) {
-      // When there's a user and there's a "redirect". Go to it.
-      // Usecase: Going into /login, but there's actually a user.
-      if (props.redirect) {
-        navigate(props.redirect)
-        return
-      }
-
-      // Remove the protector.
-      setShowProtector(false)
-    }
-
-    if (!user() && !loading()) {
+    const u = user()
+    if (!u) {
+      // No user, redirect and remove protector
       navigate(defaultProps.fallback)
-
-      // Remove the protector.
       setShowProtector(false)
+      return
     }
+
+    // User exists, check authorization
+    if (!defaultProps.isAllowed(u)) {
+      // Not allowed, redirect and remove protector
+      navigate(defaultProps.fallback)
+      setShowProtector(false)
+      return
+    }
+
+    // User is authenticated and authorized
+    if (props.redirect) {
+      // Redirect when authenticated
+      navigate(props.redirect)
+      return
+    }
+
+    // Remove the protector as no redirect is needed
+    setShowProtector(false)
   })
 
   return (
@@ -52,17 +64,23 @@ export default function ProtectedRoute(props: FlowProps<ProtectedRouteProps>) {
               Looking for user.
             </Match>
 
-            <Match when={!loading() && user()}>
+            <Match when={!loading() && user() && defaultProps.isAllowed(user()!) && props.redirect}>
               <IconLoading />
               User found. Redirecting...
             </Match>
 
             <Match when={!loading() && !user()}>User not found. Unauthorized.</Match>
+
+            <Match when={!loading() && user() && !defaultProps.isAllowed(user()!)}>
+              Unauthorized. Redirecting...
+            </Match>
           </Switch>
         </div>
       </Show>
 
-      <Show when={user() && !loading()}>{props.children}</Show>
+      <Show when={user() && !loading() && defaultProps.isAllowed(user()!) && !props.redirect}>
+        {props.children}
+      </Show>
     </>
   )
 }

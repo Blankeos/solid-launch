@@ -61,8 +61,8 @@ export type AuthContextValue = {
   magicLinkVerify: MutationState<{ token: string }, UserResponseDTO | null>
   otpSend: MutationState<{ email: string }, { success: boolean; userId?: string }>
   otpVerify: MutationState<{ userId: string; code: string }, UserResponseDTO | null>
-  googleLogin: MutationState<undefined, void>
-  githubLogin: MutationState<undefined, void>
+  googleLogin: MutationState<{ newWindow?: boolean }, { success: boolean }>
+  githubLogin: MutationState<{ newWindow?: boolean }, { success: boolean }>
 }
 
 const AuthContext = createContext({
@@ -75,8 +75,8 @@ const AuthContext = createContext({
   magicLinkVerify: { loading: () => false, error: () => null, run: async () => null },
   otpSend: { loading: () => false, error: () => null, run: async () => ({ success: false }) },
   otpVerify: { loading: () => false, error: () => null, run: async () => null },
-  googleLogin: { loading: () => false, error: () => null, run: async () => {} },
-  githubLogin: { loading: () => false, error: () => null, run: async () => {} },
+  googleLogin: { loading: () => false, error: () => null, run: async () => ({ success: false }) },
+  githubLogin: { loading: () => false, error: () => null, run: async () => ({ success: false }) },
 } as AuthContextValue)
 
 // ===========================================================================
@@ -144,19 +144,70 @@ export const AuthContextProvider: FlowComponent = (props) => {
     }
   )
 
-  const googleLogin = createMutation<undefined, void>(async () => {
-    const url = honoClient.auth.login.google.$url().toString()
-    window.location.href = url
-    // Fake await to make the function awaitable – page will navigate away long before this resolves (10s)
-    await new Promise<void>((resolve) => setTimeout(resolve, 10_000))
-  })
+  // OAuth utility function
+  function _openOAuthUrl(
+    url: string,
+    options?: {
+      newWindow?: boolean
+      width?: number
+      height?: number
+      timeout?: number
+    }
+  ): Promise<{ success: boolean }> {
+    const { newWindow = false, width = 600, height = 700, timeout = 30_000 } = options || {}
 
-  const githubLogin = createMutation<undefined, void>(async () => {
-    const url = honoClient.auth.login.github.$url().toString()
+    if (newWindow) {
+      const popup = window.open(
+        url,
+        'oauth',
+        `popup,width=${width},height=${height},left=${screen.width / 2 - width / 2},top=${screen.height / 2 - height / 2}`
+      )
+      if (!popup) {
+        window.location.href = url
+        return Promise.resolve({ success: true })
+      }
+      return new Promise<{ success: boolean }>((resolve) => {
+        const poll = setInterval(() => {
+          try {
+            // When the popup redirects back to the same origin, close it and finish
+            if (popup.closed || popup.location.origin === window.location.origin) {
+              clearInterval(poll)
+              if (!popup.closed) popup.close()
+              _fetchCurrentUser()
+              resolve({ success: true })
+            }
+          } catch {
+            // Cross-origin, keep polling
+          }
+        }, 500)
+        // Safety timeout
+        setTimeout(() => {
+          clearInterval(poll)
+          if (!popup.closed) popup.close()
+          resolve({ success: true })
+        }, timeout)
+      })
+    }
+
     window.location.href = url
-    // Fake await to make the function awaitable – page will navigate away long before this resolves (10s)
-    await new Promise<void>((resolve) => setTimeout(resolve, 10_000))
-  })
+    return new Promise<{ success: boolean }>((resolve) => {
+      setTimeout(() => resolve({ success: true }), timeout)
+    })
+  }
+
+  const googleLogin = createMutation<{ newWindow?: boolean }, { success: boolean }>(
+    async (options) => {
+      const url = honoClient.auth.login.google.$url().toString()
+      return _openOAuthUrl(url, { newWindow: options?.newWindow })
+    }
+  )
+
+  const githubLogin = createMutation<{ newWindow?: boolean }, { success: boolean }>(
+    async (options?: { newWindow?: boolean }) => {
+      const url = honoClient.auth.login.github.$url().toString()
+      return _openOAuthUrl(url, { newWindow: options?.newWindow })
+    }
+  )
 
   const magicLinkSend = createMutation<{ email: string }, { success: boolean }>(
     async ({ email }) => {
@@ -209,15 +260,7 @@ export const AuthContextProvider: FlowComponent = (props) => {
     }
   )
 
-  // Gets the current user at the start of the app.
-  onMount(async () => {
-    // Hydrated
-    if (user()) {
-      setLoading(false)
-      return
-    }
-
-    // Clientside Fetch
+  async function _fetchCurrentUser() {
     setLoading(true)
     try {
       const response = await honoClient.auth.$get()
@@ -236,6 +279,18 @@ export const AuthContextProvider: FlowComponent = (props) => {
     } finally {
       setLoading(false)
     }
+  }
+
+  // Gets the current user at the start of the app.
+  onMount(async () => {
+    // Hydrated
+    if (user()) {
+      setLoading(false)
+      return
+    }
+
+    // Clientside Fetch
+    _fetchCurrentUser()
   })
 
   return (

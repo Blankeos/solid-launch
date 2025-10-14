@@ -55,7 +55,7 @@ export default function SignUpPage() {
   const handleGithubLogin = () => {
     toast.promise(
       async () => {
-        const result = await githubLogin.run()
+        const result = await githubLogin.run({})
         if (result) navigate(getRoute('/dashboard'))
       },
       {
@@ -69,7 +69,7 @@ export default function SignUpPage() {
   const handleGoogleLogin = () => {
     toast.promise(
       async () => {
-        const result = await googleLogin.run()
+        const result = await googleLogin.run({})
         if (result) navigate(getRoute('/dashboard'))
       },
       {
