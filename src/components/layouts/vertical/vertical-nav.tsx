@@ -1,5 +1,4 @@
 import { IconLoading } from '@/assets/icons'
-import { useThemeContext } from '@/contexts/theme.context'
 import { useAuthContext } from '@/features/auth/auth.context'
 import { AvatarDropdown } from '@/features/auth/avatar-dropdown'
 import { getRoute } from '@/route-tree.gen'
@@ -11,9 +10,8 @@ import { usePageContext } from 'vike-solid/usePageContext'
 type VerticalNavProps = {}
 
 export default function VerticalNav(_props: VoidProps<VerticalNavProps>) {
-  const { user, loading, logout } = useAuthContext()
+  const { user, loading } = useAuthContext()
   const pageContext = usePageContext()
-  const { toggleTheme, theme } = useThemeContext()
 
   const navLinks = createMemo<{ name: string; href: string; visible: () => boolean }[]>(() => {
     return [

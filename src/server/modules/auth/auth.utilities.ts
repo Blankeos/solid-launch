@@ -1,4 +1,6 @@
 import { privateEnv } from '@/env.private'
+import { publicEnv } from '@/env.public'
+import { initHonoClient } from '@/lib/hono-client'
 import { Context } from 'hono'
 
 export function setSessionTokenCookie(context: Context, token: string, expiresAt: string): void {
@@ -104,4 +106,17 @@ export function getSimpleDeviceName(userAgent: string | null): string {
   if (/linux/i.test(userAgent)) return 'Linux'
 
   return 'Device'
+}
+
+// Redirect Urls (For emails)
+export function getMagicLinkVerifyUrl(token: string) {
+  initHonoClient(publicEnv.PUBLIC_BASE_URL)
+    .auth.login['magic-link'].verify.$url({ query: { token: token } })
+    .toString()
+}
+
+export function getEmailVerifyUrl(token: string) {
+  initHonoClient(publicEnv.PUBLIC_BASE_URL).auth['verify-email'].verify.$url({
+    query: { token: token },
+  })
 }

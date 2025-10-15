@@ -1,8 +1,15 @@
-export const AUTH_CONFIG = {
+type AuthConfig = {
   session: {
-    // Session expires after how many days after it's created.
+    /** Session expires after how many days after it's created. */
+    expiresInDays: number
+    /** Extend session if it expires within <renewWithinDays> days. (Should always be less than expiresInDays) */
+    renewWithinDays: 3.5
+  }
+}
+
+export const AUTH_CONFIG: AuthConfig = {
+  session: {
     expiresInDays: 7,
-    // Extend session if it expires within <renewWithinDays> days. (Should always be less than expiresInDays)
     renewWithinDays: 3.5,
   },
 }

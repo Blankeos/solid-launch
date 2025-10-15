@@ -2,7 +2,7 @@ import { IconGitHub, IconGoogle } from '@/assets/icons'
 import { TextField, useAppForm } from '@/components/form'
 import { Button } from '@/components/ui/button'
 import { useAuthContext } from '@/features/auth/auth.context'
-import { getRoute } from '@/route-tree.gen'
+import { usePostLoginRedirectUrl } from '@/features/auth/use-post-login-redirect-url'
 import { useCounterContext } from '@/stores/counter.context'
 import getTitle from '@/utils/get-title'
 import { toast } from 'solid-sonner'
@@ -14,6 +14,8 @@ export default function SignUpPage() {
   useMetadata({
     title: getTitle('Sign Up'),
   })
+
+  const postLoginRedirectUrl = usePostLoginRedirectUrl()
 
   const { count, setCount } = useCounterContext()
 
@@ -40,7 +42,7 @@ export default function SignUpPage() {
             password: value.password,
           })
 
-          if (result) navigate(getRoute('/dashboard'))
+          if (result) navigate(postLoginRedirectUrl())
         },
         {
           error: 'Failed to register',
@@ -56,7 +58,7 @@ export default function SignUpPage() {
     toast.promise(
       async () => {
         const result = await githubLogin.run({})
-        if (result) navigate(getRoute('/dashboard'))
+        if (result) navigate(postLoginRedirectUrl())
       },
       {
         error: 'Failed to login with GitHub',
@@ -70,7 +72,7 @@ export default function SignUpPage() {
     toast.promise(
       async () => {
         const result = await googleLogin.run({})
-        if (result) navigate(getRoute('/dashboard'))
+        if (result) navigate(postLoginRedirectUrl())
       },
       {
         error: 'Failed to login with Google',
@@ -85,7 +87,6 @@ export default function SignUpPage() {
       <div class="mx-auto flex w-full max-w-5xl flex-col items-center gap-y-5">
         <h1 class="text-3xl font-medium">Sign Up</h1>
         <Button onClick={() => setCount((count) => count + 1)}>🌎 global count is {count()}</Button>
-
         <form
           class="flex w-full max-w-xs flex-col gap-y-3"
           onSubmit={(e) => {
@@ -109,7 +110,6 @@ export default function SignUpPage() {
             Register
           </Button>
         </form>
-
         <div class="flex gap-x-3">
           <Button
             onClick={handleGithubLogin}
@@ -124,11 +124,9 @@ export default function SignUpPage() {
             <IconGoogle />
           </Button>
         </div>
-
         <pre class="rounded-md border border-gray-500 bg-gray-900 p-3 text-white">
           {JSON.stringify(data().values, null, 2)}
         </pre>
-
         <pre class="rounded-md border border-gray-500 bg-gray-900 p-3 text-white">
           {JSON.stringify(data().errors, null, 2)}
         </pre>

@@ -6,7 +6,6 @@ export function useGlobalErrorToast() {
   onMount(() => {
     const url = new URL(window.location.href)
     const error = url.searchParams.get('error')
-    console.log('hello', error)
     if (error) {
       // For some weird reason, if I don't do this, it doesn't show.
       // Maybe because this hook gets called before <Toaster /> initializes.

@@ -289,7 +289,7 @@ export const AuthContextProvider: FlowComponent = (props) => {
       }
     } catch (error) {
       if (error instanceof Error) {
-        toast.error('Could not fetch the user.')
+        toast.error(`Could not fetch the user: ${error.message}`)
       }
     } finally {
       setLoading(false)

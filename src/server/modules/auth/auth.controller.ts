@@ -146,7 +146,7 @@ export const authController = new Hono<{
     }
   )
 
-  // Google Login
+  // Google Login [redirect]
   .get('/login/google', describeRoute({}), async (c) => {
     const { redirectUrl } = c.req.query()
 
@@ -160,7 +160,7 @@ export const authController = new Hono<{
     return c.redirect(authorizationUrl)
   })
 
-  // Google Login Callback
+  // Google Login Callback [redirect]
   .get('/login/google/callback', describeRoute({}), async (c) => {
     const allCookies = getCookie(c)
     const storedState = allCookies['google_oauth_state']
@@ -185,7 +185,7 @@ export const authController = new Hono<{
     return c.redirect(redirectUrl)
   })
 
-  // GitHub Login
+  // GitHub Login [redirect]
   .get('/login/github', describeRoute({}), async (c) => {
     const { redirectUrl } = c.req.query()
 
@@ -199,7 +199,7 @@ export const authController = new Hono<{
     return c.redirect(authorizationUrl)
   })
 
-  // GitHub Login Callback
+  // GitHub Login Callback [redirect]
   .get('/login/github/callback', describeRoute({}), async (c) => {
     const code = c.req.query('code')
     const state = c.req.query('state')
@@ -284,7 +284,7 @@ export const authController = new Hono<{
     }
   )
 
-  // Verify Login High Entropy (Magic Link)
+  // Verify Login High Entropy (Magic Link) [redirect]
   .get(
     '/login/magic-link/verify',
     zValidator(
@@ -369,7 +369,7 @@ export const authController = new Hono<{
     }
   )
 
-  // Email Verification Verify
+  // Email Verification Verify [redirect]
   .get(
     '/verify-email/verify',
     zValidator(

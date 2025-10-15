@@ -33,6 +33,8 @@ export function rateLimit(options: RateLimitOptions = {}) {
       options.keyGenerator ??
       ((c) => {
         // If authMiddleware ran, prefer authenticated user id over IP
+        // Also, this isn't used for the global rate limit
+        // because auth middlewares are opt-in and called after global rate limit.
         const user = (c as any).get('user')
         if (user?.id) return `user:${user.id}`
 

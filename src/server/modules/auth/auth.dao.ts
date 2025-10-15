@@ -209,6 +209,7 @@ export class AuthDAO {
         .selectFrom('session')
         .select(['id', 'revoke_id', 'expires_at', 'ip_address', 'session.user_agent_hash'])
         .where('session.user_id', '=', userId)
+        .where('session.expires_at', '>', new Date().toISOString())
         .execute(),
     ])
 

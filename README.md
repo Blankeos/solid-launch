@@ -34,6 +34,11 @@ You can also try my other starters:
   - [ ] Organization Auth (easily opt-outable)
   - [ ] User Management Dashboard
   - [x] Rate Limits + Global Rate Limits
+  - [x] Frontend Components and practices ready:
+    - [x] Flexible and ssr-compatible `useAuthContext()` and `auth.context.tsx`,
+    - [x] `<ProtectedRoute>`
+    - [x] `<AccountManagement>` - like Clerk's <UserProfile />
+    - [ ] UX edge-cases covered! (i.e. post-login-redirects vs Redirect-back-to-origin)
 
 ### Tech Stack
 
@@ -96,8 +101,9 @@ cd <your-app-name>
 
 I took care of the painstaking parts to help you develop easily on a SPA + SSR + backend paradigm. You can take take these practices to different projects as well.
 
-1.  Make use of the `code-snippets` I added. It'll help!
-2.  Check all typescript errors (`Cmd` + `Shift` + `B` > `tsc:watch tsconfig.json`).
+1.  I added code snippets. They seem useful.
+2.  Backend Practices:
+    - For GET endpoints that need to utilize c.redirect(), it's extremely recommended to catch all errors and just pass it as `?error=Message here` (i.e. for oAuth Callbacks, Magic Links, Email Verification, Payment Checkout Url Redirect)
 3.  Authentication Practices - I have these out-of-the-box for you so you won't have to build it.
 
     - Getting Current User

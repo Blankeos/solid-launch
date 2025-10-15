@@ -10,6 +10,13 @@ type ProtectedRouteProps = {
   redirect?: string
   /** Fallback when not authed. @defaultValue /sign-in */
   fallback?: string
+  /**
+   * Attaches a `?to=<current_path>` which can be used in sign-in or sign-up to redirect you back to a protected-route.
+   * Solves a sensible UX problem of user intention after sign-in.
+   *
+   * @defaultValue true
+   */
+  enablePostLoginRedirect?: boolean
   /** Callback to determine if the authenticated user is allowed. Defaults to `() => true`. */
   isAllowed?: (user: UserResponseDTO) => boolean
 }
@@ -20,9 +27,20 @@ type ProtectedRouteProps = {
 export default function ProtectedRoute(props: FlowProps<ProtectedRouteProps>) {
   const { user, loading } = useAuthContext()
 
-  const defaultProps = mergeProps({ fallback: getRoute('/sign-in'), isAllowed: () => true }, props)
+  const defaultProps = mergeProps(
+    { fallback: getRoute('/sign-in'), isAllowed: () => true, enablePostLoginRedirect: true },
+    props
+  )
 
   const [showProtector, setShowProtector] = createSignal(!Boolean(user()))
+
+  const buildFallbackWithToParam = () => {
+    if (!defaultProps.enablePostLoginRedirect) return defaultProps.fallback
+
+    const currentUrl = new URL(window.location.href)
+    const to = encodeURIComponent(currentUrl.pathname + currentUrl.search)
+    return `${defaultProps.fallback}?to=${to}`
+  }
 
   createEffect(() => {
     if (loading()) return // Still fetching. Don't do anything.
@@ -30,7 +48,7 @@ export default function ProtectedRoute(props: FlowProps<ProtectedRouteProps>) {
     const u = user()
     if (!u) {
       // No user, redirect and remove protector
-      navigate(defaultProps.fallback)
+      navigate(buildFallbackWithToParam())
       setShowProtector(false)
       return
     }
@@ -38,7 +56,7 @@ export default function ProtectedRoute(props: FlowProps<ProtectedRouteProps>) {
     // User exists, check authorization
     if (!defaultProps.isAllowed(u)) {
       // Not allowed, redirect and remove protector
-      navigate(defaultProps.fallback)
+      navigate(buildFallbackWithToParam())
       setShowProtector(false)
       return
     }

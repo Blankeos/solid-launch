@@ -3,7 +3,7 @@ import { TextField, useAppForm } from '@/components/form'
 import { Button } from '@/components/ui/button'
 import { TextFieldComp } from '@/components/ui/text-field'
 import { useAuthContext } from '@/features/auth/auth.context'
-import { getRoute } from '@/route-tree.gen'
+import { usePostLoginRedirectUrl } from '@/features/auth/use-post-login-redirect-url'
 import { useCounterContext } from '@/stores/counter.context'
 import getTitle from '@/utils/get-title'
 import { createSignal, Show } from 'solid-js'
@@ -19,14 +19,14 @@ function OTPForm(props: { onBack: () => void }) {
   const [userId, setUserId] = createSignal('')
   const [email, setEmail] = createSignal('')
 
+  const postLoginRedirectUrl = usePostLoginRedirectUrl()
+
   const handleOTPSend = () => {
     toast.promise(
       // eslint-disable-next-line solid/reactivity
       async () => {
         const result = await otpSend.run({ email: email() })
-        console.log('result', result)
         if (result?.userId) {
-          console.log('hello')
           setUserId(result.userId!)
           setHasSent(true)
         }
@@ -44,7 +44,7 @@ function OTPForm(props: { onBack: () => void }) {
       // eslint-disable-next-line solid/reactivity
       async () => {
         const result = await otpVerify.run({ userId: userId(), code: code() })
-        if (result) navigate(getRoute('/dashboard'))
+        if (result) navigate(postLoginRedirectUrl())
       },
       {
         error: (err) => `Failed to verify OTP: ${err.message}`,
@@ -82,6 +82,8 @@ export default function SignInPage() {
     title: getTitle('Sign In'),
   })
 
+  const postLoginRedirectUrl = usePostLoginRedirectUrl()
+
   const { count: globalCount, setCount: setGlobalCount } = useCounterContext()
 
   const { emailLogin: login, githubLogin, googleLogin } = useAuthContext()
@@ -110,7 +112,7 @@ export default function SignInPage() {
             password: value.password,
           })
 
-          if (result) navigate(getRoute('/dashboard'))
+          if (result) navigate(postLoginRedirectUrl())
         },
         {
           error: (err) => `Failed to login: ${err.message}`,
@@ -127,7 +129,7 @@ export default function SignInPage() {
     toast.promise(
       async () => {
         const result = await githubLogin.run({})
-        if (result?.success) navigate(getRoute('/dashboard'))
+        if (result?.success) navigate(postLoginRedirectUrl())
       },
       {
         error: 'Failed to login with GitHub',
@@ -141,7 +143,7 @@ export default function SignInPage() {
     toast.promise(
       async () => {
         const result = await googleLogin.run({})
-        if (result?.success) navigate(getRoute('/dashboard'))
+        if (result?.success) navigate(postLoginRedirectUrl())
       },
       {
         error: 'Failed to login with Google',

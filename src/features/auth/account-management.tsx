@@ -16,8 +16,6 @@ export function AccountManagement(props: VoidProps<{ class?: string }>) {
   const profileQuery = useQuery(() => ({
     queryKey: ['auth.profile'],
     queryFn: async () => {
-      console.log('YOOO!!', user())
-
       const resp = await honoClient.auth.profile.$get()
       return resp.json()
     },
@@ -206,6 +204,25 @@ function SessionItem(props: {
     if (name.includes('mobile') || name.includes('android') || name.includes('ios')) return '📱'
     return '💻'
   }
+  const expiresText = () => {
+    // This won't really show, but just in case...
+    const expired = new Date() > new Date(props.session.expires_at)
+    if (expired)
+      return {
+        text: `Expired ${new Date(props.session.expires_at).toLocaleString(undefined, {
+          dateStyle: 'medium',
+          timeStyle: 'short',
+        })}`,
+        class: 'text-destructive',
+      }
+    return {
+      text: `Expires ${new Date(props.session.expires_at).toLocaleString(undefined, {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      })}`,
+      class: 'text-muted-foreground',
+    }
+  }
 
   return (
     <li class="flex items-center justify-between py-3 first:pt-0 last:pb-0">
@@ -213,13 +230,9 @@ function SessionItem(props: {
         <span class="text-muted-foreground text-lg">{deviceEmoji()}</span>
         <div>
           <p class="text-sm font-medium">{props.session.display_id || 'Unknown Device'}</p>
-          <p class="text-muted-foreground text-xs">
-            {props.session.device_name} · Expires{' '}
-            {new Date(props.session.expires_at).toLocaleString(undefined, {
-              dateStyle: 'medium',
-              timeStyle: 'short',
-            })}
-            {/*{new Date(props.session.expires_at).toLocaleString()}*/}
+          <p class="text-xs">
+            {props.session.device_name} ·{' '}
+            <span class={expiresText().class}>{expiresText().text}</span>
             {props.session.ip_address && <span> · {props.session.ip_address}</span>}
           </p>
         </div>
