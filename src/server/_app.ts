@@ -9,5 +9,4 @@ export const appRouter = new Hono()
   .route('/payments', paymentsController)
   .route('/testmail', testEmailRouter)
 
-// Export type router type signature, this is used by the client.
 export type AppRouter = typeof appRouter
