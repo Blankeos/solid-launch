@@ -1,23 +1,22 @@
 // Purely for state management of the sidebars.
 
+import { useHotkeys, useLocalStorageStore } from "bagon-hooks"
 import {
   createContext,
   createEffect,
   createSignal,
-  FlowComponent,
-  useContext,
+  type FlowComponent,
   type Setter,
-} from 'solid-js'
-
-import { debounce } from '@/utils/debounce'
-import { useHotkeys, useLocalStorageStore } from 'bagon-hooks'
-import { PanelGroupAPI } from 'solid-resizable-panels'
+  useContext,
+} from "solid-js"
+import type { PanelGroupAPI } from "solid-resizable-panels"
+import { debounce } from "@/utils/debounce"
 
 // ===========================================================================
 // Configurations
 // ===========================================================================
 export const DEFAULT_EXPAND_SIZE = 30
-export const PANEL_ID__SIDEBAR = 'panel__sidebar'
+export const PANEL_ID__SIDEBAR = "panel__sidebar"
 
 // ===========================================================================
 // Context
@@ -53,7 +52,7 @@ export const HorizontalLayoutContextProvider: FlowComponent = (props) => {
   const [api, setApi] = createSignal<PanelGroupAPI | undefined>()
 
   const [sidebarState, setSidebarState] = useLocalStorageStore({
-    key: 'sidenav-state',
+    key: "sidenav-state",
     defaultValue: {
       isOpen: true,
       lastSize: DEFAULT_EXPAND_SIZE,
@@ -64,28 +63,28 @@ export const HorizontalLayoutContextProvider: FlowComponent = (props) => {
   // not get counted as a resize.
   const onResize = debounce((value: number) => {
     if (value === 0) return
-    setSidebarState('lastSize', value)
+    setSidebarState("lastSize", value)
   }, 5) // Debounce for 5ms
 
   function onCollapse() {
-    setSidebarState('isOpen', false)
+    setSidebarState("isOpen", false)
   }
 
   function onExpand() {
-    setSidebarState('isOpen', true)
+    setSidebarState("isOpen", true)
   }
 
   function open() {
     if (!api()) return
 
-    setSidebarState('isOpen', true)
+    setSidebarState("isOpen", true)
     api()!.expand(PANEL_ID__SIDEBAR, sidebarState.lastSize)
   }
 
   function close() {
     if (!api()) return
 
-    setSidebarState('isOpen', false)
+    setSidebarState("isOpen", false)
     api()!.collapse(PANEL_ID__SIDEBAR)
     // WEIRD BUG: For some reason it sometimes fails to collapse to 0, it just goes to min size.
     // Calling collapse again will make it 0 in that same frame.
@@ -94,7 +93,7 @@ export const HorizontalLayoutContextProvider: FlowComponent = (props) => {
 
   useHotkeys([
     [
-      'meta+b',
+      "meta+b",
       () => {
         if (sidebarState.isOpen) {
           close()

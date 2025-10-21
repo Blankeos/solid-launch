@@ -1,10 +1,8 @@
-import { FlowProps } from 'solid-js'
-import VerticalFooter from './vertical-footer'
-import VerticalNav from './vertical-nav'
+import type { FlowProps } from "solid-js"
+import VerticalFooter from "./vertical-footer"
+import VerticalNav from "./vertical-nav"
 
-type VerticalLayoutProps = {}
-
-export default function VerticalLayout(props: FlowProps<VerticalLayoutProps>) {
+export default function VerticalLayout(props: FlowProps) {
   return (
     <div class="flex min-h-screen flex-col">
       <VerticalNav />

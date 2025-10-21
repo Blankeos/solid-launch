@@ -90,24 +90,23 @@
    you like; the provider handles the rest.
 */
 
-import {
-  Accessor,
-  createContext,
-  createEffect,
-  createMemo,
-  createSignal,
-  FlowProps,
-  JSX,
-  onCleanup,
-  useContext,
-} from 'solid-js'
-
-import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine'
+import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine"
 import {
   draggable,
   dropTargetForElements,
   monitorForElements,
-} from '@atlaskit/pragmatic-drag-and-drop/element/adapter'
+} from "@atlaskit/pragmatic-drag-and-drop/element/adapter"
+import {
+  type Accessor,
+  createContext,
+  createEffect,
+  createMemo,
+  createSignal,
+  type FlowProps,
+  type JSX,
+  onCleanup,
+  useContext,
+} from "solid-js"
 
 /* ---------- 1. Context ---------- */
 
@@ -145,7 +144,7 @@ const DragAndDropContext = createContext<DragAndDropContextValue>()
 
 export const useDragAndDropContext = () => {
   const ctx = useContext(DragAndDropContext)
-  if (!ctx) throw new Error('useDragAndDropContext must be used within <DragAndDropProvider>')
+  if (!ctx) throw new Error("useDragAndDropContext must be used within <DragAndDropProvider>")
   return ctx
 }
 
@@ -161,7 +160,7 @@ export const DragAndDropProvider = (props: FlowProps<DragAndDropProviderProps>) 
     () => props.instanceId ?? `draginstance-${Math.random().toString(36).substring(2, 9)}`
   )
 
-  let registry = new Map<string | number, { id: string | number; data: any }>()
+  const registry = new Map<string | number, { id: string | number; data: any }>()
 
   createEffect(() => {
     onCleanup(
@@ -231,7 +230,7 @@ export const DragAndDropProvider = (props: FlowProps<DragAndDropProviderProps>) 
 
 /* ---------- 2. Building Blocks ---------- */
 
-export type DragState = 'idle' | 'dragging' | 'over'
+export type DragState = "idle" | "dragging" | "over"
 
 /**
  * DraggableItem is both `draggable()` and `dropTargetForElements()`, just for simplicity
@@ -248,7 +247,7 @@ export const DraggableItem = (props: {
   enableDropTarget?: boolean
   children: (state: Accessor<DragState>, ref: (el: HTMLElement) => void) => JSX.Element
 }) => {
-  const [state, setState] = createSignal<DragState>('idle')
+  const [state, setState] = createSignal<DragState>("idle")
   let ref!: HTMLElement
   const { instanceId, registry } = useDragAndDropContext()
 
@@ -264,13 +263,13 @@ export const DraggableItem = (props: {
           element: ref,
           getInitialData: () => ({
             id: props.id,
-            type: props.type || 'item',
+            type: props.type || "item",
             instanceId,
             data: props.data,
           }),
-          onDragStart: () => setState('dragging'),
-          onDrag: () => setState('dragging'),
-          onDrop: () => setState('idle'),
+          onDragStart: () => setState("dragging"),
+          onDrag: () => setState("dragging"),
+          onDrop: () => setState("idle"),
         }),
         // Exactly like Droppable.
         ...(props.enableDropTarget !== false
@@ -290,15 +289,15 @@ export const DraggableItem = (props: {
 
                   const types = Array.isArray(props.dropTargetType)
                     ? props.dropTargetType
-                    : [props.dropTargetType || 'item']
+                    : [props.dropTargetType || "item"]
                   if (!types.includes(s.type)) return false
 
                   if (props.dropTargetCanDrop) return props.dropTargetCanDrop(s.data)
                   return true
                 },
-                onDragEnter: () => setState('over'),
-                onDragLeave: () => setState('idle'),
-                onDrop: () => setState('idle'),
+                onDragEnter: () => setState("over"),
+                onDragLeave: () => setState("idle"),
+                onDrop: () => setState("idle"),
               }),
             ]
           : [])
@@ -307,6 +306,7 @@ export const DraggableItem = (props: {
   })
 
   // eslint-disable-next-line solid/reactivity
+  // biome-ignore lint/suspicious/noAssignInExpressions: ref setting w/ solid
   return props.children(state, (el) => (ref = el))
 }
 
@@ -318,7 +318,7 @@ export const Droppable = (props: {
   canDrop?: (sourceData: any) => boolean
   children: (state: Accessor<DragState>, ref: (el: HTMLElement) => void) => JSX.Element
 }) => {
-  const [state, setState] = createSignal<DragState>('idle')
+  const [state, setState] = createSignal<DragState>("idle")
   let ref!: HTMLElement
   const { instanceId, registry } = useDragAndDropContext()
 
@@ -343,26 +343,27 @@ export const Droppable = (props: {
             }
             if (s.instanceId !== instanceId) return false
 
-            const types = Array.isArray(props.type) ? props.type : [props.type || 'item']
+            const types = Array.isArray(props.type) ? props.type : [props.type || "item"]
             if (!types.includes(s.type)) return false
 
             if (props.canDrop) return props.canDrop(s.data)
             return true
           },
-          onDragEnter: () => setState('over'),
-          onDragLeave: () => setState('idle'),
-          onDrop: () => setState('idle'),
+          onDragEnter: () => setState("over"),
+          onDragLeave: () => setState("idle"),
+          onDrop: () => setState("idle"),
         })
       )
     )
   })
 
   // eslint-disable-next-line solid/reactivity
+  // biome-ignore lint/suspicious/noAssignInExpressions: ref setting w/ solid
   return props.children(state, (el) => (ref = el))
 }
 
 /* ---------- 3. Auto-scroll helper ---------- */
-import { autoScrollForElements } from '@atlaskit/pragmatic-drag-and-drop-auto-scroll/element'
+import { autoScrollForElements } from "@atlaskit/pragmatic-drag-and-drop-auto-scroll/element"
 
 type AutoScrollOptions = {
   canScroll?: (args: { source: any }) => boolean
@@ -383,5 +384,6 @@ export const useAutoScroll = (opts?: AutoScrollOptions) => {
     )
   })
 
+  // biome-ignore lint/suspicious/noAssignInExpressions: ref setting w/ solid
   return (el: HTMLElement) => (ref = el)
 }

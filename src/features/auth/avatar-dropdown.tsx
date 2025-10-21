@@ -1,10 +1,10 @@
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { DropdownMenuComp } from '@/components/ui/dropdown-menu'
-import { useThemeContext } from '@/contexts/theme.context'
-import { getRoute } from '@/route-tree.gen'
-import { toast } from 'solid-sonner'
-import { navigate } from 'vike/client/router'
-import { useAuthContext } from './auth.context'
+import { toast } from "solid-sonner"
+import { navigate } from "vike/client/router"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { DropdownMenuComp } from "@/components/ui/dropdown-menu"
+import { useThemeContext } from "@/contexts/theme.context"
+import { getRoute } from "@/route-tree.gen"
+import { useAuthContext } from "./auth.context"
 
 export function AvatarDropdown() {
   const { theme, toggleTheme } = useThemeContext()
@@ -13,26 +13,26 @@ export function AvatarDropdown() {
   return (
     <DropdownMenuComp
       options={[
-        { type: 'label', label: 'My Account' },
+        { type: "label", label: "My Account" },
         {
-          type: 'item',
-          itemId: 'dashboard',
-          itemDisplay: 'Dashboard',
-          itemOnSelect: () => navigate(getRoute('/dashboard')),
+          type: "item",
+          itemId: "dashboard",
+          itemDisplay: "Dashboard",
+          itemOnSelect: () => navigate(getRoute("/dashboard")),
         },
         {
-          type: 'item',
-          itemId: 'settings',
-          itemDisplay: 'Settings',
-          itemOnSelect: () => navigate(getRoute('/dashboard/settings')),
+          type: "item",
+          itemId: "settings",
+          itemDisplay: "Settings",
+          itemOnSelect: () => navigate(getRoute("/dashboard/settings")),
         },
-        { type: 'separator' },
+        { type: "separator" },
         {
-          type: 'item',
-          itemId: 'theme',
+          type: "item",
+          itemId: "theme",
           itemDisplay: (
             <span class="flex items-center gap-2">
-              {theme() === 'dark' ? <span>🌙</span> : <span>☀️</span>}
+              {theme() === "dark" ? <span>🌙</span> : <span>☀️</span>}
               Toggle Theme
             </span>
           ),
@@ -40,12 +40,12 @@ export function AvatarDropdown() {
           closeOnSelect: false,
         },
         {
-          type: 'item',
-          itemId: 'logout',
-          itemDisplay: 'Logout',
+          type: "item",
+          itemId: "logout",
+          itemDisplay: "Logout",
           itemOnSelect: () => {
             logout.run()
-            toast.success('Logged out!')
+            toast.success("Logged out!")
           },
         },
       ]}
@@ -59,10 +59,10 @@ export function AvatarDropdown() {
         />
         <AvatarFallback>
           {user()
-            ?.metadata?.name?.split(' ')
+            ?.metadata?.name?.split(" ")
             .map((n) => n[0])
-            .join('')
-            .toUpperCase() || 'Me'}
+            .join("")
+            .toUpperCase() || "Me"}
         </AvatarFallback>
       </Avatar>
     </DropdownMenuComp>

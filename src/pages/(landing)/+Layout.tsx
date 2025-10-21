@@ -1,5 +1,5 @@
-import VerticalLayout from '@/components/layouts/vertical/vertical-layout'
-import { FlowProps } from 'solid-js'
+import type { FlowProps } from "solid-js"
+import VerticalLayout from "@/components/layouts/vertical/vertical-layout"
 
 type LandingLayoutProps = {}
 

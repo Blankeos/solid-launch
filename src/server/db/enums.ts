@@ -1,4 +1,4 @@
 export const OAuthProviderId = {
-  GOOGLE: 'GOOGLE',
+  GOOGLE: "GOOGLE",
 } as const
 export type OAuthProviderId = (typeof OAuthProviderId)[keyof typeof OAuthProviderId]

@@ -1,23 +1,24 @@
-import { Hono } from 'hono'
-import { describeRoute, validator as zValidator } from 'hono-openapi'
-import { z } from 'zod'
-import { authMiddleware, requireAuthMiddleware } from './auth.middleware'
-import { deleteSessionTokenCookie, setSessionTokenCookie } from './auth.utilities'
+import { Hono } from "hono"
+import { getCookie } from "hono/cookie"
+import { describeRoute, validator as zValidator } from "hono-openapi"
+import { z } from "zod"
+import { authMiddleware, requireAuthMiddleware } from "./auth.middleware"
+import { AuthService } from "./auth.service"
+import { deleteSessionTokenCookie, setSessionTokenCookie } from "./auth.utilities"
 
-import { getCookie } from 'hono/cookie'
-import { AuthService } from './auth.service'
 const authService = new AuthService()
 
-import { publicEnv } from '@/env.public'
-import { ApiError } from '@/server/lib/error'
+import { publicEnv } from "@/env.public"
+import { ApiError } from "@/server/lib/error"
 import {
   RATE_LIMIT_EMAIL_SEND,
   RATE_LIMIT_LOGIN,
   RATE_LIMIT_REGISTER,
   rateLimit,
-} from '@/server/lib/rate-limit'
-import { AuthDAO } from '@/server/modules/auth/auth.dao'
-import { getUserResponseDTO } from './auth.dto'
+} from "@/server/lib/rate-limit"
+import { AuthDAO } from "@/server/modules/auth/auth.dao"
+import { getUserResponseDTO } from "./auth.dto"
+
 const authDAO = new AuthDAO()
 
 export const authController = new Hono<{
@@ -26,18 +27,18 @@ export const authController = new Hono<{
     session: { id: string; expiresAt: Date } | undefined
   }
 }>()
-  .use(describeRoute({ tags: ['Auth'] }))
-  .use('/login', rateLimit({ ...RATE_LIMIT_LOGIN }))
-  .use('/register', rateLimit({ ...RATE_LIMIT_REGISTER }))
-  .use('/login/otp', rateLimit({ ...RATE_LIMIT_EMAIL_SEND }))
-  .use('/login/magic-link', rateLimit({ ...RATE_LIMIT_EMAIL_SEND }))
-  .use('/forgot-password', rateLimit({ ...RATE_LIMIT_EMAIL_SEND }))
-  .use('/verify-email', rateLimit({ ...RATE_LIMIT_EMAIL_SEND }))
+  .use(describeRoute({ tags: ["Auth"] }))
+  .use("/login", rateLimit({ ...RATE_LIMIT_LOGIN }))
+  .use("/register", rateLimit({ ...RATE_LIMIT_REGISTER }))
+  .use("/login/otp", rateLimit({ ...RATE_LIMIT_EMAIL_SEND }))
+  .use("/login/magic-link", rateLimit({ ...RATE_LIMIT_EMAIL_SEND }))
+  .use("/forgot-password", rateLimit({ ...RATE_LIMIT_EMAIL_SEND }))
+  .use("/verify-email", rateLimit({ ...RATE_LIMIT_EMAIL_SEND }))
 
   // Get current user
-  .get('/', authMiddleware, async (c) => {
-    const user = c.get('user')
-    const session = c.get('session')
+  .get("/", authMiddleware, async (c) => {
+    const user = c.get("user")
+    const session = c.get("session")
 
     return c.json({
       user: user ? getUserResponseDTO(user) : null,
@@ -46,7 +47,7 @@ export const authController = new Hono<{
   })
 
   // Get authenticated user profile
-  .get('/profile', authMiddleware, requireAuthMiddleware, describeRoute({}), async (c) => {
+  .get("/profile", authMiddleware, requireAuthMiddleware, describeRoute({}), async (c) => {
     const user = c.var.user
     const userDetails = await authService.getUserDetails(user.id)
 
@@ -57,9 +58,9 @@ export const authController = new Hono<{
 
   // Login
   .post(
-    '/login',
+    "/login",
     zValidator(
-      'json',
+      "json",
       z.object({
         email: z.string(),
         password: z.string(),
@@ -67,7 +68,7 @@ export const authController = new Hono<{
     ),
     authMiddleware,
     async (c) => {
-      const { email, password } = c.req.valid('json')
+      const { email, password } = c.req.valid("json")
 
       const { user, session } = await authService.emailLogin({
         email: email,
@@ -83,7 +84,7 @@ export const authController = new Hono<{
   )
 
   // Logout
-  .get('/logout', authMiddleware, requireAuthMiddleware, describeRoute({}), async (c) => {
+  .get("/logout", authMiddleware, requireAuthMiddleware, describeRoute({}), async (c) => {
     const session = c.var.session
 
     await authDAO.invalidateSession(session.id)
@@ -96,22 +97,22 @@ export const authController = new Hono<{
   })
 
   .post(
-    '/revoke',
+    "/revoke",
     authMiddleware,
     requireAuthMiddleware,
     zValidator(
-      'json',
+      "json",
       z.object({
         revokeId: z.string(),
       })
     ),
     async (c) => {
-      const { revokeId } = c.req.valid('json')
+      const { revokeId } = c.req.valid("json")
       const user = c.var.user
 
       const result = await authDAO.revokeSessionByRevokeId({ userId: user.id, revokeId })
       if (!result.success) {
-        throw ApiError.NotFound('Session not found or does not belong to user')
+        throw ApiError.NotFound("Session not found or does not belong to user")
       }
 
       if (c.var.session.revoke_id === revokeId) deleteSessionTokenCookie(c)
@@ -122,16 +123,16 @@ export const authController = new Hono<{
 
   // Register
   .post(
-    '/register',
+    "/register",
     zValidator(
-      'json',
+      "json",
       z.object({
         email: z.email(),
         password: z.string(),
       })
     ),
     async (c) => {
-      const validJson = c.req.valid('json')
+      const validJson = c.req.valid("json")
 
       const { user, session } = await authService.emailRegister({
         email: validJson.email,
@@ -147,28 +148,28 @@ export const authController = new Hono<{
   )
 
   // Google Login [redirect]
-  .get('/login/google', describeRoute({}), async (c) => {
+  .get("/login/google", describeRoute({}), async (c) => {
     const { redirectUrl } = c.req.query()
 
     const { stateCookie, codeVerifierCookie, redirectUrlCookie, authorizationUrl } =
       await authService.googleLogin({ redirectUrl })
 
-    c.header('Set-Cookie', stateCookie, { append: true })
-    c.header('Set-Cookie', codeVerifierCookie, { append: true })
-    c.header('Set-Cookie', redirectUrlCookie, { append: true })
+    c.header("Set-Cookie", stateCookie, { append: true })
+    c.header("Set-Cookie", codeVerifierCookie, { append: true })
+    c.header("Set-Cookie", redirectUrlCookie, { append: true })
 
     return c.redirect(authorizationUrl)
   })
 
   // Google Login Callback [redirect]
-  .get('/login/google/callback', describeRoute({}), async (c) => {
+  .get("/login/google/callback", describeRoute({}), async (c) => {
     const allCookies = getCookie(c)
-    const storedState = allCookies['google_oauth_state']
-    const storedCodeVerifier = allCookies['google_oauth_codeverifier']
-    const storedRedirectUrl = allCookies['google_oauth_redirect_url']
+    const storedState = allCookies["google_oauth_state"]
+    const storedCodeVerifier = allCookies["google_oauth_codeverifier"]
+    const storedRedirectUrl = allCookies["google_oauth_redirect_url"]
 
-    const code = c.req.query('code')
-    const state = c.req.query('state')
+    const code = c.req.query("code")
+    const state = c.req.query("state")
 
     const { session, redirectUrl } = await authService.googleCallback({
       code,
@@ -186,27 +187,27 @@ export const authController = new Hono<{
   })
 
   // GitHub Login [redirect]
-  .get('/login/github', describeRoute({}), async (c) => {
+  .get("/login/github", describeRoute({}), async (c) => {
     const { redirectUrl } = c.req.query()
 
     const { stateCookie, redirectUrlCookie, authorizationUrl } = await authService.githubLogin({
       redirectUrl,
     })
 
-    c.header('Set-Cookie', stateCookie, { append: true })
-    c.header('Set-Cookie', redirectUrlCookie, { append: true })
+    c.header("Set-Cookie", stateCookie, { append: true })
+    c.header("Set-Cookie", redirectUrlCookie, { append: true })
 
     return c.redirect(authorizationUrl)
   })
 
   // GitHub Login Callback [redirect]
-  .get('/login/github/callback', describeRoute({}), async (c) => {
-    const code = c.req.query('code')
-    const state = c.req.query('state')
+  .get("/login/github/callback", describeRoute({}), async (c) => {
+    const code = c.req.query("code")
+    const state = c.req.query("state")
 
     const cookies = getCookie(c)
-    const storedState = cookies['github_oauth_state']
-    const storedRedirectUrl = cookies['github_oauth_redirect_url']
+    const storedState = cookies["github_oauth_state"]
+    const storedRedirectUrl = cookies["github_oauth_redirect_url"]
 
     const { redirectUrl, session } = await authService.githubCallback({
       state,
@@ -224,16 +225,16 @@ export const authController = new Hono<{
 
   // Send Email OTP
   .post(
-    '/login/otp',
+    "/login/otp",
     zValidator(
-      'json',
+      "json",
       z.object({
         email: z.email(),
       })
     ),
     describeRoute({}),
     async (c) => {
-      const { email } = c.req.valid('json')
+      const { email } = c.req.valid("json")
 
       const { userId } = await authService.sendEmailOTP({ email })
 
@@ -243,9 +244,9 @@ export const authController = new Hono<{
 
   // Verify Login OTP
   .post(
-    '/login/otp/verify',
+    "/login/otp/verify",
     zValidator(
-      'json',
+      "json",
       z.object({
         userId: z.string(),
         code: z.string(),
@@ -253,7 +254,7 @@ export const authController = new Hono<{
     ),
     describeRoute({}),
     async (c) => {
-      const { userId, code } = c.req.valid('json')
+      const { userId, code } = c.req.valid("json")
 
       const { user, session } = await authService.verifyLoginShortcode({ userId, code })
 
@@ -267,16 +268,16 @@ export const authController = new Hono<{
 
   // Send Magic Link
   .post(
-    '/login/magic-link',
+    "/login/magic-link",
     zValidator(
-      'json',
+      "json",
       z.object({
         email: z.email(),
       })
     ),
     describeRoute({}),
     async (c) => {
-      const { email } = c.req.valid('json')
+      const { email } = c.req.valid("json")
 
       await authService.sendMagicLink({ email })
 
@@ -286,9 +287,9 @@ export const authController = new Hono<{
 
   // Verify Login High Entropy (Magic Link) [redirect]
   .get(
-    '/login/magic-link/verify',
+    "/login/magic-link/verify",
     zValidator(
-      'query',
+      "query",
       z.object({
         token: z.string(),
         redirect: z.string().optional(),
@@ -296,34 +297,34 @@ export const authController = new Hono<{
     ),
     describeRoute({}),
     async (c) => {
-      const { token, redirect } = c.req.valid('query')
+      const { token, redirect } = c.req.valid("query")
 
       try {
         const { user, session } = await authService.verifyLoginHighEntropy({ token })
 
         setSessionTokenCookie(c, session.id, session.expires_at)
       } catch (error: any) {
-        const redirectUrl = new URL(redirect || '/', publicEnv.PUBLIC_BASE_URL)
-        redirectUrl.searchParams.set('error', error.message || 'Magic link verification failed')
+        const redirectUrl = new URL(redirect || "/", publicEnv.PUBLIC_BASE_URL)
+        redirectUrl.searchParams.set("error", error.message || "Magic link verification failed")
         return c.redirect(redirectUrl.toString())
       }
 
-      return c.redirect(redirect || '/')
+      return c.redirect(redirect || "/")
     }
   )
 
   // Forgot Password Send
   .post(
-    '/forgot-password',
+    "/forgot-password",
     zValidator(
-      'json',
+      "json",
       z.object({
         email: z.email(),
       })
     ),
     describeRoute({}),
     async (c) => {
-      const { email } = c.req.valid('json')
+      const { email } = c.req.valid("json")
 
       await authService.forgotPasswordSend({ email })
 
@@ -333,9 +334,9 @@ export const authController = new Hono<{
 
   // Forgot Password Verify
   .post(
-    '/forgot-password/verify',
+    "/forgot-password/verify",
     zValidator(
-      'json',
+      "json",
       z.object({
         token: z.string(),
         newPassword: z.string().min(6).max(255),
@@ -343,7 +344,7 @@ export const authController = new Hono<{
     ),
     describeRoute({}),
     async (c) => {
-      const { token, newPassword } = c.req.valid('json')
+      const { token, newPassword } = c.req.valid("json")
 
       const result = await authService.forgotPasswordVerify({ token, newPassword })
 
@@ -353,15 +354,15 @@ export const authController = new Hono<{
 
   // Email Verification Send
   .post(
-    '/verify-email',
+    "/verify-email",
     zValidator(
-      'json',
+      "json",
       z.object({
         email: z.email(),
       })
     ),
     async (c) => {
-      const { email } = c.req.valid('json')
+      const { email } = c.req.valid("json")
 
       await authService.emailVerificationSend({ email })
 
@@ -371,25 +372,25 @@ export const authController = new Hono<{
 
   // Email Verification Verify [redirect]
   .get(
-    '/verify-email/verify',
+    "/verify-email/verify",
     zValidator(
-      'query',
+      "query",
       z.object({
         token: z.string(),
         redirect: z.string().optional(),
       })
     ),
     async (c) => {
-      const { token, redirect } = c.req.valid('query')
+      const { token, redirect } = c.req.valid("query")
 
       try {
         await authService.emailVerificationVerify({ token })
       } catch (error: any) {
-        const redirectUrl = new URL(redirect || '/', publicEnv.PUBLIC_BASE_URL)
-        redirectUrl.searchParams.set('error', error.message || 'Email verification failed')
+        const redirectUrl = new URL(redirect || "/", publicEnv.PUBLIC_BASE_URL)
+        redirectUrl.searchParams.set("error", error.message || "Email verification failed")
         return c.redirect(redirectUrl.toString())
       }
 
-      return c.redirect(redirect || '/')
+      return c.redirect(redirect || "/")
     }
   )

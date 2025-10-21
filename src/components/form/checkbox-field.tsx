@@ -1,5 +1,5 @@
-import { CheckboxComp } from '@/components/ui/checkbox'
-import { createField, DeepKeys, FieldApi } from '@tanstack/solid-form'
+import { createField, type DeepKeys, type FieldApi } from "@tanstack/solid-form"
+import { CheckboxComp } from "@/components/ui/checkbox"
 
 interface CheckboxFieldProps<TParentData, TName extends DeepKeys<TParentData>> {
   form: FieldApi<TParentData, TName>

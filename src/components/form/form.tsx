@@ -1,5 +1,5 @@
-import { createFormHook, createFormHookContexts } from '@tanstack/solid-form'
-import { TextField } from './text-field'
+import { createFormHook, createFormHookContexts } from "@tanstack/solid-form"
+import { TextField } from "./text-field"
 
 // ===========================================================================
 // 1. Form Context

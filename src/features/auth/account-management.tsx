@@ -1,20 +1,20 @@
-import { IconGitHub, IconGoogle } from '@/assets/icons'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
-import { honoClient } from '@/lib/hono-client'
-import { cn } from '@/utils/cn'
-import { useMutation, useQuery } from '@tanstack/solid-query'
-import { Index, Show, VoidProps } from 'solid-js'
-import { toast } from 'solid-sonner'
-import { useAuthContext } from './auth.context'
+import { useMutation, useQuery } from "@tanstack/solid-query"
+import { Index, Show, type VoidProps } from "solid-js"
+import { toast } from "solid-sonner"
+import { IconGitHub, IconGoogle } from "@/assets/icons"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
+import { honoClient } from "@/lib/hono-client"
+import { cn } from "@/utils/cn"
+import { useAuthContext } from "./auth.context"
 
 export function AccountManagement(props: VoidProps<{ class?: string }>) {
   const { user, revokeSession } = useAuthContext()
 
   const profileQuery = useQuery(() => ({
-    queryKey: ['auth.profile'],
+    queryKey: ["auth.profile"],
     queryFn: async () => {
       const resp = await honoClient.auth.profile.$get()
       return resp.json()
@@ -23,9 +23,9 @@ export function AccountManagement(props: VoidProps<{ class?: string }>) {
   }))
 
   const sendVerificationEmailMut = useMutation(() => ({
-    mutationKey: ['auth.verify-email'],
+    mutationKey: ["auth.verify-email"],
     mutationFn: async () => {
-      const resp = await honoClient.auth['verify-email'].$post({ json: { email: user()!.email } })
+      const resp = await honoClient.auth["verify-email"].$post({ json: { email: user()!.email } })
       return resp.json()
     },
     onError: (err) => {
@@ -35,15 +35,15 @@ export function AccountManagement(props: VoidProps<{ class?: string }>) {
 
   function handleRevokeSession(revokeId: string) {
     toast.promise(revokeSession.run({ revokeId }), {
-      loading: 'Revoking session…',
-      success: 'Session revoked',
+      loading: "Revoking session…",
+      success: "Session revoked",
       error: (err) => `Could not revoke session: ${err.message}`,
     })
   }
 
   return (
-    <div class={cn('mx-auto w-full max-w-2xl', props.class)}>
-      <h2 class="mb-6 text-2xl font-semibold">Account</h2>
+    <div class={cn("mx-auto w-full max-w-2xl", props.class)}>
+      <h2 class="mb-6 font-semibold text-2xl">Account</h2>
 
       <Card class="mb-4 overflow-hidden">
         <CardHeader>
@@ -53,7 +53,7 @@ export function AccountManagement(props: VoidProps<{ class?: string }>) {
         <CardContent class="grid gap-4">
           <div class="flex items-center justify-between">
             <span class="text-muted-foreground text-sm">Email address</span>
-            <span class="text-sm font-medium">{user()?.email}</span>
+            <span class="font-medium text-sm">{user()?.email}</span>
           </div>
           <div class="flex items-start justify-between">
             <span class="text-muted-foreground text-sm">Email status</span>
@@ -66,26 +66,26 @@ export function AccountManagement(props: VoidProps<{ class?: string }>) {
                   onClick={() => sendVerificationEmailMut.mutate()}
                   disabled={sendVerificationEmailMut.isPending || !!sendVerificationEmailMut.data}
                 >
-                  📩{' '}
+                  📩{" "}
                   {sendVerificationEmailMut.data
-                    ? 'Check your email'
+                    ? "Check your email"
                     : sendVerificationEmailMut.isPending
-                      ? 'Sending...'
-                      : 'Send verification email'}
+                      ? "Sending..."
+                      : "Send verification email"}
                 </Button>
               </Show>
-              <Badge variant={user()?.email_verified ? 'success' : 'warning'}>
-                {user()?.email_verified ? 'Verified' : 'Unverified'}
+              <Badge variant={user()?.email_verified ? "success" : "warning"}>
+                {user()?.email_verified ? "Verified" : "Unverified"}
               </Badge>
             </div>
           </div>
           <div class="flex items-center justify-between">
             <span class="text-muted-foreground text-sm">Name</span>
-            <span class="text-sm font-medium">{user()?.metadata?.name || '—'}</span>
+            <span class="font-medium text-sm">{user()?.metadata?.name || "—"}</span>
           </div>
           <div class="flex items-center justify-between">
             <span class="text-muted-foreground text-sm">Avatar</span>
-            <span class="text-sm font-medium">
+            <span class="font-medium text-sm">
               {user()?.metadata?.avatar_url ? (
                 <img
                   src={user()!.metadata!.avatar_url}
@@ -93,7 +93,7 @@ export function AccountManagement(props: VoidProps<{ class?: string }>) {
                   class="h-8 w-8 rounded-full object-cover"
                 />
               ) : (
-                '—'
+                "—"
               )}
             </span>
           </div>
@@ -121,11 +121,11 @@ export function AccountManagement(props: VoidProps<{ class?: string }>) {
                   {(acc) => (
                     <li class="flex items-center justify-between py-3 first:pt-0 last:pb-0">
                       <div class="flex items-center gap-3">
-                        <div class="bg-background flex h-8 w-8 items-center justify-center rounded-md border">
-                          {acc().provider === 'google' ? <IconGoogle /> : <IconGitHub />}
+                        <div class="flex h-8 w-8 items-center justify-center rounded-md border bg-background">
+                          {acc().provider === "google" ? <IconGoogle /> : <IconGitHub />}
                         </div>
                         <div>
-                          <p class="text-sm font-medium capitalize">{acc().provider}</p>
+                          <p class="font-medium text-sm capitalize">{acc().provider}</p>
                           <p class="text-muted-foreground text-xs">
                             ID: {acc().provider_user_id.slice(0, 8)}…
                           </p>
@@ -197,12 +197,12 @@ function SessionItem(props: {
   loading: boolean
 }) {
   const deviceEmoji = () => {
-    const name = (props.session.device_name || '').toLowerCase()
-    if (name.includes('mac') || name.includes('apple') || name.includes('os x')) return '🍎'
-    if (name.includes('windows')) return '🪟'
-    if (name.includes('linux')) return '🐧'
-    if (name.includes('mobile') || name.includes('android') || name.includes('ios')) return '📱'
-    return '💻'
+    const name = (props.session.device_name || "").toLowerCase()
+    if (name.includes("mac") || name.includes("apple") || name.includes("os x")) return "🍎"
+    if (name.includes("windows")) return "🪟"
+    if (name.includes("linux")) return "🐧"
+    if (name.includes("mobile") || name.includes("android") || name.includes("ios")) return "📱"
+    return "💻"
   }
   const expiresText = () => {
     // This won't really show, but just in case...
@@ -210,28 +210,28 @@ function SessionItem(props: {
     if (expired)
       return {
         text: `Expired ${new Date(props.session.expires_at).toLocaleString(undefined, {
-          dateStyle: 'medium',
-          timeStyle: 'short',
+          dateStyle: "medium",
+          timeStyle: "short",
         })}`,
-        class: 'text-destructive',
+        class: "text-destructive",
       }
     return {
       text: `Expires ${new Date(props.session.expires_at).toLocaleString(undefined, {
-        dateStyle: 'medium',
-        timeStyle: 'short',
+        dateStyle: "medium",
+        timeStyle: "short",
       })}`,
-      class: 'text-muted-foreground',
+      class: "text-muted-foreground",
     }
   }
 
   return (
     <li class="flex items-center justify-between py-3 first:pt-0 last:pb-0">
       <div class="flex items-center gap-3">
-        <span class="text-muted-foreground text-lg">{deviceEmoji()}</span>
+        <span class="text-lg text-muted-foreground">{deviceEmoji()}</span>
         <div>
-          <p class="text-sm font-medium">{props.session.display_id || 'Unknown Device'}</p>
+          <p class="font-medium text-sm">{props.session.display_id || "Unknown Device"}</p>
           <p class="text-xs">
-            {props.session.device_name} ·{' '}
+            {props.session.device_name} ·{" "}
             <span class={expiresText().class}>{expiresText().text}</span>
             {props.session.ip_address && <span> · {props.session.ip_address}</span>}
           </p>
@@ -243,7 +243,7 @@ function SessionItem(props: {
         onClick={() => props.onRevoke(props.session.revoke_id)}
         disabled={props.loading}
       >
-        {props.loading ? 'Revoking…' : 'Revoke'}
+        {props.loading ? "Revoking…" : "Revoke"}
       </Button>
     </li>
   )

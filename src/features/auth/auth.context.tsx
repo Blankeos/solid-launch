@@ -1,17 +1,16 @@
-import { honoClient } from '@/lib/hono-client'
 import {
+  type Accessor,
   createContext,
   createSignal,
-  FlowComponent,
+  type FlowComponent,
   onMount,
   useContext,
-  type Accessor,
-} from 'solid-js'
-import { toast } from 'solid-sonner'
+} from "solid-js"
+import { toast } from "solid-sonner"
+import { useData } from "vike-solid/useData"
+import { honoClient } from "@/lib/hono-client"
 
-import { useData } from 'vike-solid/useData'
-
-import type { UserResponseDTO } from '@/server/modules/auth/auth.dto'
+import type { UserResponseDTO } from "@/server/modules/auth/auth.dto"
 
 // ===========================================================================
 // Mini-TanStack-like mutation helper - so auth.context.tsx is dependencyless
@@ -93,7 +92,7 @@ export const AuthContextProvider: FlowComponent = (props) => {
   // Opt-in hydration
   const data = useData<{ user: UserResponseDTO }>()
 
-  const [user, setUser] = createSignal<ReturnType<AuthContextValue['user']>>(data?.user ?? null)
+  const [user, setUser] = createSignal<ReturnType<AuthContextValue["user"]>>(data?.user ?? null)
   const [loading, setLoading] = createSignal<boolean>(data?.user ? false : true)
 
   const logout = createMutation<undefined, { success: boolean }>(async () => {
@@ -172,7 +171,7 @@ export const AuthContextProvider: FlowComponent = (props) => {
     if (newWindow) {
       const popup = window.open(
         url,
-        'oauth',
+        "oauth",
         `popup,width=${width},height=${height},left=${screen.width / 2 - width / 2},top=${screen.height / 2 - height / 2}`
       )
       if (!popup) {
@@ -224,7 +223,7 @@ export const AuthContextProvider: FlowComponent = (props) => {
 
   const magicLinkSend = createMutation<{ email: string }, { success: boolean }>(
     async ({ email }) => {
-      const response = await honoClient.auth.login['magic-link'].$post({
+      const response = await honoClient.auth.login["magic-link"].$post({
         json: { email: email },
       })
       const result = await response.json()
@@ -237,7 +236,7 @@ export const AuthContextProvider: FlowComponent = (props) => {
   // FIXME I have not specially tested this yet.
   const magicLinkVerify = createMutation<{ token: string }, UserResponseDTO | null>(
     async ({ token }) => {
-      const response = await honoClient.auth.login['magic-link']['verify'].$get({
+      const response = await honoClient.auth.login["magic-link"]["verify"].$get({
         query: { token },
       })
       return null

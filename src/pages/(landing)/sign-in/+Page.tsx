@@ -1,23 +1,23 @@
-import { IconGitHub, IconGoogle } from '@/assets/icons'
-import { TextField, useAppForm } from '@/components/form'
-import { Button } from '@/components/ui/button'
-import { TextFieldComp } from '@/components/ui/text-field'
-import { useAuthContext } from '@/features/auth/auth.context'
-import { usePostLoginRedirectUrl } from '@/features/auth/use-post-login-redirect-url'
-import { useCounterContext } from '@/stores/counter.context'
-import getTitle from '@/utils/get-title'
-import { createSignal, Show } from 'solid-js'
-import { toast } from 'solid-sonner'
-import { useMetadata } from 'vike-metadata-solid'
-import { navigate } from 'vike/client/router'
-import { z } from 'zod'
+import { createSignal, Show } from "solid-js"
+import { toast } from "solid-sonner"
+import { navigate } from "vike/client/router"
+import { useMetadata } from "vike-metadata-solid"
+import { z } from "zod"
+import { IconGitHub, IconGoogle } from "@/assets/icons"
+import { TextField, useAppForm } from "@/components/form"
+import { Button } from "@/components/ui/button"
+import { TextFieldComp } from "@/components/ui/text-field"
+import { useAuthContext } from "@/features/auth/auth.context"
+import { usePostLoginRedirectUrl } from "@/features/auth/use-post-login-redirect-url"
+import { useCounterContext } from "@/stores/counter.context"
+import getTitle from "@/utils/get-title"
 
 function OTPForm(props: { onBack: () => void }) {
   const { otpVerify, otpSend } = useAuthContext()
-  const [code, setCode] = createSignal('')
+  const [code, setCode] = createSignal("")
   const [hasSent, setHasSent] = createSignal(false)
-  const [userId, setUserId] = createSignal('')
-  const [email, setEmail] = createSignal('')
+  const [userId, setUserId] = createSignal("")
+  const [email, setEmail] = createSignal("")
 
   const postLoginRedirectUrl = usePostLoginRedirectUrl()
 
@@ -33,8 +33,8 @@ function OTPForm(props: { onBack: () => void }) {
       },
       {
         error: (err) => `Failed to send OTP: ${err.message}`,
-        success: 'OTP sent! Check your email.',
-        loading: 'Sending OTP...',
+        success: "OTP sent! Check your email.",
+        loading: "Sending OTP...",
       }
     )
   }
@@ -48,8 +48,8 @@ function OTPForm(props: { onBack: () => void }) {
       },
       {
         error: (err) => `Failed to verify OTP: ${err.message}`,
-        success: 'Logged in',
-        loading: 'Verifying OTP...',
+        success: "Logged in",
+        loading: "Verifying OTP...",
       }
     )
   }
@@ -79,7 +79,7 @@ function OTPForm(props: { onBack: () => void }) {
 
 export default function SignInPage() {
   useMetadata({
-    title: getTitle('Sign In'),
+    title: getTitle("Sign In"),
   })
 
   const postLoginRedirectUrl = usePostLoginRedirectUrl()
@@ -97,8 +97,8 @@ export default function SignInPage() {
 
   const form = useAppForm(() => ({
     defaultValues: {
-      email: '',
-      password: '',
+      email: "",
+      password: "",
     },
     validators: {
       // onChange: schema,
@@ -117,8 +117,8 @@ export default function SignInPage() {
         {
           error: (err) => `Failed to login: ${err.message}`,
 
-          success: 'Logged in',
-          loading: 'Logging in...',
+          success: "Logged in",
+          loading: "Logging in...",
         }
       )
     },
@@ -132,9 +132,9 @@ export default function SignInPage() {
         if (result?.success) navigate(postLoginRedirectUrl())
       },
       {
-        error: 'Failed to login with GitHub',
-        success: 'Logged in with GitHub',
-        loading: 'Logging in with GitHub...',
+        error: "Failed to login with GitHub",
+        success: "Logged in with GitHub",
+        loading: "Logging in with GitHub...",
       }
     )
   }
@@ -146,9 +146,9 @@ export default function SignInPage() {
         if (result?.success) navigate(postLoginRedirectUrl())
       },
       {
-        error: 'Failed to login with Google',
-        success: 'Logged in with Google',
-        loading: 'Logging in with Google...',
+        error: "Failed to login with Google",
+        success: "Logged in with Google",
+        loading: "Logging in with Google...",
       }
     )
   }
@@ -160,7 +160,7 @@ export default function SignInPage() {
   return (
     <div class="flex h-full flex-1 flex-col">
       <div class="mx-auto flex w-full max-w-5xl flex-col items-center gap-y-5">
-        <h1 class="text-3xl font-medium">Sign In</h1>
+        <h1 class="font-medium text-3xl">Sign In</h1>
         <Button onClick={() => setGlobalCount((count) => count + 1)}>
           🌎 global count is {globalCount()}
         </Button>

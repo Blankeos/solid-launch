@@ -1,10 +1,10 @@
-import { IconSolid } from '@/assets/icons'
-import { Button } from '@/components/ui/button'
-import { getRoute } from '@/route-tree.gen'
-import { useCounterContext } from '@/stores/counter.context'
-import { createSignal } from 'solid-js'
-import { toast } from 'solid-sonner'
-import { useMetadata } from 'vike-metadata-solid'
+import { createSignal } from "solid-js"
+import { toast } from "solid-sonner"
+import { useMetadata } from "vike-metadata-solid"
+import { IconSolid } from "@/assets/icons"
+import { Button } from "@/components/ui/button"
+import { getRoute } from "@/route-tree.gen"
+import { useCounterContext } from "@/stores/counter.context"
 
 export default function HomePage() {
   const [count, setCount] = createSignal(0)
@@ -17,15 +17,15 @@ export default function HomePage() {
     <div class="flex h-full flex-1 flex-col">
       <div class="mx-auto flex w-full max-w-5xl flex-col items-center justify-center gap-y-5 px-8">
         <div class="flex">
-          <a href="https://vitejs.dev" target="_blank">
+          <a href="https://vitejs.dev" target="_blank" rel="noopener">
             <img src="/vite.svg" class="logo" alt="Vite logo" />
           </a>
-          <a href="https://solidjs.com" target="_blank">
+          <a href="https://solidjs.com" target="_blank" rel="noopener">
             <IconSolid width={40} height={40} />
           </a>
         </div>
 
-        <h1 class="text-3xl font-medium">Vite + Solid</h1>
+        <h1 class="font-medium text-3xl">Vite + Solid</h1>
 
         <div class="flex flex-col items-center justify-center gap-x-2 gap-y-2">
           <div class="flex flex-wrap justify-center gap-2">
@@ -39,7 +39,7 @@ export default function HomePage() {
               variant="outline"
               onClick={() => {
                 const toasts = [
-                  () => toast('🍞 Awesome!'),
+                  () => toast("🍞 Awesome!"),
                   () =>
                     toast.promise(
                       async () => {
@@ -50,21 +50,21 @@ export default function HomePage() {
                           await new Promise((resolve, reject) => setTimeout(reject, 2000))
                       },
                       {
-                        loading: '🍞 Cooking your toast...',
-                        success: '🍔 Toast cooked!',
-                        error: '☄️ Toast failed!',
+                        loading: "🍞 Cooking your toast...",
+                        success: "🍔 Toast cooked!",
+                        error: "☄️ Toast failed!",
                       }
                     ),
                   async () => {
-                    const toastIdAlphabet = 'abcdefghijklmnopqrstuvwxyz1234567890'
+                    const toastIdAlphabet = "abcdefghijklmnopqrstuvwxyz1234567890"
                     const toastId = [...Array(5)].reduce(
                       (acc, _) =>
                         acc + toastIdAlphabet[Math.floor(Math.random() * toastIdAlphabet.length)],
-                      ''
+                      ""
                     )
-                    toast.loading('🔪 Slicing your toast...', { id: toastId })
+                    toast.loading("🔪 Slicing your toast...", { id: toastId })
                     await new Promise((resolve) => setTimeout(resolve, 800))
-                    toast.loading('🤺 Slicing EVEN HARDER!!!', { id: toastId })
+                    toast.loading("🤺 Slicing EVEN HARDER!!!", { id: toastId })
                     await new Promise((resolve) => setTimeout(resolve, 800))
                     toast.loading("💣 It's GONNA BLOW!!!", { id: toastId })
                     await new Promise((resolve) => setTimeout(resolve, 500))
@@ -78,9 +78,9 @@ export default function HomePage() {
                           await new Promise((resolve, reject) => setTimeout(reject, 2000))
                       },
                       {
-                        loading: '👨‍🍳 Cooking EVEN HARDER!!!',
-                        success: '🍔 Toast cooked!',
-                        error: '☄️ Toast BURNT!',
+                        loading: "👨‍🍳 Cooking EVEN HARDER!!!",
+                        success: "🍔 Toast cooked!",
+                        error: "☄️ Toast BURNT!",
                         id: toastId,
                       }
                     )
@@ -94,7 +94,7 @@ export default function HomePage() {
             >
               🍞 Show a Toast
             </Button>
-            <Button variant="outline" as="a" href={getRoute('/_components')}>
+            <Button variant="outline" as="a" href={getRoute("/_components")}>
               Browse Components
             </Button>
           </div>

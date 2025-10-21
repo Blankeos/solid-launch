@@ -1,4 +1,4 @@
-import { createEffect, createSignal } from 'solid-js'
+import { createEffect, createSignal } from "solid-js"
 
 /** https://stackoverflow.com/questions/74987753/how-can-i-react-to-changes-in-the-window-size-in-solidjs */
 export function useWindowSize() {
@@ -14,10 +14,10 @@ export function useWindowSize() {
     // component is mounted and window is available
     handleWindowResize()
 
-    window.addEventListener('resize', handleWindowResize)
+    window.addEventListener("resize", handleWindowResize)
 
     // unsubscribe from the event on component unmount
-    return () => window.removeEventListener('resize', handleWindowResize)
+    return () => window.removeEventListener("resize", handleWindowResize)
   })
 
   return { width, height }

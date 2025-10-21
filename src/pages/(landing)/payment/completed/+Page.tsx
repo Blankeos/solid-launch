@@ -1,5 +1,5 @@
-import { Button } from '@/components/ui/button'
-import { usePageContext } from 'vike-solid/usePageContext'
+import { usePageContext } from "vike-solid/usePageContext"
+import { Button } from "@/components/ui/button"
 
 export default function SuccessPage() {
   const { urlParsed } = usePageContext()
@@ -7,10 +7,10 @@ export default function SuccessPage() {
   const { payment_id, status } = urlParsed.search || {}
 
   return (
-    <div class="bg-background flex min-h-screen items-center justify-center">
-      <div class="bg-card text-card-foreground w-full max-w-md rounded-xl border p-8 text-center shadow">
+    <div class="flex min-h-screen items-center justify-center bg-background">
+      <div class="w-full max-w-md rounded-xl border bg-card p-8 text-center text-card-foreground shadow">
         <div class="mb-6">
-          {status === 'succeeded' ? (
+          {status === "succeeded" ? (
             <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
               <svg
                 class="h-8 w-8 text-green-500"
@@ -45,19 +45,19 @@ export default function SuccessPage() {
           )}
         </div>
 
-        <h2 class="mb-2 text-3xl font-bold">
-          {status === 'succeeded' ? 'Payment Successful!' : 'Payment Failed'}
+        <h2 class="mb-2 font-bold text-3xl">
+          {status === "succeeded" ? "Payment Successful!" : "Payment Failed"}
         </h2>
-        <p class="text-muted-foreground mb-6">
-          {status === 'succeeded'
-            ? 'Thank you for your purchase. Your payment has been processed successfully.'
-            : 'Sorry, there was an issue processing your payment. Please try again.'}
+        <p class="mb-6 text-muted-foreground">
+          {status === "succeeded"
+            ? "Thank you for your purchase. Your payment has been processed successfully."
+            : "Sorry, there was an issue processing your payment. Please try again."}
         </p>
 
         {payment_id && (
-          <div class="bg-muted mb-6 rounded-lg p-4">
+          <div class="mb-6 rounded-lg bg-muted p-4">
             <p class="text-muted-foreground text-sm">Payment ID</p>
-            <p class="font-mono text-sm break-all">{payment_id}</p>
+            <p class="break-all font-mono text-sm">{payment_id}</p>
           </div>
         )}
 

@@ -1,19 +1,18 @@
-import type { Component, ComponentProps, JSX, ValidComponent } from 'solid-js'
-import { For, Show, splitProps } from 'solid-js'
+import type { PolymorphicProps } from "@kobalte/core"
+import * as BreadcrumbPrimitive from "@kobalte/core/breadcrumbs"
+import type { Component, ComponentProps, JSX, ValidComponent } from "solid-js"
+import { For, Show, splitProps } from "solid-js"
 
-import type { PolymorphicProps } from '@kobalte/core'
-import * as BreadcrumbPrimitive from '@kobalte/core/breadcrumbs'
-
-import { cn } from '@/utils/cn'
+import { cn } from "@/utils/cn"
 
 const Breadcrumb = BreadcrumbPrimitive.Root
 
-const BreadcrumbList: Component<ComponentProps<'ol'>> = (props) => {
-  const [local, others] = splitProps(props, ['class'])
+const BreadcrumbList: Component<ComponentProps<"ol">> = (props) => {
+  const [local, others] = splitProps(props, ["class"])
   return (
     <ol
       class={cn(
-        'text-muted-foreground flex flex-wrap items-center gap-1.5 text-sm break-words sm:gap-2.5',
+        "flex flex-wrap items-center gap-1.5 break-words text-muted-foreground text-sm sm:gap-2.5",
         local.class
       )}
       {...others}
@@ -21,22 +20,22 @@ const BreadcrumbList: Component<ComponentProps<'ol'>> = (props) => {
   )
 }
 
-const BreadcrumbItem: Component<ComponentProps<'li'>> = (props) => {
-  const [local, others] = splitProps(props, ['class'])
-  return <li class={cn('inline-flex items-center gap-1.5', local.class)} {...others} />
+const BreadcrumbItem: Component<ComponentProps<"li">> = (props) => {
+  const [local, others] = splitProps(props, ["class"])
+  return <li class={cn("inline-flex items-center gap-1.5", local.class)} {...others} />
 }
 
-type BreadcrumbLinkProps<T extends ValidComponent = 'a'> =
+type BreadcrumbLinkProps<T extends ValidComponent = "a"> =
   BreadcrumbPrimitive.BreadcrumbsLinkProps<T> & { class?: string | undefined }
 
-const BreadcrumbLink = <T extends ValidComponent = 'a'>(
+const BreadcrumbLink = <T extends ValidComponent = "a">(
   props: PolymorphicProps<T, BreadcrumbLinkProps<T>>
 ) => {
-  const [local, others] = splitProps(props as BreadcrumbLinkProps, ['class'])
+  const [local, others] = splitProps(props as BreadcrumbLinkProps, ["class"])
   return (
     <BreadcrumbPrimitive.Link
       class={cn(
-        'hover:text-foreground data-[current]:text-foreground transition-colors data-[current]:font-normal',
+        "transition-colors hover:text-foreground data-[current]:font-normal data-[current]:text-foreground",
         local.class
       )}
       {...others}
@@ -44,18 +43,18 @@ const BreadcrumbLink = <T extends ValidComponent = 'a'>(
   )
 }
 
-type BreadcrumbSeparatorProps<T extends ValidComponent = 'span'> =
+type BreadcrumbSeparatorProps<T extends ValidComponent = "span"> =
   BreadcrumbPrimitive.BreadcrumbsSeparatorProps<T> & {
     class?: string | undefined
     children?: JSX.Element
   }
 
-const BreadcrumbSeparator = <T extends ValidComponent = 'span'>(
+const BreadcrumbSeparator = <T extends ValidComponent = "span">(
   props: PolymorphicProps<T, BreadcrumbSeparatorProps<T>>
 ) => {
-  const [local, others] = splitProps(props as BreadcrumbSeparatorProps, ['class', 'children'])
+  const [local, others] = splitProps(props as BreadcrumbSeparatorProps, ["class", "children"])
   return (
-    <BreadcrumbPrimitive.Separator class={cn('[&>svg]:size-3.5', local.class)} {...others}>
+    <BreadcrumbPrimitive.Separator class={cn("[&>svg]:size-3.5", local.class)} {...others}>
       <Show
         when={local.children}
         fallback={
@@ -78,10 +77,10 @@ const BreadcrumbSeparator = <T extends ValidComponent = 'span'>(
   )
 }
 
-const BreadcrumbEllipsis: Component<ComponentProps<'span'>> = (props) => {
-  const [local, others] = splitProps(props, ['class'])
+const BreadcrumbEllipsis: Component<ComponentProps<"span">> = (props) => {
+  const [local, others] = splitProps(props, ["class"])
   return (
-    <span class={cn('flex size-9 items-center justify-center', local.class)} {...others}>
+    <span class={cn("flex size-9 items-center justify-center", local.class)} {...others}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"

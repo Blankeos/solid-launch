@@ -1,5 +1,5 @@
-import { initHonoClient } from '@/lib/hono-client'
-import { PageContext } from 'vike/types'
+import type { PageContext } from "vike/types"
+import { initHonoClient } from "@/lib/hono-client"
 
 export type Data = ReturnType<Awaited<typeof data>>
 

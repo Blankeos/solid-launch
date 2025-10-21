@@ -13,27 +13,26 @@ export type SendEmailFunction = (params: {
 // Your custom code here....
 // ===========================================================================
 
-import { privateEnv } from '@/env.private'
-
-// @ts-ignore
-import { SendMailClient } from 'zeptomail'
+// @ts-expect-error
+import { SendMailClient } from "zeptomail"
+import { privateEnv } from "@/env.private"
 
 /** Turns 'Name <name@email.com>' format to { name: 'Name', address: 'name@email.com' } */
 const FROM = (() => {
   try {
     const raw = privateEnv.ZEPTOMAIL_FROM
-    if (!raw) throw new Error('ZEPTOMAIL_FROM is empty')
+    if (!raw) throw new Error("ZEPTOMAIL_FROM is empty")
     const match = raw.match(/^(.+?)\s*<([^>]+)>$/)
-    if (!match) throw new Error('Invalid ZEPTOMAIL_FROM format')
+    if (!match) throw new Error("Invalid ZEPTOMAIL_FROM format")
     return { name: match[1].trim(), address: match[2].trim() }
   } catch (err) {
-    console.error('[sendEmail] Failed to parse ZEPTOMAIL_FROM:', err)
+    console.error("[sendEmail] Failed to parse ZEPTOMAIL_FROM:", err)
     throw err
   }
 })()
 
 const client = new SendMailClient({
-  url: 'api.zeptomail.com/',
+  url: "api.zeptomail.com/",
   token: privateEnv.ZEPTOMAIL_TOKEN,
 })
 
@@ -49,9 +48,9 @@ export const sendEmail: SendEmailFunction = async (params) => {
 
   try {
     const resp = await client.sendMail(payload)
-    console.log('[sendEmail] Message sent:', resp)
+    console.log("[sendEmail] Message sent:", resp)
   } catch (err) {
-    console.error('[sendEmail] Error:', JSON.stringify(err))
+    console.error("[sendEmail] Error:", JSON.stringify(err))
     throw err
   }
 }

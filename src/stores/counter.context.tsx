@@ -1,11 +1,11 @@
 import {
+  type Accessor,
   createContext,
   createSignal,
-  FlowComponent,
-  useContext,
-  type Accessor,
+  type FlowComponent,
   type Setter,
-} from 'solid-js'
+  useContext,
+} from "solid-js"
 
 // ===========================================================================
 // Context

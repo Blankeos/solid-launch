@@ -1,12 +1,12 @@
 export function isLinkActive(path: string, currentPath: string, depth = 1) {
   currentPath
-    .split('/')
+    .split("/")
     .slice(0, depth + 1)
-    .join('/')
+    .join("/")
   const navLinkPath = path
-    .split('/')
+    .split("/")
     .slice(0, depth + 1)
-    .join('/')
+    .join("/")
 
   return currentPath === navLinkPath
 }

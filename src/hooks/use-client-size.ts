@@ -1,4 +1,4 @@
-import { createEffect, createSignal } from 'solid-js'
+import { createEffect, createSignal } from "solid-js"
 
 /**
  * Using signals as refs: https://docs.solidjs.com/concepts/refs (Important because ref won't work if you wrap the element in a conditional).

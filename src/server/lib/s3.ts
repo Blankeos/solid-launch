@@ -1,11 +1,11 @@
-import { privateEnv } from '@/env.private'
-import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
-import { createId } from '@paralleldrive/cuid2'
+import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3"
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
+import { createId } from "@paralleldrive/cuid2"
+import { privateEnv } from "@/env.private"
 
 export const _s3Client = new S3Client({
   endpoint: privateEnv.S3_ENDPOINT,
-  region: 'auto',
+  region: "auto",
   credentials: {
     accessKeyId: privateEnv.S3_ACCESS_KEY_ID,
     secretAccessKey: privateEnv.S3_SECRET_ACCESS_KEY,
@@ -24,7 +24,9 @@ class S3CustomClient {
       Key: destinationObjectKey,
     })
 
-    const signedUrl = await getSignedUrl(_s3Client, command, { expiresIn: 900 }) // 15 minutes
+    const signedUrl = await getSignedUrl(_s3Client, command, {
+      expiresIn: 900,
+    }) // 15 minutes
 
     return {
       signedUrl: signedUrl,
@@ -53,7 +55,7 @@ class S3CustomClient {
 
       return signedUrl
     } catch (err) {
-      console.error('Error creating presigned URL', err)
+      console.error("Error creating presigned URL", err)
     }
 
     return null
@@ -70,28 +72,28 @@ class S3CustomClient {
       const url = new URL(signedUrl)
 
       // For AWS S3/R2 signed URLs, expiration is in 'X-Amz-Expires' and 'X-Amz-Date' params
-      const expires = url.searchParams.get('X-Amz-Expires') // Duration in seconds
-      const date = url.searchParams.get('X-Amz-Date') // Start time (ISO format)
+      const expires = url.searchParams.get("X-Amz-Expires") // Duration in seconds
+      const date = url.searchParams.get("X-Amz-Date") // Start time (ISO format)
 
       if (!expires || !date) {
-        console.warn('URL missing expiration parameters')
+        console.warn("URL missing expiration parameters")
         return true // Assume expired if we can't determine
       }
 
       // Parse the date (format: 20240821T120000Z)
       const startTime = new Date(
         date.slice(0, 4) +
-          '-' +
+          "-" +
           date.slice(4, 6) +
-          '-' +
+          "-" +
           date.slice(6, 8) +
-          'T' +
+          "T" +
           date.slice(9, 11) +
-          ':' +
+          ":" +
           date.slice(11, 13) +
-          ':' +
+          ":" +
           date.slice(13, 15) +
-          'Z'
+          "Z"
       )
 
       // Calculate expiration time
@@ -103,7 +105,7 @@ class S3CustomClient {
 
       return now.getTime() > expirationTime.getTime() - bufferTime
     } catch (error) {
-      console.error('Error parsing signed URL:', error)
+      console.error("Error parsing signed URL:", error)
       return true // Assume expired if parsing fails
     }
   }
@@ -116,8 +118,8 @@ class S3CustomClient {
   getUrlRemainingTime(signedUrl: string): number {
     try {
       const url = new URL(signedUrl)
-      const expires = url.searchParams.get('X-Amz-Expires')
-      const date = url.searchParams.get('X-Amz-Date')
+      const expires = url.searchParams.get("X-Amz-Expires")
+      const date = url.searchParams.get("X-Amz-Date")
 
       if (!expires || !date) {
         return 0
@@ -125,25 +127,25 @@ class S3CustomClient {
 
       const startTime = new Date(
         date.slice(0, 4) +
-          '-' +
+          "-" +
           date.slice(4, 6) +
-          '-' +
+          "-" +
           date.slice(6, 8) +
-          'T' +
+          "T" +
           date.slice(9, 11) +
-          ':' +
+          ":" +
           date.slice(11, 13) +
-          ':' +
+          ":" +
           date.slice(13, 15) +
-          'Z'
+          "Z"
       )
 
       const expirationTime = new Date(startTime.getTime() + parseInt(expires) * 1000)
-      const remainingTime = expirationTime.getTime() - new Date().getTime()
+      const remainingTime = expirationTime.getTime() - Date.now()
 
       return Math.max(0, remainingTime)
     } catch (error) {
-      console.error('Error calculating remaining time:', error)
+      console.error("Error calculating remaining time:", error)
       return 0
     }
   }

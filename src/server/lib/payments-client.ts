@@ -1,8 +1,8 @@
-import { privateEnv } from '@/env.private'
-import { publicEnv } from '@/env.public'
-import DodoPayments from 'dodopayments'
-import { CheckoutSessionCreateParams } from 'dodopayments/resources/checkout-sessions.mjs'
-import { BillingAddress } from 'dodopayments/resources/payments.mjs'
+import DodoPayments from "dodopayments"
+import type { CheckoutSessionCreateParams } from "dodopayments/resources/checkout-sessions.mjs"
+import type { BillingAddress } from "dodopayments/resources/payments.mjs"
+import { privateEnv } from "@/env.private"
+import { publicEnv } from "@/env.public"
 
 const COMPLETED_CHECKOUT_URL = `${publicEnv.PUBLIC_BASE_URL}/payment/completed`
 
@@ -17,7 +17,7 @@ class DodoClient {
   }
 
   createStaticPaymentLink(productId: string) {
-    const origin = `${privateEnv.DODO_PAYMENTS_ENV === 'test_mode' ? 'test.' : ''}checkout.dodopayments.com`
+    const origin = `${privateEnv.DODO_PAYMENTS_ENV === "test_mode" ? "test." : ""}checkout.dodopayments.com`
     return `https://${origin}/buy/${productId}?quantity=1&redirect_url=${COMPLETED_CHECKOUT_URL}`
   }
 
@@ -36,7 +36,7 @@ class DodoClient {
     try {
       // Validate API key is configured
       if (!privateEnv.DODO_PAYMENTS_API_KEY) {
-        throw new Error('DODO_PAYMENTS_API_KEY is not configured')
+        throw new Error("DODO_PAYMENTS_API_KEY is not configured")
       }
 
       const payload: CheckoutSessionCreateParams = {
@@ -53,8 +53,8 @@ class DodoClient {
 
         // Custom data for your internal tracking
         metadata: {
-          order_id: params.orderId ?? 'order_123',
-          source: 'web_app',
+          order_id: params.orderId ?? "order_123",
+          source: "web_app",
           ...(params.metadata ?? {}),
         },
       }
@@ -70,9 +70,9 @@ class DodoClient {
       }
 
       console.log(
-        '[create checkout] productId',
+        "[create checkout] productId",
         params.productId,
-        '|',
+        "|",
         privateEnv.DODO_PAYMENTS_API_KEY
       )
 
@@ -81,12 +81,12 @@ class DodoClient {
       })
 
       // Redirect your customer to this URL to complete payment
-      console.log('Checkout URL:', session.checkout_url)
-      console.log('Session ID:', session.session_id)
+      console.log("Checkout URL:", session.checkout_url)
+      console.log("Session ID:", session.session_id)
 
       return session
     } catch (error) {
-      console.error('Failed to create checkout session:', error)
+      console.error("Failed to create checkout session:", error)
       throw error
     }
   }

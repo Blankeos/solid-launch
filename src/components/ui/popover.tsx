@@ -1,11 +1,9 @@
-import type { Component, ComponentProps, ValidComponent } from 'solid-js'
-import { Show, splitProps } from 'solid-js'
-
-import type { PolymorphicProps } from '@kobalte/core/polymorphic'
-import * as PopoverPrimitive from '@kobalte/core/popover'
-
-import { cn } from '@/utils/cn'
-import { JSX } from 'solid-js/jsx-runtime'
+import type { PolymorphicProps } from "@kobalte/core/polymorphic"
+import * as PopoverPrimitive from "@kobalte/core/popover"
+import type { Component, ComponentProps, ValidComponent } from "solid-js"
+import { Show, splitProps } from "solid-js"
+import type { JSX } from "solid-js/jsx-runtime"
+import { cn } from "@/utils/cn"
 
 const PopoverTrigger = PopoverPrimitive.Trigger
 
@@ -13,18 +11,18 @@ const Popover: Component<PopoverPrimitive.PopoverRootProps> = (props) => {
   return <PopoverPrimitive.Root gutter={4} {...props} />
 }
 
-type PopoverContentProps<T extends ValidComponent = 'div'> =
+type PopoverContentProps<T extends ValidComponent = "div"> =
   PopoverPrimitive.PopoverContentProps<T> & { class?: string | undefined }
 
-const PopoverContent = <T extends ValidComponent = 'div'>(
+const PopoverContent = <T extends ValidComponent = "div">(
   props: PolymorphicProps<T, PopoverContentProps<T>>
 ) => {
-  const [local, others] = splitProps(props as PopoverContentProps, ['class'])
+  const [local, others] = splitProps(props as PopoverContentProps, ["class"])
   return (
     <PopoverPrimitive.Portal>
       <PopoverPrimitive.Content
         class={cn(
-          'bg-popover text-popover-foreground data-[expanded]:animate-flyUpAndScale data-[closed]:animate-flyUpAndScaleExit z-50 w-72 origin-[var(--kb-popover-content-transform-origin)] rounded-md border p-4 shadow-md outline-none',
+          "z-50 w-72 origin-[var(--kb-popover-content-transform-origin)] rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none data-[closed]:animate-flyUpAndScaleExit data-[expanded]:animate-flyUpAndScale",
           local.class
         )}
         {...others}
@@ -45,7 +43,7 @@ export const PopoverComp: Component<
     arrow?: boolean
   }
 > = (props) => {
-  const [local, rest] = splitProps(props, ['children', 'content', 'contentProps', 'arrow'])
+  const [local, rest] = splitProps(props, ["children", "content", "contentProps", "arrow"])
   return (
     <Popover {...rest}>
       <PopoverTrigger>{local.children}</PopoverTrigger>

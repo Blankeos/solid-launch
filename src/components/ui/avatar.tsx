@@ -1,48 +1,47 @@
-import type { ValidComponent } from 'solid-js'
-import { splitProps } from 'solid-js'
+import * as ImagePrimitive from "@kobalte/core/image"
+import type { PolymorphicProps } from "@kobalte/core/polymorphic"
+import type { ValidComponent } from "solid-js"
+import { splitProps } from "solid-js"
 
-import * as ImagePrimitive from '@kobalte/core/image'
-import type { PolymorphicProps } from '@kobalte/core/polymorphic'
+import { cn } from "@/utils/cn"
 
-import { cn } from '@/utils/cn'
-
-type AvatarRootProps<T extends ValidComponent = 'span'> = ImagePrimitive.ImageRootProps<T> & {
+type AvatarRootProps<T extends ValidComponent = "span"> = ImagePrimitive.ImageRootProps<T> & {
   class?: string | undefined
 }
 
-const Avatar = <T extends ValidComponent = 'span'>(
+const Avatar = <T extends ValidComponent = "span">(
   props: PolymorphicProps<T, AvatarRootProps<T>>
 ) => {
-  const [local, others] = splitProps(props as AvatarRootProps, ['class'])
+  const [local, others] = splitProps(props as AvatarRootProps, ["class"])
   return (
     <ImagePrimitive.Root
-      class={cn('relative flex size-10 shrink-0 overflow-hidden rounded-full', local.class)}
+      class={cn("relative flex size-10 shrink-0 overflow-hidden rounded-full", local.class)}
       {...others}
     />
   )
 }
 
-type AvatarImageProps<T extends ValidComponent = 'img'> = ImagePrimitive.ImageImgProps<T> & {
+type AvatarImageProps<T extends ValidComponent = "img"> = ImagePrimitive.ImageImgProps<T> & {
   class?: string | undefined
 }
 
-const AvatarImage = <T extends ValidComponent = 'img'>(
+const AvatarImage = <T extends ValidComponent = "img">(
   props: PolymorphicProps<T, AvatarImageProps<T>>
 ) => {
-  const [local, others] = splitProps(props as AvatarImageProps, ['class'])
-  return <ImagePrimitive.Img class={cn('aspect-square size-full', local.class)} {...others} />
+  const [local, others] = splitProps(props as AvatarImageProps, ["class"])
+  return <ImagePrimitive.Img class={cn("aspect-square size-full", local.class)} {...others} />
 }
 
-type AvatarFallbackProps<T extends ValidComponent = 'span'> =
+type AvatarFallbackProps<T extends ValidComponent = "span"> =
   ImagePrimitive.ImageFallbackProps<T> & { class?: string | undefined }
 
-const AvatarFallback = <T extends ValidComponent = 'span'>(
+const AvatarFallback = <T extends ValidComponent = "span">(
   props: PolymorphicProps<T, AvatarFallbackProps<T>>
 ) => {
-  const [local, others] = splitProps(props as AvatarFallbackProps, ['class'])
+  const [local, others] = splitProps(props as AvatarFallbackProps, ["class"])
   return (
     <ImagePrimitive.Fallback
-      class={cn('bg-muted flex size-full items-center justify-center', local.class)}
+      class={cn("flex size-full items-center justify-center bg-muted", local.class)}
       {...others}
     />
   )

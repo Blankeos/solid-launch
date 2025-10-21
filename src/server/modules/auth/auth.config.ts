@@ -19,5 +19,5 @@ export const AUTH_CONFIG: AuthConfig = {
 // Validate session configuration
 const { expiresInDays, renewWithinDays } = AUTH_CONFIG.session
 if (expiresInDays <= renewWithinDays) {
-  throw new Error('AUTH_CONFIG.session.expiresInDays must be greater than renewWithinDays')
+  throw new Error("AUTH_CONFIG.session.expiresInDays must be greater than renewWithinDays")
 }

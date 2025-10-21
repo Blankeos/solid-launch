@@ -28,8 +28,8 @@
 // - External trigger a11y docs - added.
 // ----------------------------------------------------------------
 
-import { cn } from '@/utils/cn'
-import { type JSX, children, createSignal, onCleanup, onMount, splitProps } from 'solid-js'
+import { children, createSignal, type JSX, onCleanup, onMount, splitProps } from "solid-js"
+import { cn } from "@/utils/cn"
 
 export interface CollapsibleProps extends JSX.HTMLAttributes<HTMLDivElement> {
   open?: boolean
@@ -73,8 +73,8 @@ export function Collapsible(props: CollapsibleProps) {
   let innerRef: HTMLDivElement | undefined
   let lastHeight = 0
 
-  const [local, others] = splitProps(props, ['open', 'containerClass', 'class', 'children'])
-  const [height, setHeight] = createSignal<number | string>('auto')
+  const [local, others] = splitProps(props, ["open", "containerClass", "class", "children"])
+  const [height, setHeight] = createSignal<number | string>("auto")
 
   // Observe the *inner* element’s size so any content change is reflected
   const resizeHandler = () => {
@@ -98,16 +98,16 @@ export function Collapsible(props: CollapsibleProps) {
   // (invoke children here once so ResizeObserver sees static children of inner)
   const content = children(() => local.children)
 
-  const heightStyle = () => (local.open ? `${height()}px` : '0px')
+  const heightStyle = () => (local.open ? `${height()}px` : "0px")
   return (
     <div
       style={{ height: heightStyle() }}
-      class={cn('overflow-hidden transition-[width,height] duration-400', local.containerClass)}
+      class={cn("overflow-hidden transition-[width,height] duration-400", local.containerClass)}
       aria-hidden={!local.open}
       {...others}
     >
       {/* inner wrapper we measure */}
-      <div ref={innerRef} class={cn(local.class, 'w-full')}>
+      <div ref={innerRef} class={cn(local.class, "w-full")}>
         {content()}
       </div>
     </div>

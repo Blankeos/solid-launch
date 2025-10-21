@@ -1,5 +1,5 @@
-import { getRoute } from '@/route-tree.gen'
-import { usePageContext } from 'vike-solid/usePageContext'
+import { usePageContext } from "vike-solid/usePageContext"
+import { getRoute } from "@/route-tree.gen"
 
 export function usePostLoginRedirectUrl() {
   const pageContext = usePageContext()
@@ -7,7 +7,7 @@ export function usePostLoginRedirectUrl() {
   // ===========================================================================
   // Make sure to edit me ✍️
   // ===========================================================================
-  const postLoginRedirectUrl = () => pageContext.urlParsed.search['to'] ?? getRoute('/dashboard')
+  const postLoginRedirectUrl = () => pageContext.urlParsed.search["to"] ?? getRoute("/dashboard")
 
   return postLoginRedirectUrl
 }

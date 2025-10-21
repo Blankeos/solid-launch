@@ -1,18 +1,18 @@
-import { Button } from '@/components/ui/button'
-import { useCounterContext } from '@/stores/counter.context'
-import { useMetadata } from 'vike-metadata-solid'
+import { useMetadata } from "vike-metadata-solid"
+import { Button } from "@/components/ui/button"
+import { useCounterContext } from "@/stores/counter.context"
 
 export default function AboutPage() {
   const { count: globalCount, setCount: setGlobalCount } = useCounterContext()
 
   useMetadata({
-    title: 'About | Solid Launch',
+    title: "About | Solid Launch",
   })
 
   return (
     <div class="flex h-full flex-1 flex-col">
       <div class="mx-auto flex w-full max-w-5xl flex-col items-center gap-y-5">
-        <h1 class="text-3xl font-medium">About</h1>
+        <h1 class="font-medium text-3xl">About</h1>
         <Button onClick={() => setGlobalCount((count) => count + 1)}>
           🌎 global count is {globalCount()}
         </Button>

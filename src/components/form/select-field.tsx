@@ -1,6 +1,6 @@
-import { Label } from '@/components/ui/label'
-import { SelectComp, SelectOption } from '@/components/ui/select'
-import { createField, DeepKeys, FieldApi } from '@tanstack/solid-form'
+import { createField, type DeepKeys, type FieldApi } from "@tanstack/solid-form"
+import { Label } from "@/components/ui/label"
+import { SelectComp, type SelectOption } from "@/components/ui/select"
 
 interface SelectFieldProps<TParentData, TName extends DeepKeys<TParentData>> {
   form: FieldApi<TParentData, TName>
@@ -35,11 +35,11 @@ export function SelectField<TParentData, TName extends DeepKeys<TParentData>>(
         options={props.options}
         placeholder={props.placeholder}
         triggerProps={{
-          class: 'w-full',
+          class: "w-full",
         }}
       />
       {field().state.meta.errors.length > 0 && (
-        <p class="text-sm text-red-500">{field().state.meta.errors.join(', ')}</p>
+        <p class="text-red-500 text-sm">{field().state.meta.errors.join(", ")}</p>
       )}
     </div>
   )

@@ -1,4 +1,4 @@
-import { dehydrate, QueryClient } from '@tanstack/solid-query'
+import { dehydrate, QueryClient } from "@tanstack/solid-query"
 
 /**
  * A function you can use on the server and pass the queries to be prefetched.

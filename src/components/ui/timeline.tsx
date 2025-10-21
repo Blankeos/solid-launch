@@ -1,11 +1,11 @@
-import type { ComponentProps, ParentComponent } from 'solid-js'
-import { For, mergeProps, Show, splitProps, type Component, type JSXElement } from 'solid-js'
+import type { ComponentProps, ParentComponent } from "solid-js"
+import { type Component, For, type JSXElement, mergeProps, Show, splitProps } from "solid-js"
 
-import { cn } from '@/utils/cn'
+import { cn } from "@/utils/cn"
 
 export type TimelinePropsItem = Omit<
   TimelineItemProps,
-  'isActive' | 'isActiveBullet' | 'bulletSize' | 'lineSize'
+  "isActive" | "isActiveBullet" | "bulletSize" | "lineSize"
 > & {
   bulletSize?: number
 }
@@ -29,7 +29,7 @@ const Timeline: Component<TimelineProps> = (rawProps) => {
   return (
     <ul
       style={{
-        'padding-left': `${props.bulletSize / 2}px`,
+        "padding-left": `${props.bulletSize / 2}px`,
       }}
     >
       <For each={props.items}>
@@ -64,26 +64,26 @@ export type TimelineItemProps = {
 
 const TimelineItem: Component<TimelineItemProps> = (props) => {
   const [local, others] = splitProps(props, [
-    'class',
-    'bullet',
-    'description',
-    'title',
-    'isLast',
-    'isActive',
-    'isActiveBullet',
-    'bulletSize',
-    'lineSize',
+    "class",
+    "bullet",
+    "description",
+    "title",
+    "isLast",
+    "isActive",
+    "isActiveBullet",
+    "bulletSize",
+    "lineSize",
   ])
   return (
     <li
       class={cn(
-        'relative border-l pb-8 pl-8',
-        local.isLast && 'border-l-transparent pb-0',
-        local.isActive && !local.isLast && 'border-l-primary',
+        "relative border-l pb-8 pl-8",
+        local.isLast && "border-l-transparent pb-0",
+        local.isActive && !local.isLast && "border-l-primary",
         local.class
       )}
       style={{
-        'border-left-width': `${local.lineSize}px`,
+        "border-left-width": `${local.lineSize}px`,
       }}
       {...others}
     >
@@ -113,14 +113,14 @@ const TimelineItemBullet: Component<TimelineItemBulletProps> = (props) => {
   return (
     <div
       class={cn(
-        `bg-background absolute top-0 flex items-center justify-center rounded-full border`,
-        props.isActive && 'border-primary'
+        `absolute top-0 flex items-center justify-center rounded-full border bg-background`,
+        props.isActive && "border-primary"
       )}
       style={{
         width: `${props.bulletSize}px`,
         height: `${props.bulletSize}px`,
         left: `${-props.bulletSize / 2 - props.lineSize / 2}px`,
-        'border-width': `${props.lineSize}px`,
+        "border-width": `${props.lineSize}px`,
       }}
       aria-hidden="true"
     >
@@ -130,13 +130,13 @@ const TimelineItemBullet: Component<TimelineItemBulletProps> = (props) => {
 }
 
 const TimelineItemTitle: ParentComponent = (props) => {
-  return <div class="mb-1 text-base leading-none font-semibold">{props.children}</div>
+  return <div class="mb-1 font-semibold text-base leading-none">{props.children}</div>
 }
 
-const TimelineItemDescription: Component<ComponentProps<'p'>> = (props) => {
-  const [local, others] = splitProps(props, ['class', 'children'])
+const TimelineItemDescription: Component<ComponentProps<"p">> = (props) => {
+  const [local, others] = splitProps(props, ["class", "children"])
   return (
-    <p class={cn('text-muted-foreground text-sm', local.class)} {...others}>
+    <p class={cn("text-muted-foreground text-sm", local.class)} {...others}>
       {local.children}
     </p>
   )

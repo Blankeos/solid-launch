@@ -4,13 +4,13 @@ import {
   createComputed,
   createEffect,
   createSignal,
-  JSX,
+  type JSX,
   onCleanup,
   splitProps,
   untrack,
-} from 'solid-js'
-import makeTippy, { Instance, Props } from 'tippy.js'
-import makeHeadlessTippy from 'tippy.js/headless'
+} from "solid-js"
+import makeTippy, { type Instance, type Props } from "tippy.js"
+import makeHeadlessTippy from "tippy.js/headless"
 
 export interface TippyOptions {
   disabled?: boolean
@@ -194,12 +194,12 @@ type CustomTippyOptions = {
   hidden?: boolean
   open?: boolean
   content?: string | JSX.Element
-  props?: Omit<Partial<Props>, 'content'>
+  props?: Omit<Partial<Props>, "content">
 }
 
 export function Tippy(props: CustomTippyOptions & { children: JSX.Element }) {
   // Separate component-specific props from those passed to Tippy.js.
-  const [local, tippyProps] = splitProps(props, ['children', 'content', 'open'])
+  const [local, tippyProps] = splitProps(props, ["children", "content", "open"])
 
   const resolvedChildren = children(() => local.children)
   const [trigger, setTrigger] = createSignal<HTMLElement>()
@@ -229,15 +229,15 @@ export function Tippy(props: CustomTippyOptions & { children: JSX.Element }) {
     },
     get props() {
       return {
-        animation: 'scale-subtle',
-        theme: 'custom',
+        animation: "scale-subtle",
+        theme: "custom",
         ...tippyProps.props,
         // The `content` is a reactive getter that returns the container element
         // once it's rendered.
         content: contentContainer(),
         // When open is explicitly provided, disable trigger events
-        ...(local.open !== undefined && { trigger: 'manual', hideOnClick: false }),
-      } satisfies TippyOptions['props']
+        ...(local.open !== undefined && { trigger: "manual", hideOnClick: false }),
+      } satisfies TippyOptions["props"]
     },
   })
 
@@ -250,7 +250,7 @@ export function Tippy(props: CustomTippyOptions & { children: JSX.Element }) {
         pattern ensures that Solid's reactivity is preserved for the content,
         and it's compatible with server-side rendering and hydration.
       */}
-      <div style={{ display: 'none' }}>
+      <div style={{ display: "none" }}>
         <div ref={setContentContainer}>{local.content}</div>
       </div>
     </>

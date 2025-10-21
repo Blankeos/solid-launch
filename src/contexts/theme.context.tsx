@@ -1,33 +1,33 @@
-import { useLocalStorage } from 'bagon-hooks'
+import { useLocalStorage } from "bagon-hooks"
 import {
+  type Accessor,
   createContext,
   createEffect,
   createSignal,
-  FlowComponent,
-  Setter,
+  type FlowComponent,
+  type Setter,
   useContext,
-  type Accessor,
-} from 'solid-js'
+} from "solid-js"
 
 // ===========================================================================
 // Context
 // ===========================================================================
 
-export const themes = ['light', 'dark', 'system'] as const
+export const themes = ["light", "dark", "system"] as const
 
 export type Theme = (typeof themes)[number]
 
 export type ThemeContextValue = {
   theme: Accessor<Theme>
   setTheme: Setter<Theme>
-  inferredTheme: Accessor<Exclude<Theme, 'system'>>
+  inferredTheme: Accessor<Exclude<Theme, "system">>
   toggleTheme: () => void
 }
 
 const ThemeContext = createContext({
-  theme: () => 'light',
+  theme: () => "light",
   setTheme: () => {},
-  inferredTheme: () => 'light',
+  inferredTheme: () => "light",
   toggleTheme: () => {},
 } as ThemeContextValue)
 
@@ -41,20 +41,20 @@ export const useThemeContext = () => useContext(ThemeContext)
 // ===========================================================================
 export const ThemeContextProvider: FlowComponent = (props) => {
   const [theme, setTheme] = useLocalStorage<Theme>({
-    key: 'app-theme',
-    defaultValue: 'system',
+    key: "app-theme",
+    defaultValue: "system",
   })
 
   /** For logic that relies on literally just `light` or `dark` themes (i.e. CodeMirror). Also infers system. */
   const [inferredTheme, setInferredTheme] =
-    createSignal<ReturnType<ThemeContextValue['inferredTheme']>>('light')
+    createSignal<ReturnType<ThemeContextValue["inferredTheme"]>>("light")
 
   createEffect(() => {
     let themeValue = theme()
 
-    if (themeValue === 'system') {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-      themeValue = prefersDark ? 'dark' : 'light'
+    if (themeValue === "system") {
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
+      themeValue = prefersDark ? "dark" : "light"
     }
 
     themes.forEach((themeName) => {
@@ -69,12 +69,12 @@ export const ThemeContextProvider: FlowComponent = (props) => {
   })
 
   function toggleTheme() {
-    if (theme() === 'light') {
-      setTheme('dark')
-    } else if (theme() === 'dark') {
-      setTheme('light')
+    if (theme() === "light") {
+      setTheme("dark")
+    } else if (theme() === "dark") {
+      setTheme("light")
     } else {
-      setTheme('dark')
+      setTheme("dark")
     }
   }
 

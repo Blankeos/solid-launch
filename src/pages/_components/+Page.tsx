@@ -1,17 +1,23 @@
-import { IconMoonDuo, IconSunDuo } from '@/assets/icons'
-import { AccordionComp } from '@/components/ui/accordion'
-import { AlertComp } from '@/components/ui/alert'
-import { Badge } from '@/components/ui/badge'
-import { BreadcrumbComp } from '@/components/ui/breadcrumb'
-import { Button } from '@/components/ui/button'
-import { CalloutComp } from '@/components/ui/callout'
-import { CheckboxComp } from '@/components/ui/checkbox'
-import { Collapsible } from '@/components/ui/collapsible'
-import { ContextMenuComp } from '@/components/ui/context-menu'
-import { DataTable } from '@/components/ui/data-table/data-table'
-import { TableColumnHeader } from '@/components/ui/data-table/table-column-header'
-import { CalendarComp, CalendarRangeComp } from '@/components/ui/date-picker/calendar-comp'
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import type { ColumnDef } from "@tanstack/solid-table"
+import { useDisclosure, useToggle } from "bagon-hooks"
+import { createEffect, createSignal, type FlowProps, For } from "solid-js"
+import type { JSX } from "solid-js/jsx-runtime"
+import { toast } from "solid-sonner"
+import { followCursor } from "tippy.js"
+import { IconMoonDuo, IconSunDuo } from "@/assets/icons"
+import { AccordionComp } from "@/components/ui/accordion"
+import { AlertComp } from "@/components/ui/alert"
+import { Badge } from "@/components/ui/badge"
+import { BreadcrumbComp } from "@/components/ui/breadcrumb"
+import { Button } from "@/components/ui/button"
+import { CalloutComp } from "@/components/ui/callout"
+import { CheckboxComp } from "@/components/ui/checkbox"
+import { Collapsible } from "@/components/ui/collapsible"
+import { ContextMenuComp } from "@/components/ui/context-menu"
+import { DataTable } from "@/components/ui/data-table/data-table"
+import { TableColumnHeader } from "@/components/ui/data-table/table-column-header"
+import { CalendarComp, CalendarRangeComp } from "@/components/ui/date-picker/calendar-comp"
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import {
   Drawer,
   DrawerContent,
@@ -19,26 +25,20 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from '@/components/ui/drawer'
-import { DropdownMenuComp } from '@/components/ui/dropdown-menu'
-import { PaginationComp } from '@/components/ui/pagination'
-import { PopoverComp } from '@/components/ui/popover'
-import { RadioGroupComp } from '@/components/ui/radio-group'
-import { SelectComp, SelectOption } from '@/components/ui/select'
-import { SliderComp } from '@/components/ui/slider'
-import { SwitchComp } from '@/components/ui/switch'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Timeline } from '@/components/ui/timeline'
-import { useThemeContext } from '@/contexts/theme.context'
-import { Tippy } from '@/lib/solid-tippy'
-import { cn } from '@/utils/cn'
-import { ColumnDef } from '@tanstack/solid-table'
-import { useDisclosure, useToggle } from 'bagon-hooks'
-import { createEffect, createSignal, FlowProps, For } from 'solid-js'
-import { JSX } from 'solid-js/jsx-runtime'
-import { toast } from 'solid-sonner'
-import { followCursor } from 'tippy.js'
-import { DragExample } from './drag-example'
+} from "@/components/ui/drawer"
+import { DropdownMenuComp } from "@/components/ui/dropdown-menu"
+import { PaginationComp } from "@/components/ui/pagination"
+import { PopoverComp } from "@/components/ui/popover"
+import { RadioGroupComp } from "@/components/ui/radio-group"
+import { SelectComp, type SelectOption } from "@/components/ui/select"
+import { SliderComp } from "@/components/ui/slider"
+import { SwitchComp } from "@/components/ui/switch"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Timeline } from "@/components/ui/timeline"
+import { useThemeContext } from "@/contexts/theme.context"
+import { Tippy } from "@/lib/solid-tippy"
+import { cn } from "@/utils/cn"
+import { DragExample } from "./drag-example"
 
 export default function ComponentsPage() {
   return (
@@ -69,40 +69,43 @@ export default function ComponentsPage() {
       <ComponentCard label="Dropdown">
         <DropdownMenuComp
           options={[
-            { type: 'item', itemDisplay: 'Commit', itemTip: '⌘+K' },
-            { type: 'item', itemDisplay: 'Push', itemTip: '⇧+⌘+K' },
-            { type: 'item', itemDisplay: 'Update Project', itemTip: '⌘+T' },
+            { type: "item", itemDisplay: "Commit", itemTip: "⌘+K" },
+            { type: "item", itemDisplay: "Push", itemTip: "⇧+⌘+K" },
+            { type: "item", itemDisplay: "Update Project", itemTip: "⌘+T" },
             {
-              type: 'sub',
-              subTrigger: 'GitHub',
+              type: "sub",
+              subTrigger: "GitHub",
               subOptions: [
-                { type: 'item', itemDisplay: 'Create Pull Request…' },
-                { type: 'item', itemDisplay: 'View Pull Requests' },
-                { type: 'item', itemDisplay: 'Sync Forks' },
-                { type: 'separator' },
+                { type: "item", itemDisplay: "Create Pull Request…" },
+                { type: "item", itemDisplay: "View Pull Requests" },
+                { type: "item", itemDisplay: "Sync Forks" },
+                { type: "separator" },
                 {
-                  type: 'sub',
-                  subTrigger: 'itlog',
+                  type: "sub",
+                  subTrigger: "itlog",
                   subOptions: [
                     {
-                      type: 'item',
-                      itemDisplay: '123',
+                      type: "item",
+                      itemDisplay: "123",
                     },
-                    { type: 'separator' },
+                    { type: "separator" },
                   ],
                 },
                 {
-                  type: 'item',
-                  itemDisplay: 'Open on GitHub',
+                  type: "item",
+                  itemDisplay: "Open on GitHub",
                 },
               ],
             },
-            { type: 'separator' },
-            { type: 'checkbox', label: 'Show Git log' },
-            { type: 'checkbox', label: 'Show History' },
-            { type: 'separator' },
-            { type: 'label', label: 'Radio Group' },
-            { type: 'radio', options: [{ value: 'main' }, { value: 'develop' }] },
+            { type: "separator" },
+            { type: "checkbox", label: "Show Git log" },
+            { type: "checkbox", label: "Show History" },
+            { type: "separator" },
+            { type: "label", label: "Radio Group" },
+            {
+              type: "radio",
+              options: [{ value: "main" }, { value: "develop" }],
+            },
           ]}
         >
           <Button as="div">Open options</Button>
@@ -116,7 +119,7 @@ export default function ComponentsPage() {
           return (
             <SwitchComp
               label={
-                theme() === 'light' ? (
+                theme() === "light" ? (
                   <IconMoonDuo class="h-5 w-5" />
                 ) : (
                   <IconSunDuo class="h-5 w-5" />
@@ -131,28 +134,28 @@ export default function ComponentsPage() {
         <span class="text-xs">Basic</span>
         <SelectComp
           options={[
-            { value: 'apple', label: '🍎 Apple' },
-            { value: 'orange', label: '🍊 Orange' },
-            { value: 'grape', label: '🍇 Grape' },
+            { value: "apple", label: "🍎 Apple" },
+            { value: "orange", label: "🍊 Orange" },
+            { value: "grape", label: "🍇 Grape" },
           ]}
         />
         <span class="text-xs">Multiple</span>
         <SelectComp
           multiple
           options={[
-            { value: 'apple', label: '🍎 Apple' },
-            { value: 'orange', label: '🍊 Orange' },
-            { value: 'grape', label: '🍇 Grape' },
+            { value: "apple", label: "🍎 Apple" },
+            { value: "orange", label: "🍊 Orange" },
+            { value: "grape", label: "🍇 Grape" },
           ]}
         />
         <SelectComp loading options={[]} placeholder="Loading" />
         <SelectComp disabled options={[]} placeholder="Disabled" />
         {(() => {
-          const [value, setValue] = createSignal<string | null>('apple')
+          const [value, setValue] = createSignal<string | null>("apple")
           const options: SelectOption[] = [
-            { value: 'apple', label: '🍎 Apple' },
-            { value: 'orange', label: '🍊 Orange' },
-            { value: 'grape', label: '🍇 Grape' },
+            { value: "apple", label: "🍎 Apple" },
+            { value: "orange", label: "🍊 Orange" },
+            { value: "grape", label: "🍇 Grape" },
           ]
 
           return (
@@ -171,11 +174,11 @@ export default function ComponentsPage() {
           )
         })()}
         {(() => {
-          const [value, setValue] = createSignal(['apple', 'orange'])
+          const [value, setValue] = createSignal(["apple", "orange"])
           const options: SelectOption[] = [
-            { value: 'apple', label: '🍎 Apple' },
-            { value: 'orange', label: '🍊 Orange' },
-            { value: 'grape', label: '🍇 Grape' },
+            { value: "apple", label: "🍎 Apple" },
+            { value: "orange", label: "🍊 Orange" },
+            { value: "grape", label: "🍇 Grape" },
           ]
 
           return (
@@ -256,10 +259,10 @@ export default function ComponentsPage() {
       <ComponentCard label="Breadcrumbs">
         <BreadcrumbComp
           path={[
-            { id: 'home', label: 'Home', href: '/' },
-            { id: 'ellipsis', isEllipsis: true },
-            { id: 'components', label: 'Components', href: '/components' },
-            { id: 'breadcrumbs', label: 'Breadcrumbs', current: true },
+            { id: "home", label: "Home", href: "/" },
+            { id: "ellipsis", isEllipsis: true },
+            { id: "components", label: "Components", href: "/components" },
+            { id: "breadcrumbs", label: "Breadcrumbs", current: true },
           ]}
         />
       </ComponentCard>
@@ -267,7 +270,7 @@ export default function ComponentsPage() {
         <Button
           onClick={() => {
             const toasts = [
-              () => toast('🍞 Awesome!'),
+              () => toast("🍞 Awesome!"),
               () =>
                 toast.promise(
                   async () => {
@@ -275,24 +278,24 @@ export default function ComponentsPage() {
 
                     if (random === 0) await new Promise((resolve) => setTimeout(resolve, 2000))
                     if (random === 1)
-                      await new Promise((resolve, reject) => setTimeout(reject, 2000))
+                      await new Promise((_resolve, reject) => setTimeout(reject, 2000))
                   },
                   {
-                    loading: '🍞 Cooking your toast...',
-                    success: '🍔 Toast cooked!',
-                    error: '☄️ Toast failed!',
+                    loading: "🍞 Cooking your toast...",
+                    success: "🍔 Toast cooked!",
+                    error: "☄️ Toast failed!",
                   }
                 ),
               async () => {
-                const toastIdAlphabet = 'abcdefghijklmnopqrstuvwxyz1234567890'
+                const toastIdAlphabet = "abcdefghijklmnopqrstuvwxyz1234567890"
                 const toastId = [...Array(5)].reduce(
                   (acc, _) =>
                     acc + toastIdAlphabet[Math.floor(Math.random() * toastIdAlphabet.length)],
-                  ''
+                  ""
                 )
-                toast.loading('🔪 Slicing your toast...', { id: toastId })
+                toast.loading("🔪 Slicing your toast...", { id: toastId })
                 await new Promise((resolve) => setTimeout(resolve, 800))
-                toast.loading('🤺 Slicing EVEN HARDER!!!', { id: toastId })
+                toast.loading("🤺 Slicing EVEN HARDER!!!", { id: toastId })
                 await new Promise((resolve) => setTimeout(resolve, 800))
                 toast.loading("💣 It's GONNA BLOW!!!", { id: toastId })
                 await new Promise((resolve) => setTimeout(resolve, 500))
@@ -303,12 +306,12 @@ export default function ComponentsPage() {
 
                     if (random === 0) await new Promise((resolve) => setTimeout(resolve, 2000))
                     if (random === 1)
-                      await new Promise((resolve, reject) => setTimeout(reject, 2000))
+                      await new Promise((_resolve, reject) => setTimeout(reject, 2000))
                   },
                   {
-                    loading: '👨‍🍳 Cooking EVEN HARDER!!!',
-                    success: '🍔 Toast cooked!',
-                    error: '☄️ Toast BURNT!',
+                    loading: "👨‍🍳 Cooking EVEN HARDER!!!",
+                    success: "🍔 Toast cooked!",
+                    error: "☄️ Toast BURNT!",
                     id: toastId,
                   }
                 )
@@ -325,28 +328,28 @@ export default function ComponentsPage() {
 
         <Button
           onClick={() => {
-            toast.success('All changes have been saved!')
+            toast.success("All changes have been saved!")
           }}
         >
           Success Toast
         </Button>
         <Button
           onClick={() => {
-            toast.warning('Your session will expire in 5 minutes.')
+            toast.warning("Your session will expire in 5 minutes.")
           }}
         >
           Warning Toast
         </Button>
         <Button
           onClick={() => {
-            toast.info('New feature available in your dashboard.')
+            toast.info("New feature available in your dashboard.")
           }}
         >
           Info Toast
         </Button>
         <Button
           onClick={() => {
-            toast.error('Unable to connect to the server.')
+            toast.error("Unable to connect to the server.")
           }}
         >
           Error Toast
@@ -363,6 +366,7 @@ export default function ComponentsPage() {
             <div class="flex flex-col items-center gap-2">
               Content of tooltip
               <img
+                alt="content of tooltip"
                 src="https://cdn.myanimelist.net/r/200x268/images/characters/16/586614.jpg?s=449698e15fb4c6cdb353d71a267c7d04"
                 class="h-10 w-10 rounded-full bg-white object-cover object-center"
               />
@@ -375,7 +379,11 @@ export default function ComponentsPage() {
         </Tippy>
         <Tippy
           content="I am following your cursor"
-          props={{ followCursor: true, plugins: [followCursor], hideOnClick: false }}
+          props={{
+            followCursor: true,
+            plugins: [followCursor],
+            hideOnClick: false,
+          }}
         >
           <Button variant="outline" as="div" class="h-20">
             Follow Cursor
@@ -397,7 +405,7 @@ export default function ComponentsPage() {
           )
         })()}
         {(() => {
-          const [placement, setPlacement] = useToggle(['top', 'bottom', 'left', 'right'] as const)
+          const [placement, setPlacement] = useToggle(["top", "bottom", "left", "right"] as const)
           return (
             <Tippy
               content={<>Reactive content {placement()}</>}
@@ -413,32 +421,32 @@ export default function ComponentsPage() {
       <ComponentCard label="Context Menu">
         <ContextMenuComp
           options={[
-            { label: 'Nice' },
+            { label: "Nice" },
             { separator: true },
             {
-              itemId: '2',
-              itemDisplay: 'Test 1',
-              itemTip: 'Cmd + 1',
+              itemId: "2",
+              itemDisplay: "Test 1",
+              itemTip: "Cmd + 1",
             },
             {
-              itemId: '3',
-              itemDisplay: 'Test 2',
+              itemId: "3",
+              itemDisplay: "Test 2",
             },
             {
-              subTrigger: 'Invite users',
+              subTrigger: "Invite users",
               subOptions: [
                 {
-                  itemId: 'invite-item-1',
-                  itemDisplay: 'Email message',
+                  itemId: "invite-item-1",
+                  itemDisplay: "Email message",
                 },
                 {
-                  itemId: 'invite-item-2',
-                  itemDisplay: 'Message via social',
+                  itemId: "invite-item-2",
+                  itemDisplay: "Message via social",
                 },
                 { separator: true },
                 {
-                  itemId: 'invite-item-3',
-                  itemDisplay: 'More...',
+                  itemId: "invite-item-3",
+                  itemDisplay: "More...",
                 },
               ],
             },
@@ -454,7 +462,7 @@ export default function ComponentsPage() {
           content={
             <div class="grid gap-4">
               <div class="space-y-2">
-                <h4 class="leading-none font-medium">Dimensions</h4>
+                <h4 class="font-medium leading-none">Dimensions</h4>
                 <p class="text-muted-foreground text-sm">Set the dimensions for the layer.</p>
               </div>
               <div class="grid gap-2">
@@ -521,13 +529,13 @@ export default function ComponentsPage() {
         <span class="text-xs">Directions</span>
         <div class="flex gap-1">
           {(() => {
-            const directions = ['bottom', 'top', 'left', 'right'] as const
+            const directions = ["bottom", "top", "left", "right"] as const
             const labels = [
               {
-                bottom: 'Drawer from bottom',
-                top: 'Drawer from top',
-                left: 'Drawer from left',
-                right: 'Drawer from right',
+                bottom: "Drawer from bottom",
+                top: "Drawer from top",
+                left: "Drawer from left",
+                right: "Drawer from right",
               },
             ]
             return (
@@ -562,20 +570,20 @@ export default function ComponentsPage() {
             <TabsTrigger value="password">Password</TabsTrigger>
           </TabsList>
           <TabsContent value="account">
-            <div class="border-border space-y-4 rounded-lg border p-4">
-              <h2 class="text-lg font-semibold">Account</h2>
+            <div class="space-y-4 rounded-lg border border-border p-4">
+              <h2 class="font-semibold text-lg">Account</h2>
               <p class="text-sm">Make changes to your account here. Click save when you're done.</p>
               <div class="space-y-2">
                 <input
                   type="text"
                   placeholder="Full name"
-                  class="w-full rounded border px-3 py-2 text-sm font-medium"
+                  class="w-full rounded border px-3 py-2 font-medium text-sm"
                   value="Carlo Taleon"
                 />
                 <input
                   type="text"
                   placeholder="Username"
-                  class="text-muted-foreground w-full rounded border px-3 py-2 text-sm"
+                  class="w-full rounded border px-3 py-2 text-muted-foreground text-sm"
                   value="@carlo_taleon"
                 />
               </div>
@@ -584,7 +592,7 @@ export default function ComponentsPage() {
           </TabsContent>
           <TabsContent value="password">
             <div class="space-y-4 rounded-lg border p-4">
-              <h2 class="text-lg font-semibold">Password</h2>
+              <h2 class="font-semibold text-lg">Password</h2>
               <p class="text-sm">Change your password here. After saving, you'll be logged out.</p>
               <input
                 type="password"
@@ -611,22 +619,22 @@ export default function ComponentsPage() {
           multiple
           items={[
             {
-              trigger: 'Is it accessible?',
-              content: 'Yes. It adheres to the WAI-ARIA design pattern.',
+              trigger: "Is it accessible?",
+              content: "Yes. It adheres to the WAI-ARIA design pattern.",
             },
             {
-              trigger: 'Is it styled?',
-              content: 'Yes. It comes with default styles that matches the other components.',
+              trigger: "Is it styled?",
+              content: "Yes. It comes with default styles that matches the other components.",
             },
             {
-              trigger: 'Is it animated?',
+              trigger: "Is it animated?",
               content: "Yes. It's animated by default, but you can disable it if you prefer.",
             },
           ]}
         />
       </ComponentCard>
       <ComponentCard label="Collapsible" class="w-96">
-        <p class="text-foreground/50 mb-2 text-xs">
+        <p class="mb-2 text-foreground/50 text-xs">
           Made by Carlo. Kind of like Accordion but for more flexible cases since it can be
           controlled by an external trigger. Also more fluid because of css transitions and never
           dismounts the dom.
@@ -638,8 +646,8 @@ export default function ComponentsPage() {
           const [open3, actions3] = useDisclosure()
 
           return (
-            <div class="text-foreground/60 contents">
-              <Button onClick={actions1.toggle}>{open1() ? 'Close 1' : 'Open 1'}</Button>
+            <div class="contents text-foreground/60">
+              <Button onClick={actions1.toggle}>{open1() ? "Close 1" : "Open 1"}</Button>
               <Collapsible open={open1()} class="flex flex-col">
                 <span>Collapsible 1</span>
                 <span>Collapsible 1</span>
@@ -647,10 +655,10 @@ export default function ComponentsPage() {
                 <span>Collapsible 1</span>
               </Collapsible>
 
-              <Button onClick={actions2.toggle}>{open2() ? 'Close 2' : 'Open 2'}</Button>
+              <Button onClick={actions2.toggle}>{open2() ? "Close 2" : "Open 2"}</Button>
               <Collapsible open={open2()}>Collapsible 2</Collapsible>
 
-              <Button onClick={actions3.toggle}>{open3() ? 'Close 3' : 'Open 3'}</Button>
+              <Button onClick={actions3.toggle}>{open3() ? "Close 3" : "Open 3"}</Button>
               <Collapsible open={open3()}>Collapsible 3</Collapsible>
             </div>
           )
@@ -666,16 +674,16 @@ export default function ComponentsPage() {
         <RadioGroupComp
           options={[
             {
-              value: 'apple',
-              label: '🍎 Apple',
+              value: "apple",
+              label: "🍎 Apple",
             },
             {
-              value: 'orange',
-              label: '🍊 Orange',
+              value: "orange",
+              label: "🍊 Orange",
             },
             {
-              value: 'grape',
-              label: '🍇 Grape',
+              value: "grape",
+              label: "🍇 Grape",
             },
           ]}
         />
@@ -696,23 +704,83 @@ export default function ComponentsPage() {
       <ComponentCard label="Data Table">
         {(() => {
           const data = [
-            { id: 'm5gr84i9', status: 'success', email: 'ken99@yahoo.com', amount: 316 },
-            { id: '3u1reuv4', status: 'success', email: 'Abe45@gmail.com', amount: 242 },
-            { id: 'derv1ws0', status: 'processing', email: 'Monserrat44@gmail.com', amount: 837 },
-            { id: '5kma53ae', status: 'success', email: 'silas22@gmail.com', amount: 874 },
-            { id: 'bhqecj4p', status: 'failed', email: 'carmella@hotmail.com', amount: 721 },
-            { id: 'hqkxm3n2', status: 'failed', email: 'marlon@outlook.com', amount: 143 },
-            { id: '8xvfpq7w', status: 'processing', email: 'opal88@hotmail.com', amount: 992 },
-            { id: 'jkl4mno9', status: 'success', email: 'dexter12@gmail.com', amount: 654 },
-            { id: 'qwe5rty1', status: 'success', email: 'luna54@yahoo.com', amount: 320 },
-            { id: 'zxc6vbn2', status: 'failed', email: 'enzo77@gmail.com', amount: 467 },
-            { id: 'asd7fgh3', status: 'processing', email: 'iris23@outlook.com', amount: 589 },
-            { id: 'mnb8uio4', status: 'success', email: 'finn99@hotmail.com', amount: 812 },
+            {
+              id: "m5gr84i9",
+              status: "success",
+              email: "ken99@yahoo.com",
+              amount: 316,
+            },
+            {
+              id: "3u1reuv4",
+              status: "success",
+              email: "Abe45@gmail.com",
+              amount: 242,
+            },
+            {
+              id: "derv1ws0",
+              status: "processing",
+              email: "Monserrat44@gmail.com",
+              amount: 837,
+            },
+            {
+              id: "5kma53ae",
+              status: "success",
+              email: "silas22@gmail.com",
+              amount: 874,
+            },
+            {
+              id: "bhqecj4p",
+              status: "failed",
+              email: "carmella@hotmail.com",
+              amount: 721,
+            },
+            {
+              id: "hqkxm3n2",
+              status: "failed",
+              email: "marlon@outlook.com",
+              amount: 143,
+            },
+            {
+              id: "8xvfpq7w",
+              status: "processing",
+              email: "opal88@hotmail.com",
+              amount: 992,
+            },
+            {
+              id: "jkl4mno9",
+              status: "success",
+              email: "dexter12@gmail.com",
+              amount: 654,
+            },
+            {
+              id: "qwe5rty1",
+              status: "success",
+              email: "luna54@yahoo.com",
+              amount: 320,
+            },
+            {
+              id: "zxc6vbn2",
+              status: "failed",
+              email: "enzo77@gmail.com",
+              amount: 467,
+            },
+            {
+              id: "asd7fgh3",
+              status: "processing",
+              email: "iris23@outlook.com",
+              amount: 589,
+            },
+            {
+              id: "mnb8uio4",
+              status: "success",
+              email: "finn99@hotmail.com",
+              amount: 812,
+            },
           ]
 
           const columns: ColumnDef<(typeof data)[number]>[] = [
             {
-              id: 'select',
+              id: "select",
               header: (props) => (
                 <CheckboxComp
                   checked={props.table.getIsAllPageRowsSelected()}
@@ -732,36 +800,36 @@ export default function ComponentsPage() {
               enableHiding: false,
             },
             {
-              accessorKey: 'status',
-              header: 'Status',
+              accessorKey: "status",
+              header: "Status",
               cell: (props) => (
                 <Badge
                   variant={
-                    props.row.getValue('status') === 'success'
-                      ? 'success'
-                      : props.row.getValue('status') === 'failed'
-                        ? 'error'
-                        : 'info'
+                    props.row.getValue("status") === "success"
+                      ? "success"
+                      : props.row.getValue("status") === "failed"
+                        ? "error"
+                        : "info"
                   }
                   class="capitalize"
                 >
-                  {props.row.getValue('status') as string}
+                  {props.row.getValue("status") as string}
                 </Badge>
               ),
             },
             {
-              accessorKey: 'email',
+              accessorKey: "email",
               header: (_props) => <TableColumnHeader column={_props.column} title="Email" />,
             },
             {
-              accessorKey: 'amount',
+              accessorKey: "amount",
               header: (_props) => <TableColumnHeader column={_props.column} title="Amount" />,
               cell: (props) => {
                 // eslint-disable-next-line solid/reactivity
-                const amount = parseFloat(props.row.getValue('amount'))
-                const formatted = new Intl.NumberFormat('en-US', {
-                  style: 'currency',
-                  currency: 'USD',
+                const amount = parseFloat(props.row.getValue("amount"))
+                const formatted = new Intl.NumberFormat("en-US", {
+                  style: "currency",
+                  currency: "USD",
                 }).format(amount)
                 return <div class="text-right font-medium">{formatted}</div>
               },
@@ -769,9 +837,9 @@ export default function ComponentsPage() {
           ]
 
           const statusFilterOptions = [
-            { value: 'success', label: 'Success', checked: true },
-            { value: 'failed', label: 'Failed', checked: false },
-            { value: 'processing', label: 'Processing', checked: false },
+            { value: "success", label: "Success", checked: true },
+            { value: "failed", label: "Failed", checked: false },
+            { value: "processing", label: "Processing", checked: false },
           ]
 
           return (
@@ -780,13 +848,13 @@ export default function ComponentsPage() {
               data={data}
               toolbar={{
                 searchable: {
-                  columns: 'email',
-                  placeholder: 'Search for email',
+                  columns: "email",
+                  placeholder: "Search for email",
                 },
                 filterables: [
                   {
-                    column: 'status',
-                    title: 'Status',
+                    column: "status",
+                    title: "Status",
                     options: statusFilterOptions,
                   },
                 ],
@@ -799,16 +867,16 @@ export default function ComponentsPage() {
         <Timeline
           items={[
             {
-              title: 'Event #1',
-              description: 'This is the first event of the timeline.',
+              title: "Event #1",
+              description: "This is the first event of the timeline.",
             },
             {
-              title: 'Event #2',
-              description: 'This is the second event of the timeline.',
+              title: "Event #2",
+              description: "This is the second event of the timeline.",
             },
             {
-              title: 'Event #3',
-              description: 'This is the third event of the timeline.',
+              title: "Event #3",
+              description: "This is the third event of the timeline.",
             },
           ]}
           activeItem={1}
@@ -835,9 +903,9 @@ export default function ComponentsPage() {
       <ComponentCard label="Drag and Drop Lists" class="gap-3">
         <span class="max-w-lg text-sm">
           Thoughtfully designed as 1 API, multiple usecases. <br />
-          If you have a more complex usecase, read the{' '}
-          <code class="bg-foreground text-background rounded p-0.5">drag-and-drop</code> folder.
-          Powered by{' '}
+          If you have a more complex usecase, read the{" "}
+          <code class="rounded bg-foreground p-0.5 text-background">drag-and-drop</code> folder.
+          Powered by{" "}
           <a
             href="https://atlassian.design/components/pragmatic-drag-and-drop/"
             class="text-primary"
@@ -861,11 +929,11 @@ function ComponentCard(
   return (
     <div
       class={cn(
-        'text-card-foreground border-border flex flex-col gap-1 rounded-lg border p-4 shadow-sm',
+        "flex flex-col gap-1 rounded-lg border border-border p-4 text-card-foreground shadow-sm",
         props.class
       )}
     >
-      {props.label && <h3 class="mb-2 text-xs font-semibold">{props.label}</h3>}
+      {props.label && <h3 class="mb-2 font-semibold text-xs">{props.label}</h3>}
       {props.children}
     </div>
   )

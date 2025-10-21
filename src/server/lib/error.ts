@@ -15,7 +15,7 @@
 //        - 2. The logger for debugging during development
 //        - 3. Then finally the standard response shape
 
-import { HTTPException } from 'hono/http-exception'
+import { HTTPException } from "hono/http-exception"
 
 export class ApiError {
   static NotFound(msg: string, cause?: Error) {

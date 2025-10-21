@@ -1,12 +1,10 @@
-import type { ComponentProps, ParentProps, ValidComponent } from 'solid-js'
-import { createMemo, createSignal, Show, splitProps, type Component } from 'solid-js'
-
-import type { PolymorphicProps } from '@kobalte/core/polymorphic'
-import * as TooltipPrimitive from '@kobalte/core/tooltip'
-
-import { cn } from '@/utils/cn'
-import { useMouse } from 'bagon-hooks'
-import { JSX } from 'solid-js/jsx-runtime'
+import type { PolymorphicProps } from "@kobalte/core/polymorphic"
+import * as TooltipPrimitive from "@kobalte/core/tooltip"
+import { useMouse } from "bagon-hooks"
+import type { ComponentProps, ParentProps, ValidComponent } from "solid-js"
+import { type Component, createMemo, createSignal, Show, splitProps } from "solid-js"
+import type { JSX } from "solid-js/jsx-runtime"
+import { cn } from "@/utils/cn"
 
 const TooltipTrigger = TooltipPrimitive.Trigger
 
@@ -14,18 +12,18 @@ const Tooltip: Component<TooltipPrimitive.TooltipRootProps> = (props) => {
   return <TooltipPrimitive.Root gutter={4} {...props} />
 }
 
-type TooltipContentProps<T extends ValidComponent = 'div'> =
+type TooltipContentProps<T extends ValidComponent = "div"> =
   TooltipPrimitive.TooltipContentProps<T> & { class?: string | undefined }
 
-const TooltipContent = <T extends ValidComponent = 'div'>(
+const TooltipContent = <T extends ValidComponent = "div">(
   props: PolymorphicProps<T, TooltipContentProps<T>>
 ) => {
-  const [local, others] = splitProps(props as TooltipContentProps, ['class'])
+  const [local, others] = splitProps(props as TooltipContentProps, ["class"])
   return (
     <TooltipPrimitive.Portal>
       <TooltipPrimitive.Content
         class={cn(
-          'bg-popover text-popover-foreground animate-flyUpAndScale fade-in-0 zoom-in-95 data-[closed]:animate-flyUpAndScaleExit z-50 origin-[var(--kb-popover-content-transform-origin)] rounded-md border px-3 py-1.5 text-sm shadow-md',
+          "fade-in-0 zoom-in-95 z-50 origin-[var(--kb-popover-content-transform-origin)] animate-flyUpAndScale rounded-md border bg-popover px-3 py-1.5 text-popover-foreground text-sm shadow-md data-[closed]:animate-flyUpAndScaleExit",
           local.class
         )}
         {...others}
@@ -44,25 +42,25 @@ export { Tooltip, TooltipContent, TooltipTrigger }
  */
 export function TooltipComp(
   props: ParentProps &
-    Omit<TooltipPrimitive.TooltipRootProps, 'children' | 'delayDuration'> & {
-      triggerProps?: ComponentProps<typeof TooltipTrigger<'button'>>
-      contentProps?: ComponentProps<typeof TooltipContent<'button'>>
+    Omit<TooltipPrimitive.TooltipRootProps, "children" | "delayDuration"> & {
+      triggerProps?: ComponentProps<typeof TooltipTrigger<"button">>
+      contentProps?: ComponentProps<typeof TooltipContent<"button">>
       /** @defaultValue true */
       hideOnClick?: boolean
       content?: JSX.Element
       arrow?: boolean
-      followCursor?: boolean | 'horizontal' | 'vertical'
+      followCursor?: boolean | "horizontal" | "vertical"
     }
 ) {
   // In SolidJS, use splitProps to destructure reactive props for cleaner access
   const [local, rest] = splitProps(props, [
-    'children',
-    'triggerProps',
-    'contentProps',
-    'hideOnClick',
-    'content',
-    'followCursor',
-    'arrow',
+    "children",
+    "triggerProps",
+    "contentProps",
+    "hideOnClick",
+    "content",
+    "followCursor",
+    "arrow",
   ])
 
   const hideOnClick = createMemo(() => local.hideOnClick ?? true)
@@ -72,11 +70,11 @@ export function TooltipComp(
 
   const { position, ref } = useMouse()
   const gutterY = createMemo(() => {
-    if (!local.followCursor || local.followCursor === 'horizontal') return undefined
+    if (!local.followCursor || local.followCursor === "horizontal") return undefined
     return position().y - (triggerRef()?.getBoundingClientRect().height ?? 0)
   })
   const shiftX = createMemo(() => {
-    if (!local.followCursor || local.followCursor === 'vertical') return undefined
+    if (!local.followCursor || local.followCursor === "vertical") return undefined
     return position().x - (contentRef()?.getBoundingClientRect().width ?? 0) / 2
   })
 
@@ -89,7 +87,7 @@ export function TooltipComp(
         flip: false,
         gutter: gutterY(),
         shift: shiftX(),
-        placement: 'bottom-start',
+        placement: "bottom-start",
       })}
     >
       <TooltipTrigger

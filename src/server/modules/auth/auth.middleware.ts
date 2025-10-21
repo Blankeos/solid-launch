@@ -1,18 +1,18 @@
-import { Session, User } from '@/server/db/types'
-import type { Bindings } from '@/server/lib/context'
-import { ApiError } from '@/server/lib/error'
-import { getCookie } from 'hono/cookie'
-import { createMiddleware } from 'hono/factory'
+import { getCookie } from "hono/cookie"
+import { createMiddleware } from "hono/factory"
+import type { Session, User } from "@/server/db/types"
+import type { Bindings } from "@/server/lib/context"
+import { ApiError } from "@/server/lib/error"
+import { AuthDAO } from "@/server/modules/auth/auth.dao"
+
+import type { InternalSessionDTO, InternalUserDTO } from "./auth.dto"
 import {
   deleteSessionTokenCookie,
   getClientIP,
   getUserAgentHash,
   setSessionTokenCookie,
-} from './auth.utilities'
+} from "./auth.utilities"
 
-import { InternalSessionDTO, InternalUserDTO } from './auth.dto'
-
-import { AuthDAO } from '@/server/modules/auth/auth.dao'
 const authDAO = new AuthDAO()
 
 export type AuthMiddlewareBindings = Bindings & {
@@ -24,7 +24,7 @@ export type AuthMiddlewareBindings = Bindings & {
 
 export const authMiddleware = createMiddleware<AuthMiddlewareBindings>(async (c, next) => {
   // 1. Check cookie session.
-  const sessionId = getCookie(c, 'session') ?? null
+  const sessionId = getCookie(c, "session") ?? null
 
   // 2. Validate sesssion
   const { session, user } = await authDAO.validateSession(sessionId)
@@ -39,7 +39,7 @@ export const authMiddleware = createMiddleware<AuthMiddlewareBindings>(async (c,
   // 4. Update session metadata (fire-and-forget, non-blocking)
   if (session) {
     const clientIP = getClientIP(c)
-    const userAgent = c.req.header('user-agent')
+    const userAgent = c.req.header("user-agent")
 
     // Only update if we got valid data AND it changed
     if (clientIP && session.ip_address !== clientIP) {
@@ -55,8 +55,8 @@ export const authMiddleware = createMiddleware<AuthMiddlewareBindings>(async (c,
   }
 
   // 5. Set context values.
-  c.set('user', user ?? null)
-  c.set('session', session ?? null)
+  c.set("user", user ?? null)
+  c.set("session", session ?? null)
 
   return next()
 })
@@ -70,7 +70,7 @@ export type RequireAuthMiddlewareBindings = Bindings & {
 export const requireAuthMiddleware = createMiddleware<RequireAuthMiddlewareBindings>(
   async (c, next) => {
     if (!c?.var?.session) {
-      throw ApiError.InternalServerError('Unauthorized. Please login')
+      throw ApiError.InternalServerError("Unauthorized. Please login")
     }
 
     return next()

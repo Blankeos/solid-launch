@@ -1,5 +1,5 @@
-import { createEnv } from '@t3-oss/env-core'
-import z from 'zod'
+import { createEnv } from "@t3-oss/env-core"
+import z from "zod"
 
 export const privateEnv = createEnv({
   runtimeEnv: process.env,
@@ -7,7 +7,7 @@ export const privateEnv = createEnv({
     /** Development|Prod. Port of the app. */
     PORT: z.number().default(3000),
     /** Development|Prod. */
-    NODE_ENV: z.enum(['development', 'production']).default('development'),
+    NODE_ENV: z.enum(["development", "production"]).default("development"),
 
     // Database
     /** Development|Prod. Url of the database. */
@@ -16,7 +16,7 @@ export const privateEnv = createEnv({
     DATABASE_AUTH_TOKEN: z
       .string()
       .optional()
-      .refine((val) => (process.env.NODE_ENV !== 'development' ? !!val : true)),
+      .refine((val) => (process.env.NODE_ENV !== "development" ? !!val : true)),
 
     // Auth
     /** Development|Prod. GitHub OAuth client ID. */
@@ -34,11 +34,11 @@ export const privateEnv = createEnv({
     /** Development|Prod. S3 secret access key. */
     S3_SECRET_ACCESS_KEY: z.string(),
     /** Development|Prod. S3 bucket name. */
-    S3_BUCKET_NAME: z.string().default('solid-launch'),
+    S3_BUCKET_NAME: z.string().default("solid-launch"),
     /** Development|Prod. S3 region. */
-    S3_REGION: z.string().default('us-east-1'),
+    S3_REGION: z.string().default("us-east-1"),
     /** Development|Prod. S3 endpoint. Important that this starts with http:// or https:// */
-    S3_ENDPOINT: z.string().default('http://127.0.0.1:9000'),
+    S3_ENDPOINT: z.string().default("http://127.0.0.1:9000"),
 
     // Payments
     /** Development|Prod. For payments. */
@@ -46,7 +46,7 @@ export const privateEnv = createEnv({
     /** Development|Prod. For payments. */
     DODO_PAYMENTS_WEBOOK_SECRET: z.string(),
     /** Development|Prod. For payments. */
-    DODO_PAYMENTS_ENV: z.enum(['test_mode', 'live_mode']).default('test_mode'),
+    DODO_PAYMENTS_ENV: z.enum(["test_mode", "live_mode"]).default("test_mode"),
 
     // SMTP
     // /** Development|Prod For emails. */

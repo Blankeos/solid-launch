@@ -1,11 +1,10 @@
-import type { JSX } from 'solid-js'
-import { createSignal, For, Show } from 'solid-js'
+import type { Column } from "@tanstack/solid-table"
+import type { JSX } from "solid-js"
+import { createSignal, For, Show } from "solid-js"
 
-import type { Column } from '@tanstack/solid-table'
-
-import { IconCheck, IconCirclePlus } from '@/assets/icons'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { IconCheck, IconCirclePlus } from "@/assets/icons"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   Command,
   CommandEmpty,
@@ -14,10 +13,10 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
-} from '@/components/ui/command'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Separator } from '@/components/ui/separator'
-import { cn } from '@/utils/cn'
+} from "@/components/ui/command"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Separator } from "@/components/ui/separator"
+import { cn } from "@/utils/cn"
 
 type TableFacetedFilterProps<TData, TValue> = {
   column?: Column<TData, TValue>
@@ -36,7 +35,7 @@ export function TableFacetedFilter<TData, TValue>(props: TableFacetedFilterProps
 
   return (
     <Popover placement="bottom-start">
-      <PopoverTrigger as={Button<'button'>} variant="outline" size="sm" class="h-8 border-dashed">
+      <PopoverTrigger as={Button<"button">} variant="outline" size="sm" class="h-8 border-dashed">
         <IconCirclePlus />
         {props.title}
         <Show when={selectedValues().length > 0}>
@@ -76,6 +75,7 @@ export function TableFacetedFilter<TData, TValue>(props: TableFacetedFilterProps
                   return (
                     <CommandItem
                       onSelect={() => {
+                        // biome-ignore lint/suspicious/noImplicitAnyLet: allow
                         let newValues
                         if (isSelected()) {
                           newValues = selectedValues().filter((item) => item !== option.value)
@@ -87,16 +87,16 @@ export function TableFacetedFilter<TData, TValue>(props: TableFacetedFilterProps
                     >
                       <div
                         class={cn(
-                          'border-primary mr-2 flex size-4 items-center justify-center rounded-sm border',
+                          "mr-2 flex size-4 items-center justify-center rounded-sm border border-primary",
                           isSelected()
-                            ? 'bg-primary text-primary-foreground'
-                            : 'opacity-50 [&_svg]:invisible'
+                            ? "bg-primary text-primary-foreground"
+                            : "opacity-50 [&_svg]:invisible"
                         )}
                       >
                         <IconCheck />
                       </div>
                       <Show when={option.icon} keyed>
-                        {(Icon) => <Icon class="text-muted-foreground mr-2 size-4" />}
+                        {(Icon) => <Icon class="mr-2 size-4 text-muted-foreground" />}
                       </Show>
                       <span>{option.label}</span>
                       <Show when={facets()?.get(option.value)}>

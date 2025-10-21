@@ -1,23 +1,23 @@
-import { FlowProps } from 'solid-js'
+import type { FlowProps } from "solid-js"
 
 // CSS
-import '@/lib/solid-tippy/tippy.css'
-import '@/styles/app.css'
-import '@/styles/bprogress.css'
+import "@/lib/solid-tippy/tippy.css"
+import "@/styles/app.css"
+import "@/styles/bprogress.css"
 
-import Wrapper from '@/components/layouts/wrapper'
-import { useMetadata } from 'vike-metadata-solid'
+import { useMetadata } from "vike-metadata-solid"
+import Wrapper from "@/components/layouts/wrapper"
 
 useMetadata.setGlobalDefaults({
-  title: 'Home | Solid Launch',
-  description: 'An awesome app template by Carlo Taleon.',
+  title: "Home | Solid Launch",
+  description: "An awesome app template by Carlo Taleon.",
   viewport: {
-    width: 'device-width',
+    width: "device-width",
     initialScale: 1,
   },
   twitter: {
-    card: 'summary_large_image',
-    creator: '@carlo_taleon',
+    card: "summary_large_image",
+    creator: "@carlo_taleon",
   },
   otherJSX: () => {
     return (

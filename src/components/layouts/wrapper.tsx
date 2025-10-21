@@ -1,15 +1,12 @@
-import { FlowProps } from 'solid-js'
-
-import { Toaster } from 'solid-sonner'
-
-import { AuthContextProvider } from '@/features/auth/auth.context'
-import { CounterContextProvider } from '@/stores/counter.context'
-
-import { ThemeContextProvider, useThemeContext } from '@/contexts/theme.context'
-import { useGlobalErrorToast } from '@/hooks/use-global-error-toast'
-import { QueryClient } from '@tanstack/query-core'
-import { QueryClientProvider } from '@tanstack/solid-query'
-import { SolidQueryDevtools } from '@tanstack/solid-query-devtools'
+import { QueryClient } from "@tanstack/query-core"
+import { QueryClientProvider } from "@tanstack/solid-query"
+import { SolidQueryDevtools } from "@tanstack/solid-query-devtools"
+import type { FlowProps } from "solid-js"
+import { Toaster } from "solid-sonner"
+import { ThemeContextProvider, useThemeContext } from "@/contexts/theme.context"
+import { AuthContextProvider } from "@/features/auth/auth.context"
+import { useGlobalErrorToast } from "@/hooks/use-global-error-toast"
+import { CounterContextProvider } from "@/stores/counter.context"
 
 const queryClient = new QueryClient()
 

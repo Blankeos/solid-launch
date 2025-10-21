@@ -1,11 +1,11 @@
-import { useAuthContext } from '@/features/auth/auth.context'
-import ProtectedRoute from '@/features/auth/protected-route'
-import getTitle from '@/utils/get-title'
-import { useMetadata } from 'vike-metadata-solid'
+import { useMetadata } from "vike-metadata-solid"
+import { useAuthContext } from "@/features/auth/auth.context"
+import ProtectedRoute from "@/features/auth/protected-route"
+import getTitle from "@/utils/get-title"
 
 export default function SettingsPage() {
   useMetadata({
-    title: getTitle('Settings'),
+    title: getTitle("Settings"),
   })
 
   const { user } = useAuthContext()

@@ -1,9 +1,8 @@
-import { For } from 'solid-js'
+import type { Table } from "@tanstack/solid-table"
+import { For } from "solid-js"
 
-import type { Table } from '@tanstack/solid-table'
-
-import { IconSettings } from '@/assets/icons'
-import { Button } from '@/components/ui/button'
+import { IconSettings } from "@/assets/icons"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -11,7 +10,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from "@/components/ui/dropdown-menu"
 
 type TableViewOptionsProps<TData> = {
   table: Table<TData>
@@ -21,7 +20,7 @@ export function TableViewOptions<TData>(props: TableViewOptionsProps<TData>) {
   return (
     <DropdownMenu placement="bottom-end">
       <DropdownMenuTrigger
-        as={Button<'button'>}
+        as={Button<"button">}
         variant="outline"
         size="sm"
         class="ml-auto hidden h-8 lg:flex"
@@ -35,7 +34,7 @@ export function TableViewOptions<TData>(props: TableViewOptionsProps<TData>) {
         <For
           each={props.table
             .getAllColumns()
-            .filter((column) => typeof column.accessorFn !== 'undefined' && column.getCanHide())}
+            .filter((column) => typeof column.accessorFn !== "undefined" && column.getCanHide())}
         >
           {(column) => (
             <DropdownMenuCheckboxItem

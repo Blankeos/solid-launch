@@ -1,6 +1,6 @@
-import { TextFieldComp, type TextFieldCompProps } from '@/components/ui/text-field'
-import { splitProps, type JSX } from 'solid-js'
-import { useFieldContext } from './form'
+import { type JSX, splitProps } from "solid-js"
+import { TextFieldComp, type TextFieldCompProps } from "@/components/ui/text-field"
+import { useFieldContext } from "./form"
 
 export function TextField(
   props: {
@@ -9,15 +9,15 @@ export function TextField(
     inputNodeFn?: (options: { inputNode: JSX.Element }) => JSX.Element
     /** A description to display below the field */
     description?: JSX.Element
-  } & TextFieldCompProps<'input'>
+  } & TextFieldCompProps<"input">
 ) {
   const [, others] = splitProps(props, [
-    'label',
-    'containerClass',
-    'inputNodeFn',
-    'description',
-    'onChange',
-    'onBlur',
+    "label",
+    "containerClass",
+    "inputNodeFn",
+    "description",
+    "onChange",
+    "onBlur",
   ])
   const field = useFieldContext<string>()
 
@@ -31,10 +31,10 @@ export function TextField(
         error={field()
           .getMeta()
           .errors?.map((error) => error.message)
-          ?.join(', ')}
-        validationState={field().getMeta().errors?.length > 0 ? 'invalid' : 'valid'}
+          ?.join(", ")}
+        validationState={field().getMeta().errors?.length > 0 ? "invalid" : "valid"}
         multiline={false}
-        value={field().state.value as any}
+        value={field().state.value}
         {...others}
       />
     </div>

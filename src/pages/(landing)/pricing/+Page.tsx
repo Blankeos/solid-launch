@@ -1,57 +1,57 @@
-import { Button } from '@/components/ui/button'
-import { honoClient } from '@/lib/hono-client'
-import getTitle from '@/utils/get-title'
-import { For } from 'solid-js'
-import { useMetadata } from 'vike-metadata-solid'
+import { For } from "solid-js"
+import { useMetadata } from "vike-metadata-solid"
+import { Button } from "@/components/ui/button"
+import { honoClient } from "@/lib/hono-client"
+import getTitle from "@/utils/get-title"
 
 export default function PricingPage() {
   useMetadata({
-    title: getTitle('Pricing'),
+    title: getTitle("Pricing"),
   })
 
   const plans = [
     {
-      name: 'Starter',
-      price: '$9',
-      interval: '/mo',
-      features: ['3 Projects', '1 GB Storage', 'Email Support'],
+      name: "Starter",
+      price: "$9",
+      interval: "/mo",
+      features: ["3 Projects", "1 GB Storage", "Email Support"],
       popular: false,
-      variantId: 'pdt_123', // Replace with actual variant ID
+      variantId: "pdt_123", // Replace with actual variant ID
     },
     {
-      name: 'Professional',
-      price: '$29',
-      interval: '/mo',
-      features: ['10 Projects', '10 GB Storage', 'Priority Support', 'Team Collaboration'],
+      name: "Professional",
+      price: "$29",
+      interval: "/mo",
+      features: ["10 Projects", "10 GB Storage", "Priority Support", "Team Collaboration"],
       popular: true,
-      variantId: 'pdt_123', // Replace with actual variant ID
+      variantId: "pdt_123", // Replace with actual variant ID
     },
     {
-      name: 'Enterprise',
-      price: '$99',
-      interval: '/mo',
+      name: "Enterprise",
+      price: "$99",
+      interval: "/mo",
       features: [
-        'Unlimited Projects',
-        '100 GB Storage',
-        'Phone Support',
-        'SLA',
-        'Custom Integrations',
+        "Unlimited Projects",
+        "100 GB Storage",
+        "Phone Support",
+        "SLA",
+        "Custom Integrations",
       ],
       popular: false,
-      variantId: 'pdt_123', // Replace with actual variant ID
+      variantId: "pdt_123", // Replace with actual variant ID
     },
   ]
 
   const handleCheckout = async (variantId: string) => {
     try {
-      const url = honoClient.payments.checkout[':variantId']
+      const url = honoClient.payments.checkout[":variantId"]
         .$url({
           param: { variantId: variantId },
         })
         .toString()
       window.location.href = url
     } catch (error) {
-      console.error('Error creating checkout:', error)
+      console.error("Error creating checkout:", error)
     }
   }
 
@@ -59,8 +59,8 @@ export default function PricingPage() {
     <>
       <div class="mx-auto flex w-full max-w-5xl flex-col items-center justify-center gap-y-8 px-8 py-16">
         <div class="flex flex-col items-center gap-y-2">
-          <h1 class="text-4xl font-bold">Simple, Transparent Pricing</h1>
-          <p class="text-muted-foreground text-lg">Choose the plan that fits your needs</p>
+          <h1 class="font-bold text-4xl">Simple, Transparent Pricing</h1>
+          <p class="text-lg text-muted-foreground">Choose the plan that fits your needs</p>
         </div>
 
         <div class="grid gap-6 md:grid-cols-3">
@@ -68,21 +68,21 @@ export default function PricingPage() {
             {(plan) => (
               <div
                 class={`relative rounded-lg border p-6 ${
-                  plan.popular ? 'border-primary shadow-lg' : 'border-border'
+                  plan.popular ? "border-primary shadow-lg" : "border-border"
                 }`}
               >
                 {plan.popular && (
-                  <div class="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span class="bg-primary text-primary-foreground rounded-full px-3 py-1 text-xs font-medium">
+                  <div class="-top-3 -translate-x-1/2 absolute left-1/2">
+                    <span class="rounded-full bg-primary px-3 py-1 font-medium text-primary-foreground text-xs">
                       Most Popular
                     </span>
                   </div>
                 )}
 
                 <div class="mb-4">
-                  <h3 class="text-xl font-semibold">{plan.name}</h3>
+                  <h3 class="font-semibold text-xl">{plan.name}</h3>
                   <div class="mt-2 flex items-baseline">
-                    <span class="text-3xl font-bold">{plan.price}</span>
+                    <span class="font-bold text-3xl">{plan.price}</span>
                     <span class="text-muted-foreground text-sm">{plan.interval}</span>
                   </div>
                 </div>
@@ -111,7 +111,7 @@ export default function PricingPage() {
                 </ul>
 
                 <Button
-                  variant={plan.popular ? 'default' : 'outline'}
+                  variant={plan.popular ? "default" : "outline"}
                   class="w-full"
                   onClick={() => handleCheckout(plan.variantId)}
                 >

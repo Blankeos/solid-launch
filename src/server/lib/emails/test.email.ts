@@ -1,8 +1,8 @@
-import { publicEnv } from '@/env.public'
-import { Hono } from 'hono'
-import { validator as zValidator } from 'hono-openapi'
-import { z } from 'zod'
-import { sendEmail } from './email-client'
+import { Hono } from "hono"
+import { validator as zValidator } from "hono-openapi"
+import { z } from "zod"
+import { publicEnv } from "@/env.public"
+import { sendEmail } from "./email-client"
 
 export function renderTestEmail(email: string): string {
   return `
@@ -21,21 +21,21 @@ export function renderTestEmail(email: string): string {
 
 // Only for Hono
 export const testEmailRouter = new Hono()
-if (publicEnv.NODE_ENV === 'development') {
+if (publicEnv.NODE_ENV === "development") {
   testEmailRouter.get(
-    '/',
+    "/",
     zValidator(
-      'query',
+      "query",
       z.object({
         email: z.email(),
       })
     ),
     async (c) => {
-      const validQuery = c.req.valid('query')
+      const validQuery = c.req.valid("query")
 
       await sendEmail({
         html: renderTestEmail(validQuery.email),
-        subject: 'Test Email',
+        subject: "Test Email",
         to: validQuery.email,
       })
 

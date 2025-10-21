@@ -1,9 +1,17 @@
-import { IconLoading } from '@/assets/icons'
-import { useAuthContext } from '@/features/auth/auth.context'
-import { getRoute } from '@/route-tree.gen'
-import type { UserResponseDTO } from '@/server/modules/auth/auth.dto'
-import { createEffect, createSignal, FlowProps, Match, mergeProps, Show, Switch } from 'solid-js'
-import { navigate } from 'vike/client/router'
+import {
+  createEffect,
+  createSignal,
+  type FlowProps,
+  Match,
+  mergeProps,
+  Show,
+  Switch,
+} from "solid-js"
+import { navigate } from "vike/client/router"
+import { IconLoading } from "@/assets/icons"
+import { useAuthContext } from "@/features/auth/auth.context"
+import { getRoute } from "@/route-tree.gen"
+import type { UserResponseDTO } from "@/server/modules/auth/auth.dto"
 
 type ProtectedRouteProps = {
   /** Redirect when authenticated. */
@@ -28,11 +36,11 @@ export default function ProtectedRoute(props: FlowProps<ProtectedRouteProps>) {
   const { user, loading } = useAuthContext()
 
   const defaultProps = mergeProps(
-    { fallback: getRoute('/sign-in'), isAllowed: () => true, enablePostLoginRedirect: true },
+    { fallback: getRoute("/sign-in"), isAllowed: () => true, enablePostLoginRedirect: true },
     props
   )
 
-  const [showProtector, setShowProtector] = createSignal(!Boolean(user()))
+  const [showProtector, setShowProtector] = createSignal(!user())
 
   const buildFallbackWithToParam = () => {
     if (!defaultProps.enablePostLoginRedirect) return defaultProps.fallback

@@ -1,6 +1,6 @@
-import { Label } from '@/components/ui/label'
-import { RadioGroupComp, RadioGroupOption } from '@/components/ui/radio-group'
-import { createField, DeepKeys, FieldApi } from '@tanstack/solid-form'
+import { createField, type DeepKeys, type FieldApi } from "@tanstack/solid-form"
+import { Label } from "@/components/ui/label"
+import { RadioGroupComp, type RadioGroupOption } from "@/components/ui/radio-group"
 
 interface RadioGroupFieldProps<TParentData, TName extends DeepKeys<TParentData>> {
   form: FieldApi<TParentData, TName, TFieldValidator>
@@ -32,7 +32,7 @@ export function RadioGroupField<TParentData, TName extends DeepKeys<TParentData>
         required={props.required}
       />
       {field().state.meta.errors.length > 0 && (
-        <p class="text-sm text-red-500">{field().state.meta.errors.join(', ')}</p>
+        <p class="text-red-500 text-sm">{field().state.meta.errors.join(", ")}</p>
       )}
     </div>
   )

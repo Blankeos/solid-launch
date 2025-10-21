@@ -1,9 +1,14 @@
-import { db } from '@/server/db/kysely'
+import { db } from "@/server/db/kysely"
 
-import { generateId, getSimpleDeviceName } from '@/server/modules/auth/auth.utilities'
-import { assertDTO } from '@/server/utils/assert-dto'
-import { AUTH_CONFIG } from './auth.config'
-import { InternalSessionDTO, InternalUserDTO, userMetaDTO, UserMetaDTO } from './auth.dto'
+import { generateId, getSimpleDeviceName } from "@/server/modules/auth/auth.utilities"
+import { assertDTO } from "@/server/utils/assert-dto"
+import { AUTH_CONFIG } from "./auth.config"
+import {
+  type InternalSessionDTO,
+  type InternalUserDTO,
+  type UserMetaDTO,
+  userMetaDTO,
+} from "./auth.dto"
 
 export class AuthDAO {
   // Sessions
@@ -12,7 +17,7 @@ export class AuthDAO {
     const revokeId = generateId()
 
     const session = await db
-      .insertInto('session')
+      .insertInto("session")
       .values({
         id: sessionId,
         revoke_id: revokeId,
@@ -31,18 +36,18 @@ export class AuthDAO {
     sessionId: string
   ): Promise<{ session?: InternalSessionDTO; user?: InternalUserDTO }> {
     const result = await db
-      .selectFrom('session')
-      .where('session.id', '=', sessionId)
-      .leftJoin('user', 'session.user_id', 'user.id')
+      .selectFrom("session")
+      .where("session.id", "=", sessionId)
+      .leftJoin("user", "session.user_id", "user.id")
       .select([
-        'session.id as session_id',
-        'revoke_id as session_revoke_id',
-        'session.expires_at as session_expires_at',
-        'session.user_id as session_user_id',
-        'session.ip_address as session_ip_address',
-        'session.user_agent_hash as session_user_agent_hash',
+        "session.id as session_id",
+        "revoke_id as session_revoke_id",
+        "session.expires_at as session_expires_at",
+        "session.user_id as session_user_id",
+        "session.ip_address as session_ip_address",
+        "session.user_agent_hash as session_user_agent_hash",
       ])
-      .selectAll('user')
+      .selectAll("user")
       .executeTakeFirst()
 
     if (!result) return { session: undefined, user: undefined }
@@ -87,7 +92,7 @@ export class AuthDAO {
     // Delete if expired.
     const expiresAt = new Date(session.expires_at)
     if (Date.now() >= expiresAt.getTime()) {
-      await db.deleteFrom('session').where('session.id', '=', sessionId).execute()
+      await db.deleteFrom("session").where("session.id", "=", sessionId).execute()
       return { session: undefined, user: undefined }
     }
 
@@ -101,11 +106,11 @@ export class AuthDAO {
       ).toISOString()
 
       await db
-        .updateTable('session')
+        .updateTable("session")
         .set({
           expires_at: session.expires_at,
         })
-        .where('session.id', '=', session.id)
+        .where("session.id", "=", session.id)
         .execute()
     }
 
@@ -114,8 +119,8 @@ export class AuthDAO {
 
   async invalidateSession(sessionId: string) {
     const result = await db
-      .deleteFrom('session')
-      .where('session.id', '=', sessionId)
+      .deleteFrom("session")
+      .where("session.id", "=", sessionId)
       .executeTakeFirst()
 
     if (Number(result.numDeletedRows) === 0) {
@@ -126,16 +131,16 @@ export class AuthDAO {
   }
 
   async invalidateAllSessionsByUser(userId: string) {
-    await db.deleteFrom('session').where('session.user_id', '=', userId).execute()
+    await db.deleteFrom("session").where("session.user_id", "=", userId).execute()
 
     return { success: true }
   }
 
   async revokeSessionByRevokeId(params: { revokeId: string; userId: string }) {
     const result = await db
-      .deleteFrom('session')
-      .where('session.revoke_id', '=', params.revokeId)
-      .where('session.user_id', '=', params.userId)
+      .deleteFrom("session")
+      .where("session.revoke_id", "=", params.revokeId)
+      .where("session.user_id", "=", params.userId)
       .executeTakeFirst()
 
     if (Number(result.numDeletedRows) === 0) {
@@ -147,11 +152,11 @@ export class AuthDAO {
 
   async updateSessionIP(params: { sessionId: string; ipAddress: string | null }) {
     await db
-      .updateTable('session')
+      .updateTable("session")
       .set({
         ip_address: params.ipAddress,
       })
-      .where('session.id', '=', params.sessionId)
+      .where("session.id", "=", params.sessionId)
       .execute()
 
     return { success: true }
@@ -159,11 +164,11 @@ export class AuthDAO {
 
   async updateSessionUserAgent(params: { sessionId: string; userAgentHash: string | null }) {
     await db
-      .updateTable('session')
+      .updateTable("session")
       .set({
         user_agent_hash: params.userAgentHash,
       })
-      .where('session.id', '=', params.sessionId)
+      .where("session.id", "=", params.sessionId)
       .execute()
 
     return { success: true }
@@ -172,9 +177,9 @@ export class AuthDAO {
   // User
   async getUserByUserId(userId: string) {
     const user = await db
-      .selectFrom('user')
+      .selectFrom("user")
       .selectAll()
-      .where('user.id', '=', userId)
+      .where("user.id", "=", userId)
       .executeTakeFirst()
 
     return user
@@ -182,9 +187,9 @@ export class AuthDAO {
 
   async getUserByEmail(email: string) {
     const user = await db
-      .selectFrom('user')
+      .selectFrom("user")
       .selectAll()
-      .where('user.email', '=', email)
+      .where("user.email", "=", email)
       .executeTakeFirst()
 
     return user
@@ -192,24 +197,24 @@ export class AuthDAO {
 
   async getUserDetails(userId: string) {
     const user = await db
-      .selectFrom('user')
+      .selectFrom("user")
       .selectAll()
-      .where('user.id', '=', userId)
+      .where("user.id", "=", userId)
       .executeTakeFirst()
 
     if (!user) return null
 
     const [oauthAccounts, sessions] = await Promise.all([
       db
-        .selectFrom('oauth_account')
-        .select(['provider_id', 'provider_user_id'])
-        .where('oauth_account.user_id', '=', userId)
+        .selectFrom("oauth_account")
+        .select(["provider_id", "provider_user_id"])
+        .where("oauth_account.user_id", "=", userId)
         .execute(),
       db
-        .selectFrom('session')
-        .select(['id', 'revoke_id', 'expires_at', 'ip_address', 'session.user_agent_hash'])
-        .where('session.user_id', '=', userId)
-        .where('session.expires_at', '>', new Date().toISOString())
+        .selectFrom("session")
+        .select(["id", "revoke_id", "expires_at", "ip_address", "session.user_agent_hash"])
+        .where("session.user_id", "=", userId)
+        .where("session.expires_at", ">", new Date().toISOString())
         .execute(),
     ])
 
@@ -227,7 +232,7 @@ export class AuthDAO {
         provider_user_id: acc.provider_user_id,
       })),
       active_sessions: sessions.map((s) => ({
-        display_id: '***' + s.id.slice(-4),
+        display_id: "***" + s.id.slice(-4),
         revoke_id: s.revoke_id,
         expires_at: s.expires_at,
         ip_address: s.ip_address,
@@ -246,7 +251,7 @@ export class AuthDAO {
     const userId = generateId()
 
     const user = await db
-      .insertInto('user')
+      .insertInto("user")
       .values({
         id: userId,
         password_hash: params.passwordHash,
@@ -270,7 +275,7 @@ export class AuthDAO {
 
     const user = await db.transaction().execute(async (trx) => {
       const [newUser] = await trx
-        .insertInto('user')
+        .insertInto("user")
         .values({
           id: userId,
           email: params.email,
@@ -282,7 +287,7 @@ export class AuthDAO {
         .execute()
 
       await trx
-        .insertInto('oauth_account')
+        .insertInto("oauth_account")
         .values({
           provider_id: params.provider,
           provider_user_id: params.providerUserId,
@@ -298,7 +303,7 @@ export class AuthDAO {
 
   async linkOAuthAccount(params: { userId: string; providerId: string; providerUserId: string }) {
     await db
-      .insertInto('oauth_account')
+      .insertInto("oauth_account")
       .values({
         provider_id: params.providerId,
         provider_user_id: params.providerUserId,
@@ -311,10 +316,10 @@ export class AuthDAO {
 
   async getOAuthAccount(provider: string, providerUserId: string) {
     const account = await db
-      .selectFrom('oauth_account')
+      .selectFrom("oauth_account")
       .selectAll()
-      .where('oauth_account.provider_id', '=', provider)
-      .where('oauth_account.provider_user_id', '=', providerUserId)
+      .where("oauth_account.provider_id", "=", provider)
+      .where("oauth_account.provider_user_id", "=", providerUserId)
       .executeTakeFirst()
 
     return account
@@ -327,14 +332,14 @@ export class AuthDAO {
     /** @defaultValue 300 (5 minutes) */
     expiresInSeconds?: number
     /** @defaultValue 'highentropy' ensures `token` uniqueness in the db. shortcode is a 6 digit token (number) so uniqueness is just based on `token+userId`. */
-    tokenType?: 'highentropy' | 'shortcode'
+    tokenType?: "highentropy" | "shortcode"
   }) {
-    const tokenType = params.tokenType ?? 'highentropy'
+    const tokenType = params.tokenType ?? "highentropy"
     const expiresAt = new Date(Date.now() + (params.expiresInSeconds ?? 300) * 1000)
 
     return await db.transaction().execute(async (trx) => {
-      let token: string = ''
-      if (tokenType === 'shortcode') {
+      let token: string = ""
+      if (tokenType === "shortcode") {
         // Simple shortcode; uniqueness not enforced
         token = Math.floor(100000 + Math.random() * 900000).toString()
       } else {
@@ -342,13 +347,13 @@ export class AuthDAO {
         let isUnique = false
         while (!isUnique) {
           const candidate = Array.from(crypto.getRandomValues(new Uint8Array(32)))
-            .map((b) => b.toString(36).padStart(2, '0'))
-            .join('')
+            .map((b) => b.toString(36).padStart(2, "0"))
+            .join("")
 
           const exists = await trx
-            .selectFrom('onetime_token')
-            .select('token')
-            .where('onetime_token.token', '=', candidate)
+            .selectFrom("onetime_token")
+            .select("token")
+            .where("onetime_token.token", "=", candidate)
             .executeTakeFirst()
 
           if (!exists) {
@@ -359,7 +364,7 @@ export class AuthDAO {
       }
 
       await trx
-        .insertInto('onetime_token')
+        .insertInto("onetime_token")
         .values({
           token,
           expires_at: expiresAt.toISOString(),
@@ -377,12 +382,12 @@ export class AuthDAO {
     return await db.transaction().execute(async (trx) => {
       // First, select the token to get user_id
       const tokenRow = await trx
-        .selectFrom('onetime_token')
+        .selectFrom("onetime_token")
         .selectAll()
-        .where('onetime_token.token', '=', params.token)
-        .where('onetime_token.expires_at', '>', new Date().toISOString())
-        .$if(!!params.userId, (qb) => qb.where('onetime_token.user_id', '=', params.userId!))
-        .$if(!!params.purpose, (qb) => qb.where('onetime_token.purpose', '=', params.purpose!))
+        .where("onetime_token.token", "=", params.token)
+        .where("onetime_token.expires_at", ">", new Date().toISOString())
+        .$if(!!params.userId, (qb) => qb.where("onetime_token.user_id", "=", params.userId!))
+        .$if(!!params.purpose, (qb) => qb.where("onetime_token.purpose", "=", params.purpose!))
         .executeTakeFirst()
 
       if (!tokenRow) {
@@ -391,8 +396,8 @@ export class AuthDAO {
 
       // Delete the token
       await trx
-        .deleteFrom('onetime_token')
-        .where('onetime_token.token', '=', params.token)
+        .deleteFrom("onetime_token")
+        .where("onetime_token.token", "=", params.token)
         .execute()
 
       return { consumed: true, userId: tokenRow.user_id }
@@ -402,11 +407,11 @@ export class AuthDAO {
   // --- Updates ---
   async updateUserPassword(params: { userId: string; passwordHash: string }) {
     await db
-      .updateTable('user')
+      .updateTable("user")
       .set({
         password_hash: params.passwordHash,
       })
-      .where('user.id', '=', params.userId)
+      .where("user.id", "=", params.userId)
       .execute()
 
     return { success: true }
@@ -414,11 +419,11 @@ export class AuthDAO {
 
   async updateUserVerifiedEmail(params: { userId: string }) {
     await db
-      .updateTable('user')
+      .updateTable("user")
       .set({
         email_verified: 1,
       })
-      .where('user.id', '=', params.userId)
+      .where("user.id", "=", params.userId)
       .execute()
 
     return { success: true }

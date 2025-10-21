@@ -1,14 +1,14 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { AccountManagement } from '@/features/auth/account-management'
-import ProtectedRoute from '@/features/auth/protected-route'
-import { useClientSize } from '@/hooks/use-client-size'
-import { useWindowSize } from '@/hooks/use-window-size'
-import getTitle from '@/utils/get-title'
-import { useMetadata } from 'vike-metadata-solid'
+import { useMetadata } from "vike-metadata-solid"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { AccountManagement } from "@/features/auth/account-management"
+import ProtectedRoute from "@/features/auth/protected-route"
+import { useClientSize } from "@/hooks/use-client-size"
+import { useWindowSize } from "@/hooks/use-window-size"
+import getTitle from "@/utils/get-title"
 
 export default function DashboardPage() {
   useMetadata({
-    title: getTitle('Dashboard'),
+    title: getTitle("Dashboard"),
   })
 
   const { height, width } = useWindowSize()

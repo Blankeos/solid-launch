@@ -1,15 +1,13 @@
 // A bit edited, mainly the integration with DataTableToolbarOptions.
 // Quality of life updates:
 // - Disable the toolbar if I want to.
-import { createSignal, For, Show } from 'solid-js'
 
 import type {
   ColumnDef,
   ColumnFiltersState,
   SortingState,
   VisibilityState,
-} from '@tanstack/solid-table'
-
+} from "@tanstack/solid-table"
 import {
   createSolidTable,
   flexRender,
@@ -19,12 +17,13 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-} from '@tanstack/solid-table'
+} from "@tanstack/solid-table"
+import { createSignal, For, Show } from "solid-js"
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './table'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./table"
 
-import { TablePagination } from './table-pagination'
-import { type DataTableToolbarOptions, TableToolbar } from './table-toolbar'
+import { TablePagination } from "./table-pagination"
+import { type DataTableToolbarOptions, TableToolbar } from "./table-toolbar"
 
 type DataTableProps<TData, TValue> = {
   columns: ColumnDef<TData, TValue>[]
@@ -113,7 +112,7 @@ export function DataTable<TData, TValue>(props: DataTableProps<TData, TValue>) {
             >
               <For each={table.getRowModel().rows}>
                 {(row) => (
-                  <TableRow data-state={row.getIsSelected() && 'selected'}>
+                  <TableRow data-state={row.getIsSelected() && "selected"}>
                     <For each={row.getVisibleCells()}>
                       {(cell) => (
                         <TableCell>

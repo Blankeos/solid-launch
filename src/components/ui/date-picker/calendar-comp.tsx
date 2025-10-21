@@ -3,9 +3,9 @@
 // Maximizes flexibility + reusability.
 // date-picker.tsx is untouched and completely from solid-ui.
 
-import { cn } from '@/utils/cn'
-import { Index, createMemo } from 'solid-js'
-import { Portal } from 'solid-js/web'
+import { createMemo, Index } from "solid-js"
+import { Portal } from "solid-js/web"
+import { cn } from "@/utils/cn"
 import {
   DatePicker,
   DatePickerContent,
@@ -27,11 +27,11 @@ import {
   DatePickerView,
   DatePickerViewControl,
   DatePickerViewTrigger,
-} from './date-picker'
+} from "./date-picker"
 
 const CalendarCompContent = (props: {
   class?: string
-  'aria-label'?: string
+  "aria-label"?: string
   isRange?: boolean
   inPopover?: boolean
 }) => {
@@ -160,7 +160,7 @@ const CalendarCompContent = (props: {
             </DatePickerViewControl>
             <DatePickerTable>
               <DatePickerTableBody>
-                <Index each={api().getMonthsGrid({ columns: 4, format: 'short' })}>
+                <Index each={api().getMonthsGrid({ columns: 4, format: "short" })}>
                   {(months) => (
                     <DatePickerTableRow>
                       <Index each={months()}>
@@ -220,10 +220,10 @@ const CalendarCompContent = (props: {
     <DatePickerContent
       class={cn(
         (props.inPopover ?? false) &&
-          'data-[state=open]:animate-flyUpAndScale data-[state=closed]:animate-flyUpAndScaleExit',
+          "data-[state=closed]:animate-flyUpAndScaleExit data-[state=open]:animate-flyUpAndScale",
         props.class
       )}
-      aria-label={props['aria-label']}
+      aria-label={props["aria-label"]}
     >
       {dayView}
       {monthView}
@@ -239,7 +239,7 @@ const CalendarComp = (props: {
   onChange?: (date: Date) => void
   defaultValue?: Date
   class?: string
-  'aria-label'?: string
+  "aria-label"?: string
   withControls?: boolean
   format?: (date: Date) => string
   open?: boolean
@@ -262,13 +262,13 @@ const CalendarComp = (props: {
           </DatePickerControl>
           <Portal>
             <DatePickerPositioner class="group/positioner">
-              <CalendarCompContent class={props.class} aria-label={props['aria-label']} inPopover />
+              <CalendarCompContent class={props.class} aria-label={props["aria-label"]} inPopover />
             </DatePickerPositioner>
           </Portal>
         </>
       )}
       {!props.withControls && (
-        <CalendarCompContent class={props.class} aria-label={props['aria-label']} />
+        <CalendarCompContent class={props.class} aria-label={props["aria-label"]} />
       )}
     </DatePicker>
   )
@@ -279,7 +279,7 @@ const CalendarRangeComp = (props: {
   onChange?: (dates: Date[]) => void
   defaultValue?: Date[]
   class?: string
-  'aria-label'?: string
+  "aria-label"?: string
   format?: (date: Date) => string
   withPicker?: boolean
   open?: boolean
@@ -308,7 +308,7 @@ const CalendarRangeComp = (props: {
               <CalendarCompContent
                 isRange
                 class={props.class}
-                aria-label={props['aria-label']}
+                aria-label={props["aria-label"]}
                 inPopover
               />
             </DatePickerPositioner>
@@ -316,7 +316,7 @@ const CalendarRangeComp = (props: {
         </>
       )}
       {!props.withPicker && (
-        <CalendarCompContent isRange class={props.class} aria-label={props['aria-label']} />
+        <CalendarCompContent isRange class={props.class} aria-label={props["aria-label"]} />
       )}
     </DatePicker>
   )

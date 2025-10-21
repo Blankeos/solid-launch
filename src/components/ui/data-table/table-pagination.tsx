@@ -1,19 +1,19 @@
-import type { Table } from '@tanstack/solid-table'
+import type { Table } from "@tanstack/solid-table"
 
 import {
   IconChevronLeft,
   IconChevronRight,
   IconChevronsLeft,
   IconChevronsRight,
-} from '@/assets/icons'
-import { Button } from '@/components/ui/button'
+} from "@/assets/icons"
+import { Button } from "@/components/ui/button"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from "@/components/ui/select"
 
 type TablePaginationProps<TData> = {
   table: Table<TData>
@@ -22,13 +22,13 @@ type TablePaginationProps<TData> = {
 export function TablePagination<TData>(props: TablePaginationProps<TData>) {
   return (
     <div class="flex items-center justify-between">
-      <div class="text-muted-foreground flex-1 text-sm">
-        {props.table.getFilteredSelectedRowModel().rows.length} of{' '}
+      <div class="flex-1 text-muted-foreground text-sm">
+        {props.table.getFilteredSelectedRowModel().rows.length} of{" "}
         {props.table.getFilteredRowModel().rows.length} row(s) selected.
       </div>
       <div class="flex items-center space-x-6 lg:space-x-8">
         <div class="flex items-center space-x-2">
-          <p class="text-sm font-medium">Rows per page</p>
+          <p class="font-medium text-sm">Rows per page</p>
           <Select
             value={props.table.getState().pagination.pageSize}
             onChange={(value) => value && props.table.setPageSize(value)}
@@ -43,7 +43,7 @@ export function TablePagination<TData>(props: TablePaginationProps<TData>) {
             <SelectContent />
           </Select>
         </div>
-        <div class="flex w-[100px] items-center justify-center text-sm font-medium">
+        <div class="flex w-[100px] items-center justify-center font-medium text-sm">
           Page {props.table.getState().pagination.pageIndex + 1} of {props.table.getPageCount()}
         </div>
         <div class="flex items-center space-x-2">

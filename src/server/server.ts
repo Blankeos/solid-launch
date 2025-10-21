@@ -1,41 +1,41 @@
-import { privateEnv } from '@/env.private'
-import { Hono } from 'hono'
-import { appRouter } from './_app'
-import { ApiErrorResponse } from './lib/error'
-import { RATE_LIMIT_GLOBAL, rateLimit } from './lib/rate-limit'
-
-import { apply } from 'vike-server/hono'
-import { serve } from 'vike-server/hono/serve'
+import { Hono } from "hono"
+import { apply } from "vike-server/hono"
+import { serve } from "vike-server/hono/serve"
+import { privateEnv } from "@/env.private"
+import { appRouter } from "./_app"
+import type { ApiErrorResponse } from "./lib/error"
+import { RATE_LIMIT_GLOBAL, rateLimit } from "./lib/rate-limit"
 
 const app = new Hono()
 
 // Health checks
-app.get('/up', async (c) => {
-  return c.newResponse('🟢 UP', { status: 200 })
+app.get("/up", async (c) => {
+  return c.newResponse("🟢 UP", { status: 200 })
 })
 
 // For the Backend APIs
-app.use('/api/*', rateLimit({ ...RATE_LIMIT_GLOBAL }))
-app.route('/api', appRouter)
+app.use("/api/*", rateLimit({ ...RATE_LIMIT_GLOBAL }))
+app.route("/api", appRouter)
 
+import { HTTPException } from "hono/http-exception"
 // For OpenAPI
-import { openAPIRouteHandler } from 'hono-openapi'
-import { HTTPException } from 'hono/http-exception'
-if (privateEnv.NODE_ENV === 'development') {
+import { openAPIRouteHandler } from "hono-openapi"
+
+if (privateEnv.NODE_ENV === "development") {
   app.get(
-    '/api/docs/json',
+    "/api/docs/json",
     openAPIRouteHandler(app, {
       documentation: {
         info: {
-          title: 'Solid Launch API',
-          version: '1.0.0',
-          description: 'API in Hono',
+          title: "Solid Launch API",
+          version: "1.0.0",
+          description: "API in Hono",
         },
-        servers: [{ url: 'http://localhost:3000', description: 'Local Server' }],
+        servers: [{ url: "http://localhost:3000", description: "Local Server" }],
       },
     })
   )
-  app.get('/api/docs', (c) => {
+  app.get("/api/docs", (c) => {
     return c.html(`<!doctype html>
 <html>
   <head>
@@ -85,19 +85,19 @@ app.onError((error, c) => {
   // 1. Parse into a standard shape.
   const {
     status = 500,
-    message = 'Internal Server Error',
+    message = "Internal Server Error",
     cause,
   } = error instanceof HTTPException
     ? error
-    : { status: 500, message: 'Internal Server Error', cause: error }
+    : { status: 500, message: "Internal Server Error", cause: error }
 
   // 2. Create a standard error response shape.
   const errorResponse = {
     error: {
       message,
       code: status,
-      cause: privateEnv.NODE_ENV === 'production' ? undefined : cause,
-      stack: privateEnv.NODE_ENV === 'production' ? undefined : error.stack,
+      cause: privateEnv.NODE_ENV === "production" ? undefined : cause,
+      stack: privateEnv.NODE_ENV === "production" ? undefined : error.stack,
     },
   } as ApiErrorResponse
 
