@@ -51,7 +51,7 @@
     "kysely": "^0.28.8",
     "kysely-bun-worker": "^1.2.1",
     "nodemailer": "^7.0.9",
-    "prisma": "^6.17.1",
+    "prisma": "^6.18.0",
     "prisma-kysely": "^2.2.1",
     "solid-js": "1.9.9",
     "solid-resizable-panels": "^0.5.4",
@@ -61,7 +61,7 @@
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
     "tippy.js": "^6.3.7",
-    "vike": "^0.4.243",
+    "vike": "^0.4.244",
     "vike-metadata-solid": "^1.0.4",
     "vike-server": "^1.0.25",
     "vike-solid": "^0.7.13",
@@ -70,7 +70,7 @@
     "zod-openapi": "^5.4.3"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.2.6",
+    "@biomejs/biome": "^2.2.7",
     "@blankeos/vike-routegen": "^0.0.3",
     "@tailwindcss/postcss": "^4.1.15",
     "@tanstack/solid-query-devtools": "^5.90.4",
