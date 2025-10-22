@@ -17,32 +17,41 @@
 
 import { HTTPException } from "hono/http-exception"
 
+type CauseType = {
+  data?: any
+  error?: Error
+}
+
 export class ApiError {
-  static NotFound(msg: string, cause?: Error) {
+  static NotFound(msg: string, cause?: CauseType) {
     return new HTTPException(404, { message: msg, cause })
   }
 
-  static Conflict(msg: string, cause?: Error) {
+  static Conflict(msg: string, cause?: CauseType) {
     return new HTTPException(409, { message: msg, cause })
   }
 
-  static BadRequest(msg: string, cause?: Error) {
+  static BadRequest(msg: string, cause?: CauseType) {
     return new HTTPException(400, { message: msg, cause })
   }
 
-  static InternalServerError(msg: string, cause?: Error) {
+  static InternalServerError(msg: string, cause?: CauseType) {
     return new HTTPException(500, { message: msg, cause })
   }
 
-  static BusinessLogicError(msg: string, cause?: Error) {
+  static BusinessLogicError(msg: string, cause?: CauseType) {
     return new HTTPException(422, { message: msg, cause })
   }
 
-  static Unauthorized(msg: string, cause?: Error) {
+  static Unauthorized(msg: string, cause?: CauseType) {
     return new HTTPException(401, { message: msg, cause })
   }
 
-  static TooManyRequests(msg: string, cause?: Error) {
+  static Forbidden(msg: string, cause?: CauseType) {
+    return new HTTPException(403, { message: msg, cause })
+  }
+
+  static TooManyRequests(msg: string, cause?: CauseType) {
     return new HTTPException(429, { message: msg, cause })
   }
 }
@@ -52,7 +61,7 @@ export type ApiErrorResponse = {
   error: {
     message: string
     code: number
-    cause?: string
+    cause?: CauseType
     stack?: string
   }
 }
