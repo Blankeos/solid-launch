@@ -1,6 +1,6 @@
+import { apply, serve } from "@photonjs/hono"
+import { enhance } from "@universal-middleware/core"
 import { Hono } from "hono"
-import { apply } from "vike-server/hono"
-import { serve } from "vike-server/hono/serve"
 import { privateEnv } from "@/env.private"
 import { appRouter } from "./_app"
 import type { ApiErrorResponse } from "./lib/error"
@@ -65,17 +65,18 @@ if (privateEnv.NODE_ENV === "development") {
 }
 
 // Vike
-apply(app, {
-  pageContext: (c) => {
-    const pageContextInit = {
-      urlOriginal: c.hono.req.url,
-      request: c.hono.req,
-      response: c.hono.res,
-    }
+apply(app, [
+  enhance(
+    async (_request, context, runtime) => {
+      if (runtime.adapter !== "hono") throw new Error('Expected runtime.adapter to be "hono"')
 
-    return pageContextInit
-  },
-})
+      context.urlOriginal = runtime.hono.req.url
+      context.request = runtime.hono.req
+      context.response = runtime.hono.res
+    },
+    { name: "custom-page-context" }
+  ),
+])
 
 // Standard Errors
 app.onError((error, c) => {
@@ -112,5 +113,4 @@ app.onError((error, c) => {
   return c.json(errorResponse, status)
 })
 
-// No need to export default (especially Bun).
-serve(app, { port: privateEnv.PORT })
+export default serve(app, { port: privateEnv.PORT })
