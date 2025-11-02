@@ -39,6 +39,7 @@ import { useThemeContext } from "@/contexts/theme.context"
 import { Tippy } from "@/lib/solid-tippy"
 import { cn } from "@/utils/cn"
 import { DragExample } from "./drag-example"
+import { ScrollPaginationExample } from "./scroll-pagination-example"
 
 export default function ComponentsPage() {
   return (
@@ -915,6 +916,10 @@ export default function ComponentsPage() {
           .
         </span>
         <DragExample />
+      </ComponentCard>
+
+      <ComponentCard label="Scroll Pagination">
+        <ScrollPaginationExample />
       </ComponentCard>
     </div>
   )

@@ -11,3 +11,25 @@ export const DEFAULT_PAGINATION_OPTIONS: PaginationOptionsDTO = {
   page: 1,
   limit: 10,
 }
+
+export const paginatedResponseDTO = <T extends z.ZodTypeAny>(itemSchema: T) =>
+  z.object({
+    /** Array of items for the current page */
+    items: z.array(itemSchema),
+    /** Indicates if more pages are available */
+    hasMore: z.boolean(),
+    /** Total number of items across all pages */
+    total: z.number().int().min(0),
+    /** Current page number (starts at 1) */
+    page: z.number().int().min(1),
+    /** Number of items per page */
+    limit: z.number().int().min(0),
+  })
+
+export type PaginatedResponseDTO<T> = {
+  items: T[]
+  hasMore: boolean
+  total: number
+  page: number
+  limit: number
+}
