@@ -1,29 +1,18 @@
 {
-  // Place your solid-launch workspace snippets here. Each snippet is defined under a snippet name and has a scope, prefix, body and
-  // description. Add comma separated ids of the languages where the snippet is applicable in the scope field. If scope
-  // is left empty or omitted, the snippet gets applied to all languages. The prefix is what is
-  // used to trigger the snippet and the body will be expanded and inserted. Possible variables are:
-  // $1, $2 for tab stops, $0 for the final cursor position, and ${1:label}, ${2:another} for placeholders.
-  // Placeholders with the same ids are connected.
-  // Example:
-  // "Print to console": {
-  // 	"scope": "javascript,typescript",
-  // 	"prefix": "log",
-  // 	"body": [
-  // 		"console.log('$1');",
-  // 		"$2"
-  // 	],
-  // 	"description": "Log output to console"
-  // }
   "New SolidJS Page": {
     "prefix": "newsolidpage",
-    // "scope": "typescript,javascript,javascriptreact,typescriptreact",
-    "body": ["export default function ${1:MyAwesome}Page() {", "  return <></>;", "}"],
-    "description": "Creates a new page in SolidJS."
+    "scope": "javascriptreact,typescriptreact",
+    "body": [
+      "export default function ${1:MyAwesome}Page() {",
+      "  return <></>;",
+      "}",
+    ],
+    "description": "Creates a new page in SolidJS.",
   },
 
   "New SolidJS Component": {
     "prefix": "newsolidcomponent",
+    "scope": "javascriptreact,typescriptreact",
     "body": [
       "import { mergeProps, ${2|VoidProps,FlowProps|} } from 'solid-js';",
       "",
@@ -34,25 +23,20 @@
       "",
       "  return <></>;",
       "}",
-      ""
+      "",
     ],
-    "description": "Creates a new SolidJS Component"
+    "description": "Creates a new SolidJS Component",
   },
 
   "New SolidJS Context File": {
     "prefix": "newsolidcontext",
+    "scope": "javascriptreact,typescriptreact",
     "body": [
-      "import {",
-      "  createContext,",
-      "  createSignal,",
-      "  FlowComponent,",
-      "  useContext,",
-      "  type Accessor,",
-      "  type Setter",
-      "} from 'solid-js';",
+      "import { createSignal, FlowComponent, type Accessor, type Setter } from 'solid-js';",
+      "import { createStrictContext } from '@/utils/create-strict-context';",
       "",
       "// ===========================================================================",
-      "// Context",
+      "// Context & Hook",
       "// ===========================================================================",
       "",
       "export type ${1:CounterContext}Value = {",
@@ -60,15 +44,9 @@
       "  setCount: Setter<number>",
       "}",
       "",
-      "const ${1:CounterContext} = createContext({",
-      "  count: () => 0,",
-      "  setCount: (newCount: number) => {}",
-      "} as ${1:CoutnerContext}Value);",
+      "const [use${1:CounterContext}, ${1:CounterContext}Provider] = createStrictContext<${1:CounterContext}Value>('${1:CounterContext}');",
       "",
-      "// ===========================================================================",
-      "// Hook",
-      "// ===========================================================================",
-      "export const use${1:CounterContext} = () => useContext(${1:CounterContext});",
+      "export { use${1:CounterContext} };",
       "",
       "// ===========================================================================",
       "// Provider",
@@ -77,35 +55,31 @@
       "  const [count, setCount] = createSignal(0);",
       "",
       "  return (",
-      "    <${1:CounterContext}.Provider",
-      "      value={{",
-      "        count: count,",
-      "        setCount: setCount",
-      "      }}",
-      "    >",
+      "    <${1:CounterContext}Provider value={{ count, setCount }}>",
       "      {props.children}",
-      "    </${1:CounterContext}.Provider>",
+      "    </${1:CounterContext}Provider>",
       "  );",
       "};",
-      ""
+      "",
     ],
-    "description": "New SolidJS Context File"
+    "description": "New SolidJS Context File",
   },
 
   "Comment Headers (TS)": {
-    "scope": "typescript,javascript,javascriptreact,typescriptreact",
     "prefix": "commentheaders",
+    "scope": "typescript,javascript,javascriptreact,typescriptreact",
     "body": [
       "// ===========================================================================",
       "// ${1:Comment Headers}",
-      "// ==========================================================================="
+      "// ===========================================================================",
     ],
-    "description": "Makes a comment header to subsection the content in your files."
+    "description": "Makes a comment header to subsection the content in your files.",
   },
 
   // Vike
   "Vike +data.ts": {
     "prefix": "newvikedata",
+    "scope": "typescript,javascript",
     "body": [
       "import { PageContext } from 'vike/types';",
       "",
@@ -118,8 +92,8 @@
       "  return {",
       "    todo: data as { userId: number; id: number; title: string; completed: boolean },",
       "  };",
-      "}"
+      "}",
     ],
-    "description": "Vike +data.ts"
-  }
+    "description": "Vike +data.ts",
+  },
 }

@@ -1,16 +1,15 @@
+import { createStrictContext } from "@/utils/create-strict-context"
 import { useLocalStorage } from "bagon-hooks"
 import {
-  type Accessor,
-  createContext,
-  createEffect,
-  createSignal,
-  type FlowComponent,
-  type Setter,
-  useContext,
+    type Accessor,
+    createEffect,
+    createSignal,
+    type FlowComponent,
+    type Setter
 } from "solid-js"
 
 // ===========================================================================
-// Context
+// Context & Hook
 // ===========================================================================
 
 export const themes = ["light", "dark", "system"] as const
@@ -24,17 +23,9 @@ export type ThemeContextValue = {
   toggleTheme: () => void
 }
 
-const ThemeContext = createContext({
-  theme: () => "light",
-  setTheme: () => {},
-  inferredTheme: () => "light",
-  toggleTheme: () => {},
-} as ThemeContextValue)
+const [useThemeContext, Provider] = createStrictContext<ThemeContextValue>('ThemeContext')
 
-// ===========================================================================
-// Hook
-// ===========================================================================
-export const useThemeContext = () => useContext(ThemeContext)
+export { useThemeContext }
 
 // ===========================================================================
 // Provider
@@ -79,7 +70,7 @@ export const ThemeContextProvider: FlowComponent = (props) => {
   }
 
   return (
-    <ThemeContext.Provider
+    <Provider
       value={{
         theme,
         setTheme,
@@ -88,6 +79,6 @@ export const ThemeContextProvider: FlowComponent = (props) => {
       }}
     >
       {props.children}
-    </ThemeContext.Provider>
+    </Provider>
   )
 }

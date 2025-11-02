@@ -1,6 +1,5 @@
 import { getCookie } from "hono/cookie"
 import { createMiddleware } from "hono/factory"
-import type { Session, User } from "@/server/db/types"
 import type { Bindings } from "@/server/lib/context"
 import { ApiError } from "@/server/lib/error"
 import { AuthDAO } from "@/server/modules/auth/auth.dao"
@@ -21,7 +20,6 @@ export type AuthMiddlewareBindings = Bindings & {
     session: InternalSessionDTO | null
   }
 }
-
 export const authMiddleware = createMiddleware<AuthMiddlewareBindings>(async (c, next) => {
   // 1. Check cookie session.
   const sessionId = getCookie(c, "session") ?? null
@@ -60,13 +58,13 @@ export const authMiddleware = createMiddleware<AuthMiddlewareBindings>(async (c,
 
   return next()
 })
+
 export type RequireAuthMiddlewareBindings = Bindings & {
   Variables: {
-    user: User
-    session: Session
+    user: InternalUserDTO
+    session: InternalSessionDTO
   }
 }
-
 export const requireAuthMiddleware = createMiddleware<RequireAuthMiddlewareBindings>(
   async (c, next) => {
     if (!c?.var?.session) {
@@ -76,3 +74,11 @@ export const requireAuthMiddleware = createMiddleware<RequireAuthMiddlewareBindi
     return next()
   }
 )
+
+export type PaidMiddlewareBindings = RequireAuthMiddlewareBindings
+export const paidMiddleware = createMiddleware<PaidMiddlewareBindings>(async (_c, _next) => {
+  throw ApiError.InternalServerError("Not yet implemented.")
+  // if (!c.var.user.metadata?.paid) {
+  //   throw ApiError.Unauthorized("Unauthorized. Please buy a subscription.")
+  // }
+})

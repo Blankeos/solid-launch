@@ -96,6 +96,7 @@ export const authController = new Hono<{
     })
   })
 
+  // Revoke Session
   .post(
     "/revoke",
     authMiddleware,

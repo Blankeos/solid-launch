@@ -1,16 +1,15 @@
+import { honoClient } from "@/lib/hono-client"
 import {
-  type Accessor,
-  createContext,
-  createSignal,
-  type FlowComponent,
-  onMount,
-  useContext,
+    type Accessor,
+    createSignal,
+    type FlowComponent,
+    onMount
 } from "solid-js"
 import { toast } from "solid-sonner"
 import { useData } from "vike-solid/useData"
-import { honoClient } from "@/lib/hono-client"
 
 import type { UserResponseDTO } from "@/server/modules/auth/auth.dto"
+import { createStrictContext } from "@/utils/create-strict-context"
 
 // ===========================================================================
 // Mini-TanStack-like mutation helper - so auth.context.tsx is dependencyless
@@ -47,7 +46,7 @@ function createMutation<TArgs = unknown, TData = unknown, TError = unknown>(
 }
 
 // ===========================================================================
-// Context
+// Context & Hook
 // ===========================================================================
 export type AuthContextValue = {
   user: Accessor<UserResponseDTO | null>
@@ -66,25 +65,10 @@ export type AuthContextValue = {
   revokeSession: MutationState<{ revokeId: string }, { success: boolean }>
 }
 
-const AuthContext = createContext({
-  user: () => null,
-  loading: () => false,
-  emailLogin: { loading: () => false, error: () => null, run: async () => null },
-  logout: { loading: () => false, error: () => null, run: async () => ({ success: false }) },
-  emailRegister: { loading: () => false, error: () => null, run: async () => null },
-  magicLinkSend: { loading: () => false, error: () => null, run: async () => ({ success: false }) },
-  magicLinkVerify: { loading: () => false, error: () => null, run: async () => null },
-  otpSend: { loading: () => false, error: () => null, run: async () => ({ success: false }) },
-  otpVerify: { loading: () => false, error: () => null, run: async () => null },
-  googleLogin: { loading: () => false, error: () => null, run: async () => ({ success: false }) },
-  githubLogin: { loading: () => false, error: () => null, run: async () => ({ success: false }) },
-  revokeSession: { loading: () => false, error: () => null, run: async () => ({ success: false }) },
-} as AuthContextValue)
+const [useAuthContext, Provider] = createStrictContext("AuthContext")
 
-// ===========================================================================
-// Hook
-// ===========================================================================
-export const useAuthContext = () => useContext(AuthContext)
+export { useAuthContext }
+
 
 // ===========================================================================
 // Provider
@@ -309,7 +293,7 @@ export const AuthContextProvider: FlowComponent = (props) => {
   })
 
   return (
-    <AuthContext.Provider
+    <Provider
       value={{
         user,
         loading,
@@ -327,6 +311,6 @@ export const AuthContextProvider: FlowComponent = (props) => {
       }}
     >
       {props.children}
-    </AuthContext.Provider>
+    </Provider>
   )
 }
