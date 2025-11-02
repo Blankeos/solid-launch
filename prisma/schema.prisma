@@ -13,10 +13,6 @@ generator kysely {
   fileName     = "types.ts"
   // Optionally generate runtime enums to a separate file
   enumFileName = "enums.ts"
-
-  //  prismaSchemaFolder: https://www.prisma.io/blog/organize-your-prisma-schema-with-multi-file-support
-  //  driverAdapters: https://www.prisma.io/blog/prisma-turso-ea-support-rXGd_Tmy3UXX
-  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {

@@ -45,7 +45,8 @@ model OneTimeToken {
   token      String
   expires_at DateTime
   user_id    String
-  purpose    String // e.g. 'password_reset', 'magic_link', 'otp', etc. (managed in application layer)
+  purpose    String /// e.g. 'password_reset', 'magic_link', 'otp', etc. (managed in application layer)
+  metadata   Json? /// Might be needed for consumption i.e. a phone number
 
   user User @relation(references: [id], fields: [user_id], onDelete: Cascade)
 

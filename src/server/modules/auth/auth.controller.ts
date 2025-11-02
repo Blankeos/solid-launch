@@ -164,9 +164,9 @@ export const authController = new Hono<{
   // Google Login Callback [redirect]
   .get("/login/google/callback", describeRoute({}), async (c) => {
     const allCookies = getCookie(c)
-    const storedState = allCookies["google_oauth_state"]
-    const storedCodeVerifier = allCookies["google_oauth_codeverifier"]
-    const storedRedirectUrl = allCookies["google_oauth_redirect_url"]
+    const storedState = allCookies.google_oauth_state
+    const storedCodeVerifier = allCookies.google_oauth_codeverifier
+    const storedRedirectUrl = allCookies.google_oauth_redirect_url
 
     const code = c.req.query("code")
     const state = c.req.query("state")
@@ -206,8 +206,8 @@ export const authController = new Hono<{
     const state = c.req.query("state")
 
     const cookies = getCookie(c)
-    const storedState = cookies["github_oauth_state"]
-    const storedRedirectUrl = cookies["github_oauth_redirect_url"]
+    const storedState = cookies.github_oauth_state
+    const storedRedirectUrl = cookies.github_oauth_redirect_url
 
     const { redirectUrl, session } = await authService.githubCallback({
       state,
@@ -377,11 +377,11 @@ export const authController = new Hono<{
       "query",
       z.object({
         token: z.string(),
-        redirect: z.string().optional(),
+        redirect_url: z.string().optional(),
       })
     ),
     async (c) => {
-      const { token, redirect } = c.req.valid("query")
+      const { token, redirect_url: redirect } = c.req.valid("query")
 
       try {
         await authService.emailVerificationVerify({ token })

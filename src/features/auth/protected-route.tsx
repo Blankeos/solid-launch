@@ -16,10 +16,11 @@ import type { UserResponseDTO } from "@/server/modules/auth/auth.dto"
 type ProtectedRouteProps = {
   /** Redirect when authenticated. */
   redirect?: string
-  /** Fallback when not authed. @defaultValue /sign-in */
+  /** Fallback when not authed. NOTE: must always be public. @defaultValue /sign-in */
   fallback?: string
   /**
-   * Attaches a `?to=<current_path>` which can be used in sign-in or sign-up to redirect you back to a protected-route.
+   * Attaches a `?to=<current_path>` if unauthenticated.
+   * Which can be used in /sign-in or /sign-up pages to redirect you back to a protected-route.
    * Solves a sensible UX problem of user intention after sign-in.
    *
    * @defaultValue true

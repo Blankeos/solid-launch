@@ -1,4 +1,7 @@
+import type { Selectable } from "kysely"
 import z from "zod"
+import type { Session, User } from "@/server/db/types"
+import { assertDTO } from "@/server/utils/assert-dto"
 
 // ===========================================================================
 // SERVER ONLY
@@ -15,11 +18,7 @@ export const userMetaDTO = z
   .nullable()
 export type UserMetaDTO = z.infer<typeof userMetaDTO>
 
-import type { Selectable } from "kysely"
 // Server-only: User passed around in server context
-import type { Session, User } from "@/server/db/types"
-import { assertDTO } from "@/server/utils/assert-dto"
-
 export type InternalUserDTO = Selectable<User>
 export type InternalSessionDTO = Selectable<Session>
 

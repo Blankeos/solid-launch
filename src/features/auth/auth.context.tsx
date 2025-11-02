@@ -45,6 +45,7 @@ function createMutation<TArgs = unknown, TData = unknown, TError = unknown>(
 
   return { loading, error, run }
 }
+
 // ===========================================================================
 // Context
 // ===========================================================================
@@ -93,7 +94,7 @@ export const AuthContextProvider: FlowComponent = (props) => {
   const data = useData<{ user: UserResponseDTO }>()
 
   const [user, setUser] = createSignal<ReturnType<AuthContextValue["user"]>>(data?.user ?? null)
-  const [loading, setLoading] = createSignal<boolean>(data?.user ? false : true)
+  const [loading, setLoading] = createSignal<boolean>(!data?.user)
 
   const logout = createMutation<undefined, { success: boolean }>(async () => {
     const response = await honoClient.auth.logout.$get()
