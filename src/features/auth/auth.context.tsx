@@ -65,7 +65,7 @@ export type AuthContextValue = {
   revokeSession: MutationState<{ revokeId: string }, { success: boolean }>
 }
 
-const [useAuthContext, Provider] = createStrictContext("AuthContext")
+const [useAuthContext, Provider] = createStrictContext<AuthContextValue>("AuthContext")
 
 export { useAuthContext }
 

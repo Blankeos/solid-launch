@@ -68,13 +68,13 @@ npx degit https://github.com/blankeos/solid-launch <your-app-name>
 cd <your-app-name>
 ```
 
-1. Copy the environment variables
+2. Copy the environment variables
 
    ```sh
    cp .env.example .env
    ```
 
-1. Replace the `<absolute_url>` in the local database with:
+3. Replace the `<absolute_url>` in the local database with:
 
    ```sh
    pwd # If it outputs: /User/Projects/solid-launch
@@ -83,14 +83,14 @@ cd <your-app-name>
    DATABASE_URL="file:/User/Projects/solid-launch/local.db"
    ```
 
-1. Generate
+4. Generate
 
    ```sh
    bun db:generate # generates Kysely and Prisma client types.
    bun db:migrate # migrates your database.
    ```
 
-1. Install deps and run dev
+5. Install deps and run dev
 
    ```sh
    bun install
