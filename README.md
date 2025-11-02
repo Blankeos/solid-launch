@@ -38,7 +38,7 @@ You can also try my other starters:
     - [x] Flexible and ssr-compatible `useAuthContext()` and `auth.context.tsx`,
     - [x] `<ProtectedRoute>`
     - [x] `<AccountManagement>` - like Clerk's <UserProfile />
-    - [ ] UX edge-cases covered! (i.e. post-login-redirects vs Redirect-back-to-origin)
+    - [x] UX edge-cases covered! (i.e. post-login-redirects vs Redirect-back-to-origin)
 
 ### Tech Stack
 
@@ -105,24 +105,23 @@ I took care of the painstaking parts to help you develop easily on a SPA + SSR +
 2.  Backend Practices:
     - For GET endpoints that need to utilize c.redirect(), it's extremely recommended to catch all errors and just pass it as `?error=Message here` (i.e. for oAuth Callbacks, Magic Links, Email Verification, Payment Checkout Url Redirect)
 3.  Authentication Practices - I have these out-of-the-box for you so you won't have to build it.
-
     - Getting Current User
 
       ```ts
-      import { useAuthContext } from '@/context/auth.context'
+      import { useAuthContext } from "@/context/auth.context";
 
       export default function MyComponent() {
-        const { user } = useAuthContext()
+        const { user } = useAuthContext();
       }
       ```
 
     - Login, Logout, Register
 
       ```tsx
-      import { useAuthContext } from '@/context/auth.context'
+      import { useAuthContext } from "@/context/auth.context";
 
       export default function MyComponent() {
-        const { login, logout, register } = useAuthContext()
+        const { login, logout, register } = useAuthContext();
       }
       ```
 
@@ -132,25 +131,25 @@ I took care of the painstaking parts to help you develop easily on a SPA + SSR +
 
       ```tsx
       // +data.ts
-      import { initHonoClient } from '@/lib/hono-client'
-      import { PageContext } from 'vike/types'
+      import { initHonoClient } from "@/lib/hono-client";
+      import { PageContext } from "vike/types";
 
-      export type Data = ReturnType<Awaited<typeof data>>
+      export type Data = ReturnType<Awaited<typeof data>>;
 
       export async function data(pageContext: PageContext) {
-        const { urlParsed, request, response } = pageContext
+        const { urlParsed, request, response } = pageContext;
 
         const hc = initHonoClient(urlParsed.origin!, {
           requestHeaders: request.header(),
           responseHeaders: response.headers,
-        })
+        });
 
-        const apiResponse = await hc.auth.$get()
-        const result = await apiResponse.json()
+        const apiResponse = await hc.auth.$get();
+        const result = await apiResponse.json();
 
         return {
           user: result?.user ?? null,
-        }
+        };
       }
       ```
 
@@ -175,18 +174,18 @@ I took care of the painstaking parts to help you develop easily on a SPA + SSR +
       ```ts
       // +guard.ts (If you don't have +data.ts in the same route).
       export async function guard(pageContext: PageContext) {
-        const { urlParsed, request, response } = pageContext
+        const { urlParsed, request, response } = pageContext;
 
         const hc = initHonoClient(urlParsed.origin!, {
           requestHeaders: request.header(),
           responseHeaders: response.headers,
-        })
+        });
 
-        const apiResponse = await hc.auth.$get()
-        const result = await apiResponse.json()
+        const apiResponse = await hc.auth.$get();
+        const result = await apiResponse.json();
 
         if (!result?.user) {
-          throw redirect('/') // Must be a public route.
+          throw redirect("/"); // Must be a public route.
         }
       }
 
@@ -194,7 +193,7 @@ I took care of the painstaking parts to help you develop easily on a SPA + SSR +
       // ⚠️ I have not tested this. This depends on `+guard` being called after `+data` is resolved.
       export async function guard(pageContext: PageContext) {
         if (!pageContext.data?.user) {
-          throw redirect('/') // Must be a public route.
+          throw redirect("/"); // Must be a public route.
         }
       }
       ```
@@ -277,7 +276,6 @@ Here are some guides on how to deploy.
 ### FAQs
 
 - Why not better-auth?
-
   - I thought long and hard about this, and I'm foreseeing a lot of pushback on this so I'll document it here.
   - I completely understand the extreme strawman argument of "I want to build an app, so here's the entire OAuth spec to implement it". In almost 99% of usecases, you will choose better-auth to save time, it will be better tested, and will give you more flexibility for easier auth flows for 99% of apps. This Lucia implementation is for that extra flexibility for harder auth flows in 1% of apps--which your next SaaS and mine most likely won't be, so why??
   - I initially wrote the template when better-auth wasn't the standard solution, while Lucia was the up and coming one. Lucia actually made me learn about auth more than any resource in my career, so I started to prefer it. Better auth will save you time, but I already spent that time, and this is the flywheel I wrote to save just as much time as using better auth.
