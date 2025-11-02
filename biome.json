@@ -8,7 +8,7 @@
     "lineWidth": 100
   },
   "files": {
-    "includes": ["**", "!dist/**/*", "!**/*.js", "!**/*.cjs", "!**/*.mjs"]
+    "includes": ["**", "!dist/**/*", "!**/*.js", "!**/*.cjs", "!**/*.mjs", "!src/route-tree.gen.ts"]
   },
   "linter": {
     "enabled": true,

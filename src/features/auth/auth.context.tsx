@@ -1,12 +1,7 @@
-import { honoClient } from "@/lib/hono-client"
-import {
-    type Accessor,
-    createSignal,
-    type FlowComponent,
-    onMount
-} from "solid-js"
+import { type Accessor, createSignal, type FlowComponent, onMount } from "solid-js"
 import { toast } from "solid-sonner"
 import { useData } from "vike-solid/useData"
+import { honoClient } from "@/lib/hono-client"
 
 import type { UserResponseDTO } from "@/server/modules/auth/auth.dto"
 import { createStrictContext } from "@/utils/create-strict-context"
@@ -68,7 +63,6 @@ export type AuthContextValue = {
 const [useAuthContext, Provider] = createStrictContext<AuthContextValue>("AuthContext")
 
 export { useAuthContext }
-
 
 // ===========================================================================
 // Provider

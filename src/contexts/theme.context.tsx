@@ -1,12 +1,12 @@
-import { createStrictContext } from "@/utils/create-strict-context"
 import { useLocalStorage } from "bagon-hooks"
 import {
-    type Accessor,
-    createEffect,
-    createSignal,
-    type FlowComponent,
-    type Setter
+  type Accessor,
+  createEffect,
+  createSignal,
+  type FlowComponent,
+  type Setter,
 } from "solid-js"
+import { createStrictContext } from "@/utils/create-strict-context"
 
 // ===========================================================================
 // Context & Hook
@@ -23,7 +23,7 @@ export type ThemeContextValue = {
   toggleTheme: () => void
 }
 
-const [useThemeContext, Provider] = createStrictContext<ThemeContextValue>('ThemeContext')
+const [useThemeContext, Provider] = createStrictContext<ThemeContextValue>("ThemeContext")
 
 export { useThemeContext }
 

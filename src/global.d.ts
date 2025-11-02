@@ -1,4 +1,3 @@
 declare global {
-  declare module "solid-js" {
-  }
+  declare module "solid-js" {}
 }

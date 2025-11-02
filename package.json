@@ -83,7 +83,8 @@
     "typescript": "^5.9.3",
     "vite": "^7.1.12",
     "vite-plugin-solid": "^2.11.10",
-    "vite-plugin-solid-svg": "^0.8.1"
+    "vite-plugin-solid-svg": "^0.8.1",
+    "vite-tsconfig-paths": "^5.1.4"
   },
   "trustedDependencies": [
     "iconmate"

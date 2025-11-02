@@ -1,6 +1,6 @@
+import { useMetadata } from "vike-metadata-solid"
 import { Button } from "@/components/ui/button"
 import { useCounterContext } from "@/contexts/counter.context"
-import { useMetadata } from "vike-metadata-solid"
 
 export default function AboutPage() {
   const { count: globalCount, setCount: setGlobalCount } = useCounterContext()

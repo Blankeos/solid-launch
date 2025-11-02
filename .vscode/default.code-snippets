@@ -2,12 +2,8 @@
   "New SolidJS Page": {
     "prefix": "newsolidpage",
     "scope": "javascriptreact,typescriptreact",
-    "body": [
-      "export default function ${1:MyAwesome}Page() {",
-      "  return <></>;",
-      "}",
-    ],
-    "description": "Creates a new page in SolidJS.",
+    "body": ["export default function ${1:MyAwesome}Page() {", "  return <></>;", "}"],
+    "description": "Creates a new page in SolidJS."
   },
 
   "New SolidJS Component": {
@@ -23,9 +19,9 @@
       "",
       "  return <></>;",
       "}",
-      "",
+      ""
     ],
-    "description": "Creates a new SolidJS Component",
+    "description": "Creates a new SolidJS Component"
   },
 
   "New SolidJS Context File": {
@@ -60,9 +56,9 @@
       "    </${1:CounterContext}Provider>",
       "  );",
       "};",
-      "",
+      ""
     ],
-    "description": "New SolidJS Context File",
+    "description": "New SolidJS Context File"
   },
 
   "Comment Headers (TS)": {
@@ -71,9 +67,9 @@
     "body": [
       "// ===========================================================================",
       "// ${1:Comment Headers}",
-      "// ===========================================================================",
+      "// ==========================================================================="
     ],
-    "description": "Makes a comment header to subsection the content in your files.",
+    "description": "Makes a comment header to subsection the content in your files."
   },
 
   // Vike
@@ -92,8 +88,8 @@
       "  return {",
       "    todo: data as { userId: number; id: number; title: string; completed: boolean },",
       "  };",
-      "}",
+      "}"
     ],
-    "description": "Vike +data.ts",
-  },
+    "description": "Vike +data.ts"
+  }
 }
