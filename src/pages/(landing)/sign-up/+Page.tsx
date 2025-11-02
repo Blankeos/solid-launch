@@ -1,14 +1,14 @@
-import { toast } from "solid-sonner"
-import { navigate } from "vike/client/router"
-import { useMetadata } from "vike-metadata-solid"
-import { z } from "zod"
 import { IconGitHub, IconGoogle } from "@/assets/icons"
 import { TextField, useAppForm } from "@/components/form"
 import { Button } from "@/components/ui/button"
+import { useCounterContext } from "@/contexts/counter.context"
 import { useAuthContext } from "@/features/auth/auth.context"
 import { usePostLoginRedirectUrl } from "@/features/auth/use-post-login-redirect-url"
-import { useCounterContext } from "@/stores/counter.context"
 import getTitle from "@/utils/get-title"
+import { toast } from "solid-sonner"
+import { useMetadata } from "vike-metadata-solid"
+import { navigate } from "vike/client/router"
+import { z } from "zod"
 
 export default function SignUpPage() {
   useMetadata({

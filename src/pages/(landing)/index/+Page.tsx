@@ -1,10 +1,10 @@
+import { IconSolid } from "@/assets/icons"
+import { Button } from "@/components/ui/button"
+import { useCounterContext } from "@/contexts/counter.context"
+import { getRoute } from "@/route-tree.gen"
 import { createSignal } from "solid-js"
 import { toast } from "solid-sonner"
 import { useMetadata } from "vike-metadata-solid"
-import { IconSolid } from "@/assets/icons"
-import { Button } from "@/components/ui/button"
-import { getRoute } from "@/route-tree.gen"
-import { useCounterContext } from "@/stores/counter.context"
 
 export default function HomePage() {
   const [count, setCount] = createSignal(0)
