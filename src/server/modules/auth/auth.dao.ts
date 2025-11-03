@@ -241,6 +241,31 @@ export class AuthDAO {
     }
   }
 
+  async updateUserProfile(params: { userId: string; metadata?: Partial<UserMetaDTO> }) {
+    const updates: Partial<{ metadata: string }> = {}
+
+    if (params.metadata !== undefined) {
+      // To update a JSON field we need the old row, merge, and overwrite
+      const current = await db
+        .selectFrom("user")
+        .select("metadata")
+        .where("user.id", "=", params.userId)
+        .executeTakeFirst()
+
+      const existingMeta = current?.metadata
+        ? assertDTO(JSON.parse(current.metadata as string), userMetaDTO)
+        : ({} as UserMetaDTO)
+
+      const mergedMeta: UserMetaDTO = { ...existingMeta, ...params.metadata }
+
+      updates.metadata = JSON.stringify(mergedMeta)
+    }
+
+    await db.updateTable("user").set(updates).where("user.id", "=", params.userId).execute()
+
+    return { success: true }
+  }
+
   // --- Auth Strategies ---
   // - Email and Password
   async createUserFromEmailAndPassword(params: {
