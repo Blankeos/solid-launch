@@ -6,7 +6,7 @@ import { splitProps } from "solid-js"
 import { cn } from "@/utils/cn"
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-md border px-2.5 py-0.5 font-semibold text-xs transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  "inline-flex items-center rounded-md border font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
   {
     variants: {
       variant: {
@@ -18,9 +18,14 @@ const badgeVariants = cva(
         error: "border-error bg-error/20 text-error",
         info: "border-info bg-info/20 text-info",
       },
+      size: {
+        default: "px-2.5 py-0.5 text-xs",
+        sm: "px-1.5 py-0.5 text-[9px]",
+      },
     },
     defaultVariants: {
       variant: "default",
+      size: "default",
     },
   }
 )
@@ -31,11 +36,11 @@ type BadgeProps = ComponentProps<"div"> &
   }
 
 const Badge: Component<BadgeProps> = (props) => {
-  const [local, others] = splitProps(props, ["class", "variant", "round"])
+  const [local, others] = splitProps(props, ["class", "variant", "round", "size"])
   return (
     <div
       class={cn(
-        badgeVariants({ variant: local.variant }),
+        badgeVariants({ variant: local.variant, size: local.size }),
         local.round && "rounded-full",
         local.class
       )}

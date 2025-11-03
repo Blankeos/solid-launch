@@ -1,7 +1,9 @@
 import { useMutation, useQuery } from "@tanstack/solid-query"
+import { useDisclosure } from "bagon-hooks"
 import { Index, Show, type VoidProps } from "solid-js"
 import { toast } from "solid-sonner"
 import { IconGitHub, IconGoogle } from "@/assets/icons"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -9,9 +11,12 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { honoClient } from "@/lib/hono-client"
 import { cn } from "@/utils/cn"
 import { useAuthContext } from "./auth.context"
+import { AvatarEditorDialog } from "./avatar-editor"
 
 export function AccountManagement(props: VoidProps<{ class?: string }>) {
   const { user, revokeSession } = useAuthContext()
+
+  const [avatarEditOpen, avatarEditActions] = useDisclosure()
 
   const profileQuery = useQuery(() => ({
     queryKey: ["auth.profile"],
@@ -85,17 +90,18 @@ export function AccountManagement(props: VoidProps<{ class?: string }>) {
           </div>
           <div class="flex items-center justify-between">
             <span class="text-muted-foreground text-sm">Avatar</span>
-            <span class="font-medium text-sm">
+            <button class="font-medium text-sm" onClick={avatarEditActions.open} type="button">
               {user()?.metadata?.avatar_url ? (
-                <img
-                  src={user()!.metadata!.avatar_url}
-                  alt="Avatar"
-                  class="h-8 w-8 rounded-full object-cover"
-                />
+                <Avatar>
+                  <AvatarImage src={user()!.metadata!.avatar_url} alt="Avatar" />
+                  <AvatarFallback class="text-xs">
+                    {user()?.email?.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
               ) : (
                 "—"
               )}
-            </span>
+            </button>
           </div>
         </CardContent>
         <div class="flex justify-end p-4 pt-0">
@@ -180,6 +186,12 @@ export function AccountManagement(props: VoidProps<{ class?: string }>) {
           </CardContent>
         </Card>
       </Show>
+
+      <AvatarEditorDialog
+        open={avatarEditOpen()}
+        onOpenChange={avatarEditActions.set}
+        onSave={() => {}}
+      />
     </div>
   )
 }
