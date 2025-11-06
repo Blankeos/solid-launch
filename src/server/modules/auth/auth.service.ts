@@ -204,6 +204,10 @@ export class AuthService {
         email: githubUser.email!,
         provider: "github",
         providerUserId: githubUser.id.toString(),
+        metadata: {
+          name: githubUser.login,
+          avatar_url: githubUser.avatar_url,
+        },
       })
 
       const session = await this.authDAO.createSession(userId)
@@ -301,6 +305,10 @@ export class AuthService {
         email: googleUser.email,
         provider: "google",
         providerUserId: googleUser.sub,
+        metadata: {
+          name: googleUser.name,
+          avatar_url: googleUser.picture,
+        },
       })
 
       const session = await this.authDAO.createSession(userId)
@@ -344,7 +352,7 @@ export class AuthService {
     // IMPLEMENT SEND EMAIL
     try {
       const html = renderOtpEmail({ email: user.email, otp: token })
-      await sendEmail({ html, subject: "Your Solid Launch OTP", to: user.email })
+      // await sendEmail({ html, subject: "Your Solid Launch OTP", to: user.email })
     } catch (_err) {
       console.error("[emailOtpSend] error", _err)
     }
