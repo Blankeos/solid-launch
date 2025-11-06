@@ -1,6 +1,11 @@
 import { db } from "@/server/db/kysely"
 
-import { generateId, getSimpleDeviceName } from "@/server/modules/auth/auth.utilities"
+import {
+  generateId,
+  generateUniqueCode,
+  generateUniqueToken,
+  getSimpleDeviceName,
+} from "@/server/modules/auth/auth.utilities"
 import { assertDTO } from "@/server/utils/assert-dto"
 import { AUTH_CONFIG } from "./auth.config"
 import {
@@ -290,7 +295,7 @@ export class AuthDAO {
   }
 
   // - OAuth
-  async createUserFromOAuth(params: {
+  private async createUserFromOAuth(params: {
     provider: string
     providerUserId: string
     email: string
@@ -326,7 +331,11 @@ export class AuthDAO {
     return user
   }
 
-  async linkOAuthAccount(params: { userId: string; providerId: string; providerUserId: string }) {
+  private async linkOAuthAccount(params: {
+    userId: string
+    providerId: string
+    providerUserId: string
+  }) {
     await db
       .insertInto("oauth_account")
       .values({
@@ -339,7 +348,7 @@ export class AuthDAO {
     return { success: true }
   }
 
-  async getOAuthAccount(provider: string, providerUserId: string) {
+  private async getOAuthAccount(provider: string, providerUserId: string) {
     const account = await db
       .selectFrom("oauth_account")
       .selectAll()
@@ -350,70 +359,141 @@ export class AuthDAO {
     return account
   }
 
+  async getOrCreateUserIdForOAuth(params: {
+    provider: string
+    providerUserId: string
+    email: string
+    metadata?: UserMetaDTO
+  }): Promise<string> {
+    const existingAccount = await this.getOAuthAccount(params.provider, params.providerUserId)
+
+    if (existingAccount) {
+      return existingAccount.user_id
+    }
+
+    const existingUserWithEmail = await this.getUserByEmail(params.email)
+
+    if (existingUserWithEmail) {
+      await this.linkOAuthAccount({
+        providerId: params.provider,
+        providerUserId: params.providerUserId,
+        userId: existingUserWithEmail.id,
+      })
+
+      return existingUserWithEmail.id
+    }
+
+    const newUser = await this.createUserFromOAuth({
+      provider: params.provider,
+      email: params.email,
+      providerUserId: params.providerUserId,
+      metadata: params.metadata,
+    })
+
+    return newUser.id
+  }
+
   // - Magic Links, OTPs, Cross-Domain (OAuth Login), Forgot Password
+  async getOrCreateUserFromEmail(email: string) {
+    const existingUser = await this.getUserByEmail(email)
+    if (existingUser) return existingUser
+
+    const userId = generateId()
+    const user = await db
+      .insertInto("user")
+      .values({
+        id: userId,
+        email,
+        email_verified: 0,
+        password_hash: generateId(), // random placeholder
+      })
+      .returningAll()
+      .executeTakeFirst()
+
+    return user
+  }
+
+  async getOneTimeToken(token: string) {
+    const tokenRow = await db
+      .selectFrom("onetime_token")
+      .selectAll()
+      .where("onetime_token.token", "=", token)
+      .executeTakeFirst()
+
+    return tokenRow
+  }
+
   async createOneTimeToken(params: {
     userId: string
     purpose: string
     /** @defaultValue 300 (5 minutes) */
     expiresInSeconds?: number
-    /** @defaultValue 'highentropy' ensures `token` uniqueness in the db. shortcode is a 6 digit token (number) so uniqueness is just based on `token+userId`. */
-    tokenType?: "highentropy" | "shortcode"
+    /** @defaultValue 'highentropy' uses secure token, 'shortcode' generates 6-digit code */
+    tokenType?: "token" | "shortcode"
+    metadata?: Record<string, any>
   }) {
-    const tokenType = params.tokenType ?? "highentropy"
     const expiresAt = new Date(Date.now() + (params.expiresInSeconds ?? 300) * 1000)
 
-    return await db.transaction().execute(async (trx) => {
-      let token: string = ""
-      if (tokenType === "shortcode") {
-        // Simple shortcode; uniqueness not enforced
-        token = Math.floor(100000 + Math.random() * 900000).toString()
-      } else {
-        // High-entropy token; ensure uniqueness inside the transaction
-        let isUnique = false
-        while (!isUnique) {
-          const candidate = Array.from(crypto.getRandomValues(new Uint8Array(32)))
-            .map((b) => b.toString(36).padStart(2, "0"))
-            .join("")
+    const token = generateUniqueToken()
 
-          const exists = await trx
-            .selectFrom("onetime_token")
-            .select("token")
-            .where("onetime_token.token", "=", candidate)
-            .executeTakeFirst()
+    let code: string | undefined
+    if (params.tokenType === "shortcode") {
+      code = generateUniqueCode()
+    }
 
-          if (!exists) {
-            token = candidate
-            isUnique = true
-          }
-        }
-      }
+    const result = await db
+      .insertInto("onetime_token")
+      .values({
+        token,
+        code,
+        expires_at: expiresAt.toISOString(),
+        user_id: params.userId,
+        purpose: params.purpose,
+        metadata: params.metadata ? JSON.stringify(params.metadata) : undefined,
+      })
+      .returning(["token", "code"])
+      .executeTakeFirst()
 
-      await trx
-        .insertInto("onetime_token")
-        .values({
-          token,
-          expires_at: expiresAt.toISOString(),
-          user_id: params.userId,
-          purpose: params.purpose,
-        })
-        .execute()
+    if (!result) {
+      throw new Error("Failed to create one-time token")
+    }
 
-      return token
-    })
+    return result.code ?? result.token
   }
 
-  async consumeOneTimeToken(params: { token: string; userId?: string; purpose?: string }) {
-    // Using a transaction because it works for sqlite, mariadb, and postgres. (Returning a deleted only works in postgres atm)
+  async consumeOneTimeToken(params: {
+    token?: string
+    code?: string
+    userId?: string
+    purpose?: string
+  }) {
+    if (!params.token && !params.code) {
+      return { consumed: false, userId: undefined }
+    }
+
     return await db.transaction().execute(async (trx) => {
-      // First, select the token to get user_id
-      const tokenRow = await trx
+      // Build query based on token or code
+      let query = trx
         .selectFrom("onetime_token")
         .selectAll()
-        .where("onetime_token.token", "=", params.token)
         .where("onetime_token.expires_at", ">", new Date().toISOString())
-        .$if(!!params.userId, (qb) => qb.where("onetime_token.user_id", "=", params.userId!))
-        .$if(!!params.purpose, (qb) => qb.where("onetime_token.purpose", "=", params.purpose!))
-        .executeTakeFirst()
+
+      if (params.token) {
+        query = query.where("onetime_token.token", "=", params.token)
+      } else if (params.code && params.userId) {
+        query = query
+          .where("onetime_token.code", "=", params.code)
+          .where("onetime_token.user_id", "=", params.userId)
+      } else {
+        return { consumed: false, userId: undefined }
+      }
+
+      // If the token is not used for its purpose, make sure to not allow consumption.
+      if (params.purpose) {
+        query = query.where("onetime_token.purpose", "=", params.purpose)
+      }
+
+      const tokenRow = await query.executeTakeFirst()
 
       if (!tokenRow) {
         return { consumed: false, userId: undefined }
@@ -422,7 +502,7 @@ export class AuthDAO {
       // Delete the token
       await trx
         .deleteFrom("onetime_token")
-        .where("onetime_token.token", "=", params.token)
+        .where("onetime_token.token", "=", tokenRow.token)
         .execute()
 
       return { consumed: true, userId: tokenRow.user_id }

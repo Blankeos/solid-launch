@@ -42,7 +42,8 @@ model OAuthAccount {
 
 /// For magic links, OTPs, password‐reset tokens, and other one-time secrets that expire.
 model OneTimeToken {
-  token      String
+  token      String   @unique /// Always populated, globally unique
+  code       String? /// Optional shorter digit alias, scoped to user (so not globally unique)
   expires_at DateTime
   user_id    String
   purpose    String /// e.g. 'password_reset', 'magic_link', 'otp', etc. (managed in application layer)
@@ -50,6 +51,7 @@ model OneTimeToken {
 
   user User @relation(references: [id], fields: [user_id], onDelete: Cascade)
 
-  @@id([token, user_id])
+  @@id([token])
+  @@unique([code, user_id]) // when code exists, unique per user
   @@map("onetime_token")
 }

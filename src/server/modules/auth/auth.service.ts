@@ -10,6 +10,7 @@ import { renderOtpEmail } from "@/server/lib/emails/otp.email"
 import { ApiError } from "@/server/lib/error"
 import { AuthDAO } from "@/server/modules/auth/auth.dao"
 import type { InternalSessionDTO, InternalUserDTO } from "./auth.dto"
+import { normalizeUrlOrPath } from "./auth.utilities"
 
 type UserSessionResponse = Promise<{ user: InternalUserDTO; session: InternalSessionDTO }>
 
@@ -26,7 +27,7 @@ type OAuthCallbackResponse = Promise<{
 }>
 
 export class AuthService {
-  public authDAO: AuthDAO
+  private authDAO: AuthDAO
   constructor() {
     this.authDAO = new AuthDAO()
   }
@@ -128,9 +129,10 @@ export class AuthService {
   async githubLogin(params: { redirectUrl?: string } = {}) {
     const state = generateState()
     const url = github.createAuthorizationURL(state, ["user:email", "read:user"])
+    const normalizedRedirectUrl = normalizeUrlOrPath(params?.redirectUrl)
 
     const stateCookie = `github_oauth_state=${state}; HttpOnly; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}; Path=/; ${privateEnv.NODE_ENV === "production" ? "Secure;" : ""}`
-    const redirectUrlCookie = `github_oauth_redirect_url=${params.redirectUrl ?? publicEnv.PUBLIC_BASE_URL}; HttpOnly; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}; Path=/; ${privateEnv.NODE_ENV === "production" ? "Secure;" : ""}`
+    const redirectUrlCookie = `github_oauth_redirect_url=${normalizedRedirectUrl}; HttpOnly; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}; Path=/; ${privateEnv.NODE_ENV === "production" ? "Secure;" : ""}`
 
     return {
       stateCookie,
@@ -198,42 +200,11 @@ export class AuthService {
           githubEmails.find((email) => email.verified)?.email
       }
 
-      const getOrCreateUser = async () => {
-        const existingAccount = await this.authDAO.getOAuthAccount(
-          "github",
-          githubUser.id.toString()
-        )
-
-        if (existingAccount) {
-          return existingAccount.user_id
-        }
-
-        const existingDatabaseUserWithEmail = await this.authDAO.getUserByEmail(githubUser.email!)
-
-        if (existingDatabaseUserWithEmail) {
-          await this.authDAO.linkOAuthAccount({
-            providerId: "github",
-            providerUserId: githubUser.id.toString(),
-            userId: existingDatabaseUserWithEmail.id,
-          })
-
-          return existingDatabaseUserWithEmail.id
-        } else {
-          const user = await this.authDAO.createUserFromOAuth({
-            provider: "github",
-            email: githubUser.email!,
-            providerUserId: githubUser.id.toString(),
-            metadata: {
-              name: githubUser.name,
-              avatar_url: githubUser.avatar_url,
-            },
-          })
-
-          return user.id
-        }
-      }
-
-      const userId = await getOrCreateUser()
+      const userId = await this.authDAO.getOrCreateUserIdForOAuth({
+        email: githubUser.email!,
+        provider: "github",
+        providerUserId: githubUser.id.toString(),
+      })
 
       const session = await this.authDAO.createSession(userId)
       if (!session) throw new Error("Could not create session.")
@@ -266,10 +237,11 @@ export class AuthService {
     const state = generateState()
     const codeVerifier = generateCodeVerifier()
     const url = google.createAuthorizationURL(state, codeVerifier, ["profile", "email"])
+    const normalizedRedirectUrl = normalizeUrlOrPath(params?.redirectUrl)
 
     const stateCookie = `google_oauth_state=${state}; HttpOnly; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}; Path=/; ${privateEnv.NODE_ENV === "production" ? "Secure;" : ""}`
     const codeVerifierCookie = `google_oauth_codeverifier=${codeVerifier}; HttpOnly; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}; Path=/; ${privateEnv.NODE_ENV === "production" ? "Secure;" : ""}`
-    const redirectUrlCookie = `google_oauth_redirect_url=${params.redirectUrl ?? `${publicEnv.PUBLIC_BASE_URL}`}; HttpOnly; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}; Path=/; ${privateEnv.NODE_ENV === "production" ? "Secure;" : ""}`
+    const redirectUrlCookie = `google_oauth_redirect_url=${normalizedRedirectUrl}; HttpOnly; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}; Path=/; ${privateEnv.NODE_ENV === "production" ? "Secure;" : ""}`
 
     url.searchParams.append("prompt", "select_account")
 
@@ -325,39 +297,11 @@ export class AuthService {
         picture: string
       } = await googleUserResponse.json()
 
-      const getOrCreateUser = async () => {
-        const existingAccount = await this.authDAO.getOAuthAccount("google", googleUser.sub)
-
-        if (existingAccount) {
-          return existingAccount.user_id
-        }
-
-        const existingDatabaseUserWithEmail = await this.authDAO.getUserByEmail(googleUser.email)
-
-        if (existingDatabaseUserWithEmail) {
-          await this.authDAO.linkOAuthAccount({
-            providerId: "google",
-            providerUserId: googleUser.sub,
-            userId: existingDatabaseUserWithEmail.id,
-          })
-
-          return existingDatabaseUserWithEmail.id
-        } else {
-          const user = await this.authDAO.createUserFromOAuth({
-            provider: "google",
-            email: googleUser.email,
-            providerUserId: googleUser.sub,
-            metadata: {
-              avatar_url: googleUser.picture,
-              name: googleUser.name,
-            },
-          })
-
-          return user.id
-        }
-      }
-
-      const userId = await getOrCreateUser()
+      const userId = await this.authDAO.getOrCreateUserIdForOAuth({
+        email: googleUser.email,
+        provider: "google",
+        providerUserId: googleUser.sub,
+      })
 
       const session = await this.authDAO.createSession(userId)
       if (!session) throw new Error("Could not create session.")
@@ -386,7 +330,7 @@ export class AuthService {
     }
   }
 
-  async sendEmailOTP(params: { email: string }) {
+  async emailOTPLoginSend(params: { email: string }) {
     const user = await this.authDAO.getUserByEmail(params.email)
     if (!user) throw ApiError.NotFound("User with this email not found")
 
@@ -408,8 +352,8 @@ export class AuthService {
     return { userId: user.id }
   }
 
-  async sendMagicLink(params: { email: string }) {
-    const user = await this.authDAO.getUserByEmail(params.email)
+  async magicLinkLoginSend(params: { email: string }) {
+    const user = await this.authDAO.getOrCreateUserFromEmail(params.email)
     if (!user) throw ApiError.NotFound("User with this email not found")
 
     const token = await this.authDAO.createOneTimeToken({
@@ -418,10 +362,9 @@ export class AuthService {
     })
     console.debug("🪙 [magiclinkOtpSend] Token", token)
 
-    // IMPLEMENT SEND EMAIL
     try {
-      const _html = renderMagicLinkEmail({ token: token })
-      // await sendEmail({ html, subject: 'Your Solid Launch Magic Link', to: user.email })
+      const html = renderMagicLinkEmail({ token: token })
+      await sendEmail({ html, subject: "Your Solid Launch Magic Link", to: user.email })
     } catch (_err) {
       console.error("[magiclinkOtpSend] error", _err)
     }
@@ -429,65 +372,71 @@ export class AuthService {
     return { userId: user.id }
   }
 
-  async sendSmsOTP(params: { email: string }) {
-    const user = await this.authDAO.getUserByEmail(params.email)
-    if (!user) throw ApiError.NotFound("User with this email not found")
-
-    const token = await this.authDAO.createOneTimeToken({
-      userId: user.id,
-      purpose: "otp",
-    })
-    console.debug("🪙 [smsOtpSend] Token", token)
-
-    // IMPLEMENT SMS
-    try {
-      console.log(`[smsOtpSend] SMS placeholder for token ${token}`)
-      // await sendSms({ phone: user.phone, message: `Your OTP is: ${token}` })
-    } catch (_err) {
-      console.error("[smsOtpSend] error", _err)
-    }
-
-    return { userId: user.id }
+  /** @notimplemented */
+  async smsOTPLoginSend(_params: { phone: string; email?: string }) {
+    //   const normalizedPhone = normalizePhoneNumber(params.phone)
+    //   const existingUserFromPhone = await this.authDAO.getUserByPhoneNumber(params.phone)
+    //   if (!existingUserFromPhone && !params.email) {
+    //     throw ApiError.BadRequest("New users must have an email to register.")
+    //   }
+    //
+    //   const user = await this.authDAO.getOrCreateUserByEmail(existingUserFromPhone?.email ?? params.email)
+    //   if (!user) throw ApiError.NotFound("User not found.")
+    //
+    //   const token = await this.authDAO.createOneTimeToken({
+    //     userId: user.id,
+    //     purpose: "otp",
+    //   })
+    //   console.debug("🪙 [smsOtpSend] Token", token)
+    //   // IMPLEMENT SMS
+    //   try {
+    //     await sendSms({ phone: user.phone, message: `Your OTP is: ${token}` })
+    //   } catch (_err) {
+    //     console.error("[smsOtpSend] error", _err)
+    //   }
+    //   return { userId: user.id }
   }
 
-  /** Applies for userId + code combinations (i.e. short codes) */
-  async verifyLoginShortcode(params: { userId: string; code: string }): UserSessionResponse {
-    const { consumed } = await this.authDAO.consumeOneTimeToken({
-      token: params.code,
-      userId: params.userId,
+  async validateTokenIsNotExpired(token: string) {
+    const _token = await this.authDAO.getOneTimeToken(token)
+    if (!_token?.expires_at) {
+      throw ApiError.BadRequest("Token expired or invalid")
+    }
+    return true
+  }
+
+  async verifyOTPOrTokenLogin(params: {
+    userId?: string
+    token?: string
+    code?: string
+  }): UserSessionResponse {
+    const { userId, token, code } = params
+
+    if (!token && !code) {
+      throw ApiError.BadRequest("Either token or code must be provided")
+    }
+    if (code && !userId) {
+      throw ApiError.BadRequest("Both code and userId must be provided")
+    }
+
+    const { consumed, userId: resolvedUserId } = await this.authDAO.consumeOneTimeToken({
+      token,
+      code,
+      userId,
       purpose: "otp",
     })
 
     if (!consumed) {
-      throw ApiError.BadRequest("Code for login is either invalid or expired")
+      throw ApiError.BadRequest("Token or code for login is either invalid or expired")
     }
 
-    const user = await this.authDAO.getUserByUserId(params.userId)
-    const session = await this.authDAO.createSession(params.userId)
-
-    if (!user || !session) {
-      throw ApiError.InternalServerError("Login failed: user or session missing")
+    const finalUserId = userId ?? resolvedUserId
+    if (!finalUserId) {
+      throw ApiError.InternalServerError("Login failed: unable to determine user")
     }
 
-    return {
-      user,
-      session,
-    }
-  }
-
-  /** Applies for high entropy purposes where user id is hidden (i.e. magic_link, cross_domain) */
-  async verifyLoginHighEntropy(params: { token: string }): UserSessionResponse {
-    const { consumed, userId } = await this.authDAO.consumeOneTimeToken({
-      token: params.token,
-      purpose: "otp",
-    })
-
-    if (!consumed || !userId) {
-      throw ApiError.BadRequest("Token for login is either invalid or expired")
-    }
-
-    const user = await this.authDAO.getUserByUserId(userId)
-    const session = await this.authDAO.createSession(userId)
+    const user = await this.authDAO.getUserByUserId(finalUserId)
+    const session = await this.authDAO.createSession(finalUserId)
 
     if (!user || !session) {
       throw ApiError.InternalServerError("Login failed: user or session missing")
@@ -511,7 +460,7 @@ export class AuthService {
 
     // IMPLEMENT SEND EMAIL
     try {
-      const html = renderForgotPasswordEmail({ email: user.email, otp: token })
+      const html = renderForgotPasswordEmail({ token: token })
       await sendEmail({ html, subject: "Your Solid Launch OTP", to: user.email })
     } catch (_err) {
       console.error("[emailOtpSend] error", _err)
@@ -526,10 +475,6 @@ export class AuthService {
 
     if (!consumed || !userId) {
       throw ApiError.BadRequest("Token for password reset is either invalid or expired")
-    }
-
-    if (!params.newPassword || params.newPassword.length < 6 || params.newPassword.length > 255) {
-      throw ApiError.BadRequest("Invalid new password")
     }
 
     const passwordHash = await hash(params.newPassword, {
@@ -565,7 +510,6 @@ export class AuthService {
     })
     console.debug("📧 [emailVerificationSend] Token", token)
 
-    // IMPLEMENT SEND EMAIL
     try {
       const html = renderMagicLinkEmail({ token: token })
       await sendEmail({ html, subject: "Verify your email address", to: user.email })

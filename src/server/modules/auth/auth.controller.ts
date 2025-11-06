@@ -17,6 +17,7 @@ import {
   rateLimit,
 } from "@/server/lib/rate-limit"
 import { AuthDAO } from "@/server/modules/auth/auth.dao"
+import { AUTH_CONFIG } from "./auth.config"
 import { getUserResponseDTO } from "./auth.dto"
 
 const authDAO = new AuthDAO()
@@ -149,18 +150,22 @@ export const authController = new Hono<{
   )
 
   // Google Login [redirect]
-  .get("/login/google", describeRoute({}), async (c) => {
-    const { redirectUrl } = c.req.query()
+  .get(
+    "/login/google",
+    zValidator("query", z.object({ redirect_url: z.string().optional() })),
+    async (c) => {
+      const { redirect_url } = c.req.valid("query")
 
-    const { stateCookie, codeVerifierCookie, redirectUrlCookie, authorizationUrl } =
-      await authService.googleLogin({ redirectUrl })
+      const { stateCookie, codeVerifierCookie, redirectUrlCookie, authorizationUrl } =
+        await authService.googleLogin({ redirectUrl: redirect_url })
 
-    c.header("Set-Cookie", stateCookie, { append: true })
-    c.header("Set-Cookie", codeVerifierCookie, { append: true })
-    c.header("Set-Cookie", redirectUrlCookie, { append: true })
+      c.header("Set-Cookie", stateCookie, { append: true })
+      c.header("Set-Cookie", codeVerifierCookie, { append: true })
+      c.header("Set-Cookie", redirectUrlCookie, { append: true })
 
-    return c.redirect(authorizationUrl)
-  })
+      return c.redirect(authorizationUrl)
+    }
+  )
 
   // Google Login Callback [redirect]
   .get("/login/google/callback", describeRoute({}), async (c) => {
@@ -188,18 +193,24 @@ export const authController = new Hono<{
   })
 
   // GitHub Login [redirect]
-  .get("/login/github", describeRoute({}), async (c) => {
-    const { redirectUrl } = c.req.query()
+  .get(
+    "/login/github",
+    zValidator("query", z.object({ redirect_url: z.string().optional() })),
+    describeRoute({}),
 
-    const { stateCookie, redirectUrlCookie, authorizationUrl } = await authService.githubLogin({
-      redirectUrl,
-    })
+    async (c) => {
+      const { redirect_url } = c.req.valid("query")
 
-    c.header("Set-Cookie", stateCookie, { append: true })
-    c.header("Set-Cookie", redirectUrlCookie, { append: true })
+      const { stateCookie, redirectUrlCookie, authorizationUrl } = await authService.githubLogin({
+        redirectUrl: redirect_url,
+      })
 
-    return c.redirect(authorizationUrl)
-  })
+      c.header("Set-Cookie", stateCookie, { append: true })
+      c.header("Set-Cookie", redirectUrlCookie, { append: true })
+
+      return c.redirect(authorizationUrl)
+    }
+  )
 
   // GitHub Login Callback [redirect]
   .get("/login/github/callback", describeRoute({}), async (c) => {
@@ -237,7 +248,7 @@ export const authController = new Hono<{
     async (c) => {
       const { email } = c.req.valid("json")
 
-      const { userId } = await authService.sendEmailOTP({ email })
+      const { userId } = await authService.emailOTPLoginSend({ email })
 
       return c.json({ success: true, userId })
     }
@@ -257,7 +268,7 @@ export const authController = new Hono<{
     async (c) => {
       const { userId, code } = c.req.valid("json")
 
-      const { user, session } = await authService.verifyLoginShortcode({ userId, code })
+      const { user, session } = await authService.verifyOTPOrTokenLogin({ userId, code })
 
       setSessionTokenCookie(c, session.id, session.expires_at)
 
@@ -280,7 +291,7 @@ export const authController = new Hono<{
     async (c) => {
       const { email } = c.req.valid("json")
 
-      await authService.sendMagicLink({ email })
+      await authService.magicLinkLoginSend({ email })
 
       return c.json({ success: true })
     }
@@ -293,24 +304,24 @@ export const authController = new Hono<{
       "query",
       z.object({
         token: z.string(),
-        redirect: z.string().optional(),
+        fallback_url: z.string().optional(),
       })
     ),
     describeRoute({}),
     async (c) => {
-      const { token, redirect } = c.req.valid("query")
+      const { token, fallback_url } = c.req.valid("query")
 
       try {
-        const { user, session } = await authService.verifyLoginHighEntropy({ token })
+        const { user, session } = await authService.verifyOTPOrTokenLogin({ token })
 
         setSessionTokenCookie(c, session.id, session.expires_at)
       } catch (error: any) {
-        const redirectUrl = new URL(redirect || "/", publicEnv.PUBLIC_BASE_URL)
-        redirectUrl.searchParams.set("error", error.message || "Magic link verification failed")
-        return c.redirect(redirectUrl.toString())
+        const fallbackUrl = new URL(fallback_url || "/", publicEnv.PUBLIC_BASE_URL)
+        fallbackUrl.searchParams.set("error", error.message || "Magic link verification failed")
+        return c.redirect(fallbackUrl.toString())
       }
 
-      return c.redirect(redirect || "/")
+      return c.redirect(fallback_url || "/")
     }
   )
 
@@ -333,6 +344,31 @@ export const authController = new Hono<{
     }
   )
 
+  // Forgot Password Verify [redirect]
+  .get(
+    "/forgot-password/verify",
+    zValidator(
+      "query",
+      z.object({
+        token: z.string(),
+      })
+    ),
+    describeRoute({}),
+    async (c) => {
+      const { token } = c.req.valid("query")
+
+      try {
+        await authService.validateTokenIsNotExpired(token)
+      } catch (error: any) {
+        const fallbackUrl = new URL(publicEnv.PUBLIC_BASE_URL)
+        fallbackUrl.searchParams.set("error", error.message || "Password reset verification failed")
+        return c.redirect(fallbackUrl.toString())
+      }
+
+      const redirectUrl = AUTH_CONFIG.redirectUrls.forgotPasswordVerify2(token)
+      return c.redirect(redirectUrl)
+    }
+  )
   // Forgot Password Verify
   .post(
     "/forgot-password/verify",
@@ -378,20 +414,20 @@ export const authController = new Hono<{
       "query",
       z.object({
         token: z.string(),
-        redirect_url: z.string().optional(),
+        fallback_url: z.string().optional(),
       })
     ),
     async (c) => {
-      const { token, redirect_url: redirect } = c.req.valid("query")
+      const { token, fallback_url } = c.req.valid("query")
 
       try {
         await authService.emailVerificationVerify({ token })
       } catch (error: any) {
-        const redirectUrl = new URL(redirect || "/", publicEnv.PUBLIC_BASE_URL)
+        const redirectUrl = new URL(fallback_url || "/", publicEnv.PUBLIC_BASE_URL)
         redirectUrl.searchParams.set("error", error.message || "Email verification failed")
         return c.redirect(redirectUrl.toString())
       }
 
-      return c.redirect(redirect || "/")
+      return c.redirect(fallback_url || "/")
     }
   )

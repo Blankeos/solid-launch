@@ -17,6 +17,8 @@ const pageRoutes = [
   "/about",
   "/dashboard",
   "/dashboard/settings",
+  "/forgot-password",
+  "/forgot-password/verify",
   "/payment/completed",
   "/pricing",
   "/sign-in",

@@ -27,7 +27,7 @@ export function AccountManagement(props: VoidProps<{ class?: string }>) {
     enabled: !!user(),
   }))
 
-  const sendVerificationEmailMut = useMutation(() => ({
+  const sendVerificationEmailMutation = useMutation(() => ({
     mutationKey: ["auth.verify-email"],
     mutationFn: async () => {
       const resp = await honoClient.auth["verify-email"].$post({ json: { email: user()!.email } })
@@ -68,13 +68,15 @@ export function AccountManagement(props: VoidProps<{ class?: string }>) {
                 <Button
                   variant="ghost"
                   size="xs"
-                  onClick={() => sendVerificationEmailMut.mutate()}
-                  disabled={sendVerificationEmailMut.isPending || !!sendVerificationEmailMut.data}
+                  onClick={() => sendVerificationEmailMutation.mutate()}
+                  disabled={
+                    sendVerificationEmailMutation.isPending || !!sendVerificationEmailMutation.data
+                  }
                 >
                   📩{" "}
-                  {sendVerificationEmailMut.data
+                  {sendVerificationEmailMutation.data
                     ? "Check your email"
-                    : sendVerificationEmailMut.isPending
+                    : sendVerificationEmailMutation.isPending
                       ? "Sending..."
                       : "Send verification email"}
                 </Button>

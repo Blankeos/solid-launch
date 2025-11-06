@@ -32,12 +32,12 @@ CREATE TABLE "oauth_account" (
 
 -- CreateTable
 CREATE TABLE "onetime_token" (
-    "token" TEXT NOT NULL,
+    "token" TEXT NOT NULL PRIMARY KEY,
+    "code" TEXT,
     "expires_at" DATETIME NOT NULL,
     "user_id" TEXT NOT NULL,
     "purpose" TEXT NOT NULL,
-
-    PRIMARY KEY ("token", "user_id"),
+    "metadata" JSONB,
     CONSTRAINT "onetime_token_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -46,3 +46,9 @@ CREATE UNIQUE INDEX "user_email_key" ON "user"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "session_revoke_id_key" ON "session"("revoke_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "onetime_token_token_key" ON "onetime_token"("token");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "onetime_token_code_user_id_key" ON "onetime_token"("code", "user_id");

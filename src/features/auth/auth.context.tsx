@@ -5,6 +5,7 @@ import { honoClient } from "@/lib/hono-client"
 
 import type { UserResponseDTO } from "@/server/modules/auth/auth.dto"
 import { createStrictContext } from "@/utils/create-strict-context"
+import { usePostLoginRedirectUrl } from "./use-post-login-redirect-url"
 
 // ===========================================================================
 // Mini-TanStack-like mutation helper - so auth.context.tsx is dependencyless
@@ -51,10 +52,13 @@ export type AuthContextValue = {
   logout: MutationState<undefined, { success: boolean }>
   emailLogin: MutationState<{ email: string; password: string }, UserResponseDTO | null>
   emailRegister: MutationState<{ email: string; password: string }, UserResponseDTO | null>
+  forgotPasswordSend: MutationState<{ email: string }, { success: boolean }>
+  forgotPasswordVerify: MutationState<{ token: string; newPassword: string }, { success: boolean }>
+
   magicLinkSend: MutationState<{ email: string }, { success: boolean }>
-  magicLinkVerify: MutationState<{ token: string }, UserResponseDTO | null>
   otpSend: MutationState<{ email: string }, { success: boolean; userId?: string }>
   otpVerify: MutationState<{ userId: string; code: string }, UserResponseDTO | null>
+
   googleLogin: MutationState<{ newWindow?: boolean }, { success: boolean }>
   githubLogin: MutationState<{ newWindow?: boolean }, { success: boolean }>
   revokeSession: MutationState<{ revokeId: string }, { success: boolean }>
@@ -73,6 +77,8 @@ export const AuthContextProvider: FlowComponent = (props) => {
 
   const [user, setUser] = createSignal<ReturnType<AuthContextValue["user"]>>(data?.user ?? null)
   const [loading, setLoading] = createSignal<boolean>(!data?.user)
+
+  const postLoginRedirectUrl = usePostLoginRedirectUrl()
 
   const logout = createMutation<undefined, { success: boolean }>(async () => {
     const response = await honoClient.auth.logout.$get()
@@ -135,6 +141,27 @@ export const AuthContextProvider: FlowComponent = (props) => {
     }
   )
 
+  const forgotPasswordSend = createMutation<{ email: string }, { success: boolean }>(
+    async ({ email }) => {
+      const response = await honoClient.auth["forgot-password"].$post({
+        json: { email },
+      })
+      const result = await response.json()
+      return { success: result.success }
+    }
+  )
+
+  const forgotPasswordVerify = createMutation<
+    { token: string; newPassword: string },
+    { success: boolean }
+  >(async ({ token, newPassword }) => {
+    const response = await honoClient.auth["forgot-password"].verify.$post({
+      json: { token, newPassword },
+    })
+    const result = await response.json()
+    return { success: result.success }
+  })
+
   // OAuth utility function
   function _openOAuthUrl(
     url: string,
@@ -188,14 +215,18 @@ export const AuthContextProvider: FlowComponent = (props) => {
 
   const googleLogin = createMutation<{ newWindow?: boolean }, { success: boolean }>(
     async (options) => {
-      const url = honoClient.auth.login.google.$url().toString()
+      const url = honoClient.auth.login.google
+        .$url({ query: { redirect_url: postLoginRedirectUrl() } })
+        .toString()
       return _openOAuthUrl(url, { newWindow: options?.newWindow })
     }
   )
 
   const githubLogin = createMutation<{ newWindow?: boolean }, { success: boolean }>(
     async (options?: { newWindow?: boolean }) => {
-      const url = honoClient.auth.login.github.$url().toString()
+      const url = honoClient.auth.login.github
+        .$url({ query: { redirect_url: postLoginRedirectUrl() } })
+        .toString()
       return _openOAuthUrl(url, { newWindow: options?.newWindow })
     }
   )
@@ -209,22 +240,6 @@ export const AuthContextProvider: FlowComponent = (props) => {
       if (result.success) return { success: true }
 
       return { success: false }
-    }
-  )
-
-  // FIXME I have not specially tested this yet.
-  const magicLinkVerify = createMutation<{ token: string }, UserResponseDTO | null>(
-    async ({ token }) => {
-      const response = await honoClient.auth.login["magic-link"]["verify"].$get({
-        query: { token },
-      })
-      return null
-      // const result = await response.json()
-      // if (result.user) {
-      //   setUser(result.user)
-      //   return result.user
-      // }
-      // return null
     }
   )
 
@@ -295,10 +310,13 @@ export const AuthContextProvider: FlowComponent = (props) => {
         logout,
         emailRegister,
         emailLogin,
+        forgotPasswordSend,
+        forgotPasswordVerify,
+
         magicLinkSend,
-        magicLinkVerify,
         otpSend,
         otpVerify,
+
         googleLogin,
         githubLogin,
         revokeSession,

@@ -1,7 +1,7 @@
+import { createId } from "@paralleldrive/cuid2"
 import type { Context } from "hono"
 import { privateEnv } from "@/env.private"
 import { publicEnv } from "@/env.public"
-import { initHonoClient } from "@/lib/hono-client"
 
 export function setSessionTokenCookie(context: Context, token: string, expiresAt: string): void {
   /**
@@ -36,6 +36,27 @@ export function deleteSessionTokenCookie(context: Context): void {
 
 export function generateId() {
   return Bun.randomUUIDv7()
+}
+
+export function generateUniqueToken() {
+  return createId()
+}
+
+export function generateUniqueCode() {
+  // Generate a random number between 100000 (inclusive) and 999999 (inclusive)
+  const min = 100000 // Smallest 6-digit number
+  const max = 999999 // Largest 6-digit number
+  const range = max - min + 1
+
+  // Use a secure random source for a 32-bit integer
+  const array = new Uint32Array(1)
+  crypto.getRandomValues(array)
+
+  // Apply modulo operation to fit the range, then add the minimum.
+  // Note: Modulo can introduce a slight bias, but it's negligible for this range.
+  const randomNumber = (array[0] % range) + min
+
+  return randomNumber.toString() // Returns a 6-digit string
 }
 
 export function getClientIP(c: Context): string | null {
@@ -108,15 +129,20 @@ export function getSimpleDeviceName(userAgent: string | null): string {
   return "Device"
 }
 
-// Redirect Urls (For emails)
-export function getMagicLinkVerifyUrl(token: string) {
-  initHonoClient(publicEnv.PUBLIC_BASE_URL)
-    .auth.login["magic-link"].verify.$url({ query: { token: token } })
-    .toString()
-}
+/** An easy util to parse paths (assumed local, so automatically appends base url to them) or actual urls. */
+export function normalizeUrlOrPath(input?: string): string {
+  if (!input) return publicEnv.PUBLIC_BASE_URL
 
-export function getEmailVerifyUrl(token: string) {
-  initHonoClient(publicEnv.PUBLIC_BASE_URL).auth["verify-email"].verify.$url({
-    query: { token: token },
-  })
+  // Check if it looks like a full URL (has protocol)
+  if (/^https?:\/\//i.test(input)) {
+    return input
+  }
+
+  // Ensure it starts with a slash
+  const path = input.startsWith("/") ? input : `/${input}`
+
+  // Append the public base URL from environment (assumed to be available)
+  // Make sure PUBLIC_BASE_URL ends without trailing slash and path starts with slash
+  const baseUrl = publicEnv.PUBLIC_BASE_URL.replace(/\/$/, "") ?? ""
+  return `${baseUrl}${path}`
 }
