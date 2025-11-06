@@ -82,7 +82,7 @@
     "rollup-plugin-dts": "^6.3.0",
     "tailwindcss": "^4.1.17",
     "typescript": "^5.9.3",
-    "vite": "^7.2.7",
+    "vite": "npm:rolldown-vite@latest",
     "vite-plugin-solid": "^2.11.10",
     "vite-plugin-solid-svg": "^0.8.1",
     "vite-tsconfig-paths": "^5.1.4"
@@ -90,7 +90,7 @@
   "trustedDependencies": [
     "iconmate"
   ],
-  "patchedDependencies": {
-    "zeptomail@7.0.0": "patches/zeptomail@7.0.0.patch"
+  "overrides": {
+    "vite": "npm:rolldown-vite@latest"
   }
 }
