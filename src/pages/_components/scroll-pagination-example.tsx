@@ -64,7 +64,7 @@ export function ScrollPaginationExample() {
         </Button>
       </div>
 
-      <div class="h-full max-h-52 overflow-y-auto" ref={scrollContainerRef}>
+      <div class="h-full max-h-[400px] overflow-y-auto" ref={scrollContainerRef}>
         <ul class="space-y-2">
           <For each={items()}>
             {(item) => <li class="rounded border p-3 shadow-sm">{item.title}</li>}

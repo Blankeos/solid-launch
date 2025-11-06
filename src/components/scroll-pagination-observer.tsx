@@ -1,4 +1,4 @@
-import { useIntersection } from "bagon-hooks"
+import { useDebouncedValue, useIntersection } from "bagon-hooks"
 import {
   type Accessor,
   createEffect,
@@ -32,11 +32,15 @@ export function useScrollPagination(params: Accessor<UseScrollPaginationOptions>
     threshold: params().threshold ?? 0.75,
   })
 
+  // Delay the evaluation of loading because of intersection observer race conditions
+  // - Fixes double-firing in the same intersection event;
+  // - But still fire if still intersecting after a new data render (i.e. new data isn't tall enough).
+  const [debouncedIsLoading] = useDebouncedValue(() => params().isLoading, 300)
+
   createEffect(
-    // Strictly only trigger on intersection. Very hard bug I encountered was changes in isLoading/hasMore are triggering onLoadMore no matter what.
-    on([entry], () => {
+    on([entry, debouncedIsLoading], () => {
       const el = entry()
-      if (el?.isIntersecting && !params().isLoading && params().hasMore) {
+      if (el?.isIntersecting && !debouncedIsLoading() && params().hasMore) {
         params().onLoadMore()
       }
     })
