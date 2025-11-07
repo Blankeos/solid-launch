@@ -1,3 +1,4 @@
+import { hash, verify } from "@node-rs/argon2"
 import { createId } from "@paralleldrive/cuid2"
 import type { Context } from "hono"
 import { privateEnv } from "@/env.private"
@@ -32,6 +33,23 @@ export function deleteSessionTokenCookie(context: Context): void {
   } else {
     context.header("Set-Cookie", "session=; HttpOnly; SameSite=Lax; Max-Age=0; Path=/")
   }
+}
+
+export async function hashPassword(newPassword: string) {
+  return hash(newPassword, {
+    memoryCost: 19456,
+    timeCost: 2,
+    outputLen: 32,
+    parallelism: 1,
+  })
+}
+export async function verifyPassword(passwordHash: string, password: string) {
+  return verify(passwordHash, password, {
+    memoryCost: 19456,
+    timeCost: 2,
+    outputLen: 32,
+    parallelism: 1,
+  })
 }
 
 export function generateId() {
@@ -116,7 +134,6 @@ function isValidIP(ip: string): boolean {
 export function getUserAgentHash(userAgent: string | null): string {
   return userAgent ?? "unknown"
 }
-
 export function getSimpleDeviceName(userAgent: string | null): string {
   if (!userAgent) return "Unknown Device"
 
@@ -129,7 +146,10 @@ export function getSimpleDeviceName(userAgent: string | null): string {
   return "Device"
 }
 
-/** An easy util to parse paths (assumed local, so automatically appends base url to them) or actual urls. */
+/**
+ * Used for oAuth redirect urls.
+ * An easy util to parse paths (assumed local, so automatically appends base url to them) or actual urls.
+ */
 export function normalizeUrlOrPath(input?: string): string {
   if (!input) return publicEnv.PUBLIC_BASE_URL
 

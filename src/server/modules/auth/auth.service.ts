@@ -1,16 +1,17 @@
-import { hash, verify } from "@node-rs/argon2"
 import { generateCodeVerifier, generateState, OAuth2RequestError } from "arctic"
 import { privateEnv } from "@/env.private"
 import { publicEnv } from "@/env.public"
 import { github, google } from "@/server/lib/arctic"
-import { sendEmail } from "@/server/lib/emails/email-client"
-import { renderForgotPasswordEmail } from "@/server/lib/emails/forgot-password.email"
-import { renderMagicLinkEmail } from "@/server/lib/emails/magic-link.email"
-import { renderOtpEmail } from "@/server/lib/emails/otp.email"
+import {
+  renderForgotPasswordEmail,
+  renderMagicLinkEmail,
+  renderOtpEmail,
+  sendEmail,
+} from "@/server/lib/emails"
 import { ApiError } from "@/server/lib/error"
 import { AuthDAO } from "@/server/modules/auth/auth.dao"
 import type { InternalSessionDTO, InternalUserDTO } from "./auth.dto"
-import { normalizeUrlOrPath } from "./auth.utilities"
+import { hashPassword, normalizeUrlOrPath, verifyPassword } from "./auth.utilities"
 
 type UserSessionResponse = Promise<{ user: InternalUserDTO; session: InternalSessionDTO }>
 
@@ -38,6 +39,8 @@ export class AuthService {
     return userDetails
   }
 
+  // 👉 Email & Password
+
   async emailLogin(params: { email: string; password: string }): UserSessionResponse {
     const { email, password } = params
 
@@ -56,15 +59,9 @@ export class AuthService {
       throw ApiError.BadRequest("Incorrect email or password")
     }
 
-    const validPassword = await verify(existingUser.password_hash, password, {
-      memoryCost: 19456,
-      timeCost: 2,
-      outputLen: 32,
-      parallelism: 1,
-    })
+    const validPassword = verifyPassword(existingUser.password_hash, password)
     if (!validPassword) {
-      // Vague for extra security.
-      throw ApiError.BadRequest("Incorrect email or password")
+      throw ApiError.BadRequest("Incorrect email or password") // Vague for extra security.
     }
 
     const session = await this.authDAO.createSession(existingUser.id)
@@ -97,13 +94,7 @@ export class AuthService {
       throw ApiError.BadRequest(`Email ${email} already exists.`)
     }
 
-    const passwordHash = await hash(password, {
-      // recommended minimum parameters
-      memoryCost: 19456,
-      timeCost: 2,
-      outputLen: 32,
-      parallelism: 1,
-    })
+    const passwordHash = await hashPassword(password)
 
     const user = await this.authDAO.createUserFromEmailAndPassword({
       email,
@@ -125,6 +116,92 @@ export class AuthService {
       session,
     }
   }
+
+  async emailVerificationSend(params: { email: string }) {
+    const user = await this.authDAO.getUserByEmail(params.email)
+    if (!user) throw ApiError.NotFound("User with this email not found")
+
+    if (user.email_verified) {
+      throw ApiError.BadRequest("Email already verified")
+    }
+
+    const token = await this.authDAO.createOneTimeToken({
+      userId: user.id,
+      purpose: "email_verification",
+    })
+    console.debug("📧 [emailVerificationSend] Token", token)
+
+    try {
+      const html = renderMagicLinkEmail({ token: token })
+      await sendEmail({ html, subject: "Verify your email address", to: user.email })
+    } catch (_err) {
+      console.error("[emailVerificationSend] error", _err)
+    }
+
+    return { userId: user.id }
+  }
+
+  async emailVerificationVerify(params: { token: string }) {
+    const { consumed, userId } = await this.authDAO.consumeOneTimeToken({
+      token: params.token,
+      purpose: "email_verification",
+    })
+
+    if (!consumed || !userId) {
+      throw ApiError.BadRequest("Token for email verification is either invalid or expired")
+    }
+
+    await this.authDAO.updateUserVerifiedEmail({ userId })
+
+    return {
+      success: true,
+    }
+  }
+
+  async forgotPasswordSend(params: { email: string }) {
+    const user = await this.authDAO.getUserByEmail(params.email)
+    if (!user) throw ApiError.NotFound("User with this email not found")
+
+    const token = await this.authDAO.createOneTimeToken({
+      userId: user.id,
+      purpose: "reset_password",
+    })
+    console.debug("🔐 [forgotPasswordSend] Token", token)
+
+    // IMPLEMENT SEND EMAIL
+    try {
+      const html = renderForgotPasswordEmail({ token: token })
+      await sendEmail({ html, subject: "Your Solid Launch OTP", to: user.email })
+    } catch (_err) {
+      console.error("[emailOtpSend] error", _err)
+    }
+  }
+
+  async forgotPasswordVerify(params: { token: string; newPassword: string }) {
+    const { consumed, userId } = await this.authDAO.consumeOneTimeToken({
+      token: params.token,
+      purpose: "reset_password",
+    })
+
+    if (!consumed || !userId) {
+      throw ApiError.BadRequest("Token for password reset is either invalid or expired")
+    }
+
+    const passwordHash = await hashPassword(params.newPassword)
+
+    await this.authDAO.updateUserPassword({
+      userId,
+      passwordHash,
+    })
+
+    await this.authDAO.invalidateAllSessionsByUser(userId)
+
+    return {
+      success: true,
+    }
+  }
+
+  // 👉  OAuth
 
   async githubLogin(params: { redirectUrl?: string } = {}) {
     const state = generateState()
@@ -338,6 +415,8 @@ export class AuthService {
     }
   }
 
+  // 👉 OTT Logins (OTP, Magic Link)
+
   async emailOTPLoginSend(params: { email: string }) {
     const user = await this.authDAO.getUserByEmail(params.email)
     if (!user) throw ApiError.NotFound("User with this email not found")
@@ -453,95 +532,6 @@ export class AuthService {
     return {
       user,
       session,
-    }
-  }
-
-  async forgotPasswordSend(params: { email: string }) {
-    const user = await this.authDAO.getUserByEmail(params.email)
-    if (!user) throw ApiError.NotFound("User with this email not found")
-
-    const token = await this.authDAO.createOneTimeToken({
-      userId: user.id,
-      purpose: "reset_password",
-    })
-    console.debug("🔐 [forgotPasswordSend] Token", token)
-
-    // IMPLEMENT SEND EMAIL
-    try {
-      const html = renderForgotPasswordEmail({ token: token })
-      await sendEmail({ html, subject: "Your Solid Launch OTP", to: user.email })
-    } catch (_err) {
-      console.error("[emailOtpSend] error", _err)
-    }
-  }
-
-  async forgotPasswordVerify(params: { token: string; newPassword: string }) {
-    const { consumed, userId } = await this.authDAO.consumeOneTimeToken({
-      token: params.token,
-      purpose: "reset_password",
-    })
-
-    if (!consumed || !userId) {
-      throw ApiError.BadRequest("Token for password reset is either invalid or expired")
-    }
-
-    const passwordHash = await hash(params.newPassword, {
-      memoryCost: 19456,
-      timeCost: 2,
-      outputLen: 32,
-      parallelism: 1,
-    })
-
-    await this.authDAO.updateUserPassword({
-      userId,
-      passwordHash,
-    })
-
-    await this.authDAO.invalidateAllSessionsByUser(userId)
-
-    return {
-      success: true,
-    }
-  }
-
-  async emailVerificationSend(params: { email: string }) {
-    const user = await this.authDAO.getUserByEmail(params.email)
-    if (!user) throw ApiError.NotFound("User with this email not found")
-
-    if (user.email_verified) {
-      throw ApiError.BadRequest("Email already verified")
-    }
-
-    const token = await this.authDAO.createOneTimeToken({
-      userId: user.id,
-      purpose: "email_verification",
-    })
-    console.debug("📧 [emailVerificationSend] Token", token)
-
-    try {
-      const html = renderMagicLinkEmail({ token: token })
-      await sendEmail({ html, subject: "Verify your email address", to: user.email })
-    } catch (_err) {
-      console.error("[emailVerificationSend] error", _err)
-    }
-
-    return { userId: user.id }
-  }
-
-  async emailVerificationVerify(params: { token: string }) {
-    const { consumed, userId } = await this.authDAO.consumeOneTimeToken({
-      token: params.token,
-      purpose: "email_verification",
-    })
-
-    if (!consumed || !userId) {
-      throw ApiError.BadRequest("Token for email verification is either invalid or expired")
-    }
-
-    await this.authDAO.updateUserVerifiedEmail({ userId })
-
-    return {
-      success: true,
     }
   }
 }

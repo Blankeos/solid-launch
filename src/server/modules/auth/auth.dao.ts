@@ -16,7 +16,7 @@ import {
 } from "./auth.dto"
 
 export class AuthDAO {
-  // Sessions
+  // 👉 Sessions
   async createSession(userId: string) {
     const sessionId = generateId()
     const revokeId = generateId()
@@ -179,7 +179,7 @@ export class AuthDAO {
     return { success: true }
   }
 
-  // User
+  // 👉 User
   async getUserByUserId(userId: string) {
     const user = await db
       .selectFrom("user")
@@ -247,7 +247,9 @@ export class AuthDAO {
   }
 
   async updateUserProfile(params: { userId: string; metadata?: Partial<UserMetaDTO> }) {
-    const updates: Partial<{ metadata: string }> = {}
+    const updates: Partial<{ metadata: string; updated_at: string }> = {
+      updated_at: new Date().toISOString(),
+    }
 
     if (params.metadata !== undefined) {
       // To update a JSON field we need the old row, merge, and overwrite
@@ -272,7 +274,7 @@ export class AuthDAO {
   }
 
   // --- Auth Strategies ---
-  // - Email and Password
+  // 👉 Email and Password
   async createUserFromEmailAndPassword(params: {
     email: string
     passwordHash: string
@@ -294,7 +296,33 @@ export class AuthDAO {
     return user
   }
 
-  // - OAuth
+  async updateUserPassword(params: { userId: string; passwordHash: string }) {
+    await db
+      .updateTable("user")
+      .set({
+        password_hash: params.passwordHash,
+        updated_at: new Date().toISOString(),
+      })
+      .where("user.id", "=", params.userId)
+      .execute()
+
+    return { success: true }
+  }
+
+  async updateUserVerifiedEmail(params: { userId: string }) {
+    await db
+      .updateTable("user")
+      .set({
+        email_verified: 1,
+        updated_at: new Date().toISOString(),
+      })
+      .where("user.id", "=", params.userId)
+      .execute()
+
+    return { success: true }
+  }
+
+  // 👉 OAuth
   private async createUserFromOAuth(params: {
     provider: string
     providerUserId: string
@@ -393,8 +421,8 @@ export class AuthDAO {
     return newUser.id
   }
 
-  // - Magic Links, OTPs, Cross-Domain (OAuth Login), Forgot Password
-  async getOrCreateUserFromEmail(email: string) {
+  // 👉 OTTs: Email & Password (Forgot and Verify), OAuth (Cross-Domains OTT), OTT Login (Magic Link, OTP)
+  async getOrCreateUserFromEmail(email: string, metadata?: UserMetaDTO) {
     const existingUser = await this.getUserByEmail(email)
     if (existingUser) return existingUser
 
@@ -406,6 +434,7 @@ export class AuthDAO {
         email,
         email_verified: 0,
         password_hash: generateId(), // random placeholder
+        metadata: metadata ? JSON.stringify(metadata) : undefined,
       })
       .returningAll()
       .executeTakeFirst()
@@ -507,30 +536,5 @@ export class AuthDAO {
 
       return { consumed: true, userId: tokenRow.user_id }
     })
-  }
-
-  // --- Updates ---
-  async updateUserPassword(params: { userId: string; passwordHash: string }) {
-    await db
-      .updateTable("user")
-      .set({
-        password_hash: params.passwordHash,
-      })
-      .where("user.id", "=", params.userId)
-      .execute()
-
-    return { success: true }
-  }
-
-  async updateUserVerifiedEmail(params: { userId: string }) {
-    await db
-      .updateTable("user")
-      .set({
-        email_verified: 1,
-      })
-      .where("user.id", "=", params.userId)
-      .execute()
-
-    return { success: true }
   }
 }
