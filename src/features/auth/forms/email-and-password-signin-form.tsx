@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { useAuthContext } from "@/features/auth/auth.context"
 import { usePostLoginRedirectUrl } from "@/features/auth/use-post-login-redirect-url"
 
-export function EmailAndPasswordLoginForm() {
+export function EmailAndPasswordSigninForm() {
   const { emailLogin: login } = useAuthContext()
   const postLoginRedirectUrl = usePostLoginRedirectUrl()
 
@@ -61,7 +61,7 @@ export function EmailAndPasswordLoginForm() {
         class="rounded border border-blue-300 bg-blue-500 px-5 py-2 text-white"
         loading={login.loading()}
       >
-        Login
+        Sign In
       </Button>
     </form>
   )

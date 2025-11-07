@@ -1,6 +1,7 @@
+import { Show } from "solid-js"
 import { toast } from "solid-sonner"
 import { navigate } from "vike/client/router"
-import { IconGitHub, IconGoogle } from "@/assets/icons"
+import { IconGitHub, IconGoogle, IconLoading } from "@/assets/icons"
 import { Button } from "@/components/ui/button"
 import { useAuthContext } from "../auth.context"
 import { usePostLoginRedirectUrl } from "../use-post-login-redirect-url"
@@ -41,15 +42,25 @@ export function OAuthButtons() {
     <div class="flex gap-x-3">
       <Button
         onClick={handleGithubLogin}
-        loading={githubLogin.loading()}
+        disabled={githubLogin.loading()}
         variant="outline"
         class="bg-white"
+        size="icon"
       >
-        <IconGitHub />
+        <Show when={!githubLogin.loading()} fallback={<IconLoading />}>
+          <IconGitHub />
+        </Show>
       </Button>
 
-      <Button onClick={handleGoogleLogin} loading={googleLogin.loading()} variant="outline">
-        <IconGoogle />
+      <Button
+        onClick={handleGoogleLogin}
+        disabled={googleLogin.loading()}
+        variant="outline"
+        size="icon"
+      >
+        <Show when={!googleLogin.loading()} fallback={<IconLoading />}>
+          <IconGoogle />
+        </Show>
       </Button>
     </div>
   )

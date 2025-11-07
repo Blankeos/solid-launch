@@ -93,16 +93,12 @@ export function AccountManagement(props: VoidProps<{ class?: string }>) {
           <div class="flex items-center justify-between">
             <span class="text-muted-foreground text-sm">Avatar</span>
             <button class="font-medium text-sm" onClick={avatarEditActions.open} type="button">
-              {user()?.metadata?.avatar_url ? (
-                <Avatar>
-                  <AvatarImage src={user()!.metadata!.avatar_url} alt="Avatar" />
-                  <AvatarFallback class="text-xs">
-                    {user()?.email?.charAt(0).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-              ) : (
-                "—"
-              )}
+              <Avatar>
+                <AvatarImage src={user()?.metadata?.avatar_url} alt="Avatar" />
+                <AvatarFallback class="bg-sidebar text-xs">
+                  {user()?.email?.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
             </button>
           </div>
         </CardContent>
