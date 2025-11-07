@@ -32,6 +32,38 @@ export type OneTimeToken = {
      */
     metadata: unknown | null;
 };
+export type Organization = {
+    id: string;
+    name: string;
+    /**
+     * Optional URL-friendly identifier
+     */
+    slug: string | null;
+    /**
+     * For org settings, billing, features handled in application layer
+     */
+    metadata: unknown | null;
+    created_at: Generated<string>;
+    updated_at: Generated<string>;
+};
+export type OrganizationInvitation = {
+    id: string;
+    organization_id: string;
+    email: string;
+    role: Generated<string>;
+    invited_by: string;
+    expires_at: string;
+    accepted_at: string | null;
+    rejected_at: string | null;
+    created_at: Generated<string>;
+};
+export type OrganizationMember = {
+    organization_id: string;
+    user_id: string;
+    role: Generated<string>;
+    created_at: Generated<string>;
+    updated_at: Generated<string>;
+};
 export type Session = {
     /**
      * Never send this to the frontend (except http-only cookie)
@@ -61,6 +93,9 @@ export type User = {
 export type DB = {
     oauth_account: OAuthAccount;
     onetime_token: OneTimeToken;
+    organization: Organization;
+    organization_invitation: OrganizationInvitation;
+    organization_member: OrganizationMember;
     session: Session;
     user: User;
 };

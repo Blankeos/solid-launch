@@ -1,9 +1,3 @@
-import type { ColumnDef } from "@tanstack/solid-table"
-import { useDisclosure, useToggle } from "bagon-hooks"
-import { createEffect, createSignal, type FlowProps, For } from "solid-js"
-import type { JSX } from "solid-js/jsx-runtime"
-import { toast } from "solid-sonner"
-import { followCursor } from "tippy.js"
 import { IconMoonDuo, IconSunDuo } from "@/assets/icons"
 import { AccordionComp } from "@/components/ui/accordion"
 import { AlertComp } from "@/components/ui/alert"
@@ -38,6 +32,12 @@ import { Timeline } from "@/components/ui/timeline"
 import { useThemeContext } from "@/contexts/theme.context"
 import { Tippy } from "@/lib/solid-tippy"
 import { cn } from "@/utils/cn"
+import type { ColumnDef } from "@tanstack/solid-table"
+import { useDisclosure, useToggle } from "bagon-hooks"
+import { createEffect, createSignal, type FlowProps, For } from "solid-js"
+import type { JSX } from "solid-js/jsx-runtime"
+import { toast } from "solid-sonner"
+import { followCursor } from "tippy.js"
 import { DragExample } from "./drag-example"
 import { ScrollPaginationExample } from "./scroll-pagination-example"
 
@@ -232,6 +232,17 @@ export default function ComponentsPage() {
           variant="destructive"
           title="Heads up!"
           description="You can add components to your app using the cli."
+        />
+        <AlertComp
+          variant="success"
+          title="Success!"
+          description="Your changes have been saved successfully."
+        />
+        <AlertComp variant="warning" title="Warning!" description="This action cannot be undone." />
+        <AlertComp
+          variant="info"
+          title="Info"
+          description="New updates are available for download."
         />
       </ComponentCard>
 
@@ -834,6 +845,10 @@ export default function ComponentsPage() {
                 }).format(amount)
                 return <div class="text-right font-medium">{formatted}</div>
               },
+              filterFn: (row, columnId, filterValue: string) => {
+                if (!filterValue.length) return true
+                return row.original.amount.toString().includes(filterValue)
+              },
             },
           ]
 
@@ -849,8 +864,8 @@ export default function ComponentsPage() {
               data={data}
               toolbar={{
                 searchable: {
-                  columns: "email",
-                  placeholder: "Search for email",
+                  columns: ["email"],
+                  placeholder: "Search for email or amount",
                 },
                 filterables: [
                   {

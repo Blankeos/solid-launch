@@ -21,6 +21,10 @@ export interface RateLimitOptions {
  */
 export function rateLimit(options: RateLimitOptions = {}) {
   return rateLimiter({
+    skip: () => {
+      if (process.env.NODE_ENV === "development") return true
+      return false
+    },
     handler: () => {
       throw ApiError.TooManyRequests(
         options.message ?? "Too many requests, please try again later."

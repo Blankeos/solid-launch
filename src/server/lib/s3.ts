@@ -3,7 +3,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 import { createId } from "@paralleldrive/cuid2"
 import { privateEnv } from "@/env.private"
 
-export const _s3Client = new S3Client({
+const _s3Client = new S3Client({
   endpoint: privateEnv.S3_ENDPOINT,
   region: "auto",
   credentials: {

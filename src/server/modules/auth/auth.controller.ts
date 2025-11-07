@@ -16,9 +16,10 @@ import {
   RATE_LIMIT_REGISTER,
   rateLimit,
 } from "@/server/lib/rate-limit"
+import { s3Client } from "@/server/lib/s3"
 import { AuthDAO } from "@/server/modules/auth/auth.dao"
 import { AUTH_CONFIG } from "./auth.config"
-import { getUserResponseDTO } from "./auth.dto"
+import { getUserResponseDTO, userMetaClientInputDTO } from "./auth.dto"
 
 const authDAO = new AuthDAO()
 
@@ -32,8 +33,10 @@ export const authController = new Hono<{
   .use("/login", rateLimit({ ...RATE_LIMIT_LOGIN }))
   .use("/register", rateLimit({ ...RATE_LIMIT_REGISTER }))
   .use("/login/otp", rateLimit({ ...RATE_LIMIT_EMAIL_SEND }))
+  .use("/login/otp/verify", rateLimit({ ...RATE_LIMIT_LOGIN }))
   .use("/login/magic-link", rateLimit({ ...RATE_LIMIT_EMAIL_SEND }))
   .use("/forgot-password", rateLimit({ ...RATE_LIMIT_EMAIL_SEND }))
+  .use("/forgot-password/verify", rateLimit({ ...RATE_LIMIT_LOGIN }))
   .use("/verify-email", rateLimit({ ...RATE_LIMIT_EMAIL_SEND }))
 
   // Get current user
@@ -56,6 +59,45 @@ export const authController = new Hono<{
       user: userDetails,
     })
   })
+
+  // Update User Profile
+  .put(
+    "/profile",
+    authMiddleware,
+    requireAuthMiddleware,
+    zValidator("json", userMetaClientInputDTO),
+    async (c) => {
+      const user = c.var.user
+      const updates = c.req.valid("json")
+
+      const updatedUser = await authService.updateUserProfile(user.id, { metadata: updates })
+
+      return c.json({
+        user: updatedUser,
+      })
+    }
+  )
+
+  // Generate Avatar Upload URL
+  .post(
+    "/profile/avatar/upload-url",
+    authMiddleware,
+    requireAuthMiddleware,
+    describeRoute({}),
+    async (c) => {
+      const user = c.var.user
+
+      // Generate unique filename for avatar
+      const objectKey = `avatar_${user.id}`
+
+      const uploadData = await s3Client.generateUploadUrl(objectKey)
+
+      return c.json({
+        uploadUrl: uploadData.signedUrl,
+        objectKey: objectKey,
+      })
+    }
+  )
 
   // Login
   .post(
