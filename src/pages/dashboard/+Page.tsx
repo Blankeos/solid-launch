@@ -1,6 +1,7 @@
 import { useMetadata } from "vike-metadata-solid"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { AccountManagement } from "@/features/auth/account-management"
+import { OrganizationsManagement } from "@/features/auth/organizations-management"
 import ProtectedRoute from "@/features/auth/protected-route"
 import { useClientSize } from "@/hooks/use-client-size"
 import { useWindowSize } from "@/hooks/use-window-size"
@@ -22,6 +23,8 @@ export default function DashboardPage() {
           <AccountManagement />
 
           <hr />
+
+          <OrganizationsManagement />
 
           <Card>
             <CardHeader>

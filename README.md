@@ -31,6 +31,9 @@ You can also try my other starters:
   - [x] Magic Link
   - [x] OTPs
   - [ ] 2FA
+    - [ ] Authenticator App
+    - [ ] Backup Code
+  - [ ] Pass Key
   - [ ] Organization Auth (easily opt-outable)
   - [ ] User Management Dashboard
   - [x] Rate Limits + Global Rate Limits

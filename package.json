@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "bunx --bun vike dev",
+    "dev:services": "docker compose -f docker-compose.dev.yml up -d",
     "build": "bunx --bun vike build",
     "preview": "NODE_ENV=production bun run dist/server/index.mjs",
     "preview-static": "vite preview",

@@ -5,6 +5,7 @@ import {
   generateUniqueCode,
   generateUniqueToken,
   getSimpleDeviceName,
+  hashPassword,
 } from "@/server/modules/auth/auth.utilities"
 import { assertDTO } from "@/server/utils/assert-dto"
 import { AUTH_CONFIG } from "./auth.config"
@@ -237,7 +238,7 @@ export class AuthDAO {
         provider_user_id: acc.provider_user_id,
       })),
       active_sessions: sessions.map((s) => ({
-        display_id: "***" + s.id.slice(-4),
+        display_id: `***${s.id.slice(-4)}`,
         revoke_id: s.revoke_id,
         expires_at: s.expires_at,
         ip_address: s.ip_address,
@@ -246,7 +247,7 @@ export class AuthDAO {
     }
   }
 
-  async updateUserProfile(params: { userId: string; metadata?: Partial<UserMetaDTO> }) {
+  async updateUserMetadata(params: { userId: string; metadata?: Partial<UserMetaDTO> }) {
     const updates: Partial<{ metadata: string; updated_at: string }> = {
       updated_at: new Date().toISOString(),
     }
@@ -277,7 +278,7 @@ export class AuthDAO {
   // 👉 Email and Password
   async createUserFromEmailAndPassword(params: {
     email: string
-    passwordHash: string
+    password: string
     metadata?: UserMetaDTO
   }) {
     const userId = generateId()
@@ -286,7 +287,7 @@ export class AuthDAO {
       .insertInto("user")
       .values({
         id: userId,
-        password_hash: params.passwordHash,
+        password_hash: await hashPassword(params.password),
         email: params.email,
         metadata: params.metadata ? JSON.stringify(params.metadata) : undefined,
       })
@@ -296,11 +297,11 @@ export class AuthDAO {
     return user
   }
 
-  async updateUserPassword(params: { userId: string; passwordHash: string }) {
+  async updateUserPassword(params: { userId: string; password: string }) {
     await db
       .updateTable("user")
       .set({
-        password_hash: params.passwordHash,
+        password_hash: await hashPassword(params.password),
         updated_at: new Date().toISOString(),
       })
       .where("user.id", "=", params.userId)
@@ -338,7 +339,7 @@ export class AuthDAO {
           id: userId,
           email: params.email,
           email_verified: 1, // oAuth users are always really verified
-          password_hash: generateId(), // Just a random password, that's never guessable usually.
+          password_hash: await hashPassword(generateId()), // Just a random password, that's never guessable usually.
           metadata: params.metadata ? JSON.stringify(params.metadata) : undefined,
         })
         .returningAll()
@@ -433,7 +434,7 @@ export class AuthDAO {
         id: userId,
         email,
         email_verified: 0,
-        password_hash: generateId(), // random placeholder
+        password_hash: await hashPassword(generateId()), // random placeholder
         metadata: metadata ? JSON.stringify(metadata) : undefined,
       })
       .returningAll()

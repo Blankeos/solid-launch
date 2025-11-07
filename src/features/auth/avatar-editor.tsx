@@ -1,13 +1,13 @@
 import { type Component, createEffect, createSignal, onCleanup, onMount, Show } from "solid-js"
 
-const _CropFrame = (props: { radius: string; opacity: number }) => {
+const _CropFrame = (props: { radius: string; opacity: number; size: number }) => {
   const base = "absolute inset-0 pointer-events-none z-10"
-  let canvasRef: HTMLCanvasElement | undefined
+  const [canvasRef, setCanvasRef] = createSignal<HTMLCanvasElement>()
 
   createEffect(() => {
-    if (!canvasRef || props.opacity <= 0) return
+    if (!canvasRef() || props.opacity <= 0) return
 
-    const canvas = canvasRef
+    const canvas = canvasRef()!
     const ctx = canvas.getContext("2d")
     if (!ctx) return
 
@@ -44,37 +44,127 @@ const _CropFrame = (props: { radius: string; opacity: number }) => {
 
   return (
     <Show when={props.opacity > 0}>
-      <canvas ref={canvasRef} class={base} width={256} height={256} />
+      {/*<div class="absolute inset-0 bg-red-400"></div>*/}
+      <canvas ref={setCanvasRef} class={base} width={props.size} height={props.size} />
     </Show>
   )
 }
 
-const AvatarEditor: Component<{
-  /** Source image to edit */
-  image: HTMLImageElement | null
-  /** Additional CSS classes */
-  class?: string
-  /** Zoom multiplier applied in drawImage */
-  scale: number
-  /** Rotation angle in degrees */
-  rotation: number
-  /** Translation offset for positioning the image */
-  position: { x: number; y: number }
-  /** 0-1 opacity of the black "negative space" overlay (visual only, does NOT affect output) */
-  cropFrameOpacity?: number
-  /** "full" | number (px) - shape of the overlay (visual only, does NOT affect output) */
-  cropFrameBorderRadius?: number | "full"
-  /** Size of the avatar editor in pixels (1:1 aspect ratio) @defaultValue 256 */
+// Avatar Editor Hook
+const createAvatarEditor = (options?: {
+  /** @defaultValue 256 */
   size?: number
-  /** Called when the image changes */
-  onImageChange: (img: HTMLImageElement | null) => void
-  /** Called during drag operations */
-  onDrag: (pos: { x: number; y: number }) => void
-  /** Called when a file is loaded - override this to add custom file handling (e.g., HEIC support using heic-to library) */
-  onFileLoad: (file: File) => void
-  /** Called when files are dropped */
-  onFileDrop: (e: DragEvent) => void
-}> = (props) => {
+}) => {
+  const sizeValue = options?.size ?? 256
+  const [image, setImage] = createSignal<HTMLImageElement | null>(null)
+  const [scale, setScale] = createSignal(1)
+  const [rotation, setRotation] = createSignal(0)
+  const [position, setPosition] = createSignal({ x: 0, y: 0 })
+  const [shape, setShape] = createSignal<number>(100) // 0-100 where 100 is circle
+
+  const reset = () => {
+    setImage(null)
+    setScale(1)
+    setRotation(0)
+    setPosition({ x: 0, y: 0 })
+    setShape(100)
+  }
+
+  const loadImage = (file: File) => {
+    const url = URL.createObjectURL(file)
+    const img = new Image()
+    img.onload = () => {
+      setImage(img)
+      // Reset scale to "object-contain" equivalent when image loads
+      const containScale = Math.min(sizeValue / img.width, sizeValue / img.height)
+      setScale(containScale)
+    }
+    img.src = url
+  }
+
+  // Calculate "object-contain" scale for the current image
+  const getContainScale = (img: HTMLImageElement | null) => {
+    if (!img) return 1
+    return Math.min(sizeValue / img.width, sizeValue / img.height)
+  }
+
+  // Calculate maximum zoom scale (10x the contain scale)
+  const getMaxScale = (img: HTMLImageElement | null) => {
+    if (!img) return 10
+    return getContainScale(img) * 10
+  }
+
+  const getCroppedImage = (): Promise<Blob | null> => {
+    return new Promise((resolve) => {
+      const canvas = document.createElement("canvas")
+      canvas.width = sizeValue
+      canvas.height = sizeValue
+      const ctx = canvas.getContext("2d")
+      if (!ctx) {
+        resolve(null)
+        return
+      }
+
+      ctx.clearRect(0, 0, sizeValue, sizeValue)
+
+      const img = image()
+      if (img) {
+        ctx.save()
+        ctx.translate(sizeValue / 2, sizeValue / 2)
+        ctx.rotate((rotation() * Math.PI) / 180)
+        ctx.scale(scale(), scale())
+        ctx.drawImage(img, -img.width / 2 + position().x, -img.height / 2 + position().y)
+        ctx.restore()
+
+        ctx.restore() // Restore clipping context
+      }
+
+      canvas.toBlob(resolve)
+    })
+  }
+
+  const onFileDrop = (e: DragEvent) => {
+    e.preventDefault()
+    const files = e.dataTransfer?.files
+    if (files?.[0]) loadImage(files[0])
+  }
+
+  return {
+    // State
+    size: sizeValue,
+    image,
+    scale,
+    rotation,
+    position,
+    shape,
+
+    // Actions
+    setImage,
+    setScale,
+    setRotation,
+    setPosition,
+    setShape,
+    reset,
+    loadImage,
+    onFileDrop,
+    getCroppedImage,
+    getContainScale,
+    getMaxScale,
+  }
+}
+
+const AvatarEditor: Component<
+  ReturnType<typeof createAvatarEditor> & {
+    /** Additional CSS classes */
+    class?: string
+    /** 0-1 opacity of the black "negative space" overlay (visual only, does NOT affect output) */
+    cropFrameOpacity?: number
+    /** "full" | number (px) - shape of the overlay (visual only, does NOT affect output) */
+    cropFrameBorderRadius?: number | "full"
+    /** Size of the avatar editor in pixels (1:1 aspect ratio) @defaultValue 256 */
+    size?: number
+  }
+> = (props) => {
   let canvasRef!: HTMLCanvasElement
   let fileInputRef!: HTMLInputElement
   let containerRef!: HTMLDivElement
@@ -85,7 +175,7 @@ const AvatarEditor: Component<{
   /* ---------- visual-only helpers ---------- */
   const cropFrameOpacity = () => props.cropFrameOpacity ?? 0.5
   const cropFrameBorderRadius = () => {
-    if (props.cropFrameBorderRadius === "full") return "50%"
+    if (props.cropFrameBorderRadius === "full" || props.cropFrameBorderRadius === 100) return "50%"
     if (props.cropFrameBorderRadius !== undefined) return `${props.cropFrameBorderRadius}px`
     return "0px"
   }
@@ -102,24 +192,21 @@ const AvatarEditor: Component<{
     // translate/rotate/scale the image itself (output-affecting)
     ctx.save()
     ctx.translate(size / 2, size / 2)
-    ctx.rotate((props.rotation * Math.PI) / 180)
-    ctx.scale(props.scale, props.scale)
-    ctx.drawImage(img, -img.width / 2 + props.position.x, -img.height / 2 + props.position.y)
+    ctx.rotate((props.rotation() * Math.PI) / 180)
+    ctx.scale(props.scale(), props.scale())
+    ctx.drawImage(img, -img.width / 2 + props.position().x, -img.height / 2 + props.position().y)
     ctx.restore()
   }
 
   /* ---------- visual overlay (div on top, pointer-events-none) ---------- */
 
-  /* ---------- file handling ---------- */
+  /* ---------- file handling ---------/ */
   const loadImage = (file: File) => {
-    // Delegate file loading to parent component to allow for custom handling
-    // (e.g., HEIC support via heic-to library: https://github.com/hoppergee/heic-to)
-    props.onFileLoad(file)
-
+    props.loadImage(file)
     const url = URL.createObjectURL(file)
     const img = new Image()
     img.onload = () => {
-      props.onImageChange(img)
+      props.setImage(img)
       drawCanvas(img)
     }
     img.src = url
@@ -127,7 +214,7 @@ const AvatarEditor: Component<{
 
   /* ---------- reactive redraw ---------- */
   createEffect(() => {
-    const img = props.image
+    const img = props.image()
     if (img) drawCanvas(img)
   })
 
@@ -137,22 +224,22 @@ const AvatarEditor: Component<{
     const dx = e.clientX - lastPos().x
     const dy = e.clientY - lastPos().y
 
-    const img = props.image
+    const img = props.image()
     if (!img) return
 
     // Convert screen-space delta into rotated image-space delta
-    const angleRad = (-props.rotation * Math.PI) / 180 // negate for inverse rotation
+    const angleRad = (-props.rotation() * Math.PI) / 180 // negate for inverse rotation
     const rotatedDx = dx * Math.cos(angleRad) - dy * Math.sin(angleRad)
     const rotatedDy = dx * Math.sin(angleRad) + dy * Math.cos(angleRad)
 
     // Scale the drag delta to be proportional to the zoom level
-    const scaleAwareDx = rotatedDx / props.scale
-    const scaleAwareDy = rotatedDy / props.scale
+    const scaleAwareDx = rotatedDx / props.scale()
+    const scaleAwareDy = rotatedDy / props.scale()
 
-    const newX = props.position.x + scaleAwareDx
-    const newY = props.position.y + scaleAwareDy
+    const newX = props.position().x + scaleAwareDx
+    const newY = props.position().y + scaleAwareDy
 
-    props.onDrag({ x: newX, y: newY })
+    props.setPosition({ x: newX, y: newY })
     setLastPos({ x: e.clientX, y: e.clientY })
   }
 
@@ -169,6 +256,8 @@ const AvatarEditor: Component<{
 
   /* ---------- render ---------- */
   const size = props.size ?? 256
+  console.log("ITLOG", size)
+
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: It works
     <div
@@ -179,7 +268,7 @@ const AvatarEditor: Component<{
       onDragOver={(e) => e.preventDefault()}
     >
       <Show
-        when={props.image}
+        when={props.image()}
         fallback={
           <label class="flex h-full cursor-pointer items-center justify-center">
             <input
@@ -209,13 +298,13 @@ const AvatarEditor: Component<{
             setLastPos({ x: e.clientX, y: e.clientY })
           }}
         />
-        <_CropFrame opacity={cropFrameOpacity()} radius={cropFrameBorderRadius()} />
+        <_CropFrame opacity={cropFrameOpacity()} radius={cropFrameBorderRadius()} size={size} />
       </Show>
     </div>
   )
 }
 
-export { AvatarEditor }
+export { AvatarEditor, createAvatarEditor }
 
 // ---
 import { Badge } from "@/components/ui/badge"
@@ -236,18 +325,10 @@ const AvatarEditorDialog: Component<{
   onSave: (dataUrl: string) => void
 }> = (props) => {
   let canvasRef!: HTMLCanvasElement
-  const [image, setImage] = createSignal<HTMLImageElement | null>(null)
-  const [scale, setScale] = createSignal(1)
-  const [rotation, setRotation] = createSignal(0)
-  const [position, setPosition] = createSignal({ x: 0, y: 0 })
-  const [shape, setShape] = createSignal<number>(100) // 0-100 where 100 is circle
+  const editor = createAvatarEditor({ size: 512 })
 
   const reset = () => {
-    setImage(null)
-    setScale(1)
-    setRotation(0)
-    setPosition({ x: 0, y: 0 })
-    setShape(100)
+    editor.reset()
   }
 
   const onPaste = async (e: ClipboardEvent) => {
@@ -256,7 +337,7 @@ const AvatarEditorDialog: Component<{
     for (const item of items) {
       if (item.kind === "file" && item.type.startsWith("image/")) {
         const file = item.getAsFile()
-        if (file) loadImage(file)
+        if (file) editor.loadImage(file)
         break
       }
     }
@@ -267,80 +348,18 @@ const AvatarEditorDialog: Component<{
     onCleanup(() => window.removeEventListener("paste", onPaste))
   })
 
-  const loadImage = (file: File) => {
-    const url = URL.createObjectURL(file)
-    const img = new Image()
-    img.onload = () => {
-      setImage(img)
-      // Reset scale to "object-contain" equivalent when image loads
-      const size = 256
-      const containScale = Math.min(size / img.width, size / img.height)
-      setScale(containScale)
+  const handleSave = async () => {
+    const blob = await editor.getCroppedImage()
+    if (!blob) return
+    const dataUrl = URL.createObjectURL(blob)
+    window.open(dataUrl, "_blank")
+
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      props.onSave(reader.result as string)
+      // props.onOpenChange(false)
     }
-    img.src = url
-  }
-
-  const handleSave = () => {
-    if (!canvasRef) return
-    const canvas = canvasRef
-    const size = 256
-    canvas.width = size
-    canvas.height = size
-    const ctx = canvas.getContext("2d")!
-    ctx.clearRect(0, 0, size, size)
-
-    // Use shape slider value for rounded corners (100 = circle, 0 = square)
-    const borderRadius = shape() === 100 ? size / 2 : (shape() / 100) * (size / 2)
-
-    ctx.save()
-    ctx.beginPath()
-    if (shape() === 100) {
-      ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2)
-    } else {
-      ctx.roundRect(0, 0, size, size, borderRadius)
-    }
-    ctx.clip()
-
-    const img = image()
-    if (img) {
-      ctx.save()
-      ctx.translate(size / 2, size / 2)
-      ctx.rotate((rotation() * Math.PI) / 180)
-      ctx.scale(scale(), scale())
-      ctx.drawImage(img, -img.width / 2 + position().x, -img.height / 2 + position().y)
-      ctx.restore()
-
-      ctx.restore() // Restore clipping context
-
-      canvas.toBlob((blob) => {
-        if (!blob) return
-        const reader = new FileReader()
-        reader.onloadend = () => {
-          props.onSave(reader.result as string)
-          props.onOpenChange(false)
-        }
-        reader.readAsDataURL(blob)
-      })
-    }
-  }
-
-  const onFileDrop = (e: DragEvent) => {
-    e.preventDefault()
-    const files = e.dataTransfer?.files
-    if (files?.[0]) loadImage(files[0])
-  }
-
-  // Calculate "object-contain" scale for the current image
-  const getContainScale = (img: HTMLImageElement | null) => {
-    if (!img) return 1
-    const size = 256
-    return Math.min(size / img.width, size / img.height)
-  }
-
-  // Calculate maximum zoom scale (10x the contain scale)
-  const getMaxScale = (img: HTMLImageElement | null) => {
-    if (!img) return 10
-    return getContainScale(img) * 10
+    reader.readAsDataURL(blob)
   }
 
   return (
@@ -359,16 +378,16 @@ const AvatarEditorDialog: Component<{
                 Crop shape
               </label>
               <Button
-                variant={shape() === 100 ? "default" : "secondary"}
+                variant={editor.shape() === 100 ? "default" : "secondary"}
                 size="sm"
-                onClick={() => setShape(100)}
+                onClick={() => editor.setShape(100)}
               >
                 Circle
               </Button>
               <Button
-                variant={shape() === 0 ? "default" : "secondary"}
+                variant={editor.shape() === 0 ? "default" : "secondary"}
                 size="sm"
-                onClick={() => setShape(0)}
+                onClick={() => editor.setShape(0)}
               >
                 Square
               </Button>
@@ -376,14 +395,14 @@ const AvatarEditorDialog: Component<{
             <div class="grid gap-2">
               <SliderComp
                 label="Crop roundness"
-                value={[shape()]}
+                value={[editor.shape()]}
                 getValueLabel={(v) => (v.values.at(0) === 100 ? "100%" : `${v.values}px`)}
                 id="shape-slider"
                 minValue={0}
                 maxValue={100}
                 step={1}
-                defaultValue={[shape()]}
-                onChange={(v) => setShape(v[0])}
+                defaultValue={[editor.shape()]}
+                onChange={(v) => editor.setShape(v[0])}
                 class="w-full"
               />
             </div>
@@ -391,35 +410,28 @@ const AvatarEditorDialog: Component<{
 
           <div class="mx-auto border-2 border-dashed">
             <AvatarEditor
-              class=""
-              image={image()}
-              scale={scale()}
-              rotation={rotation()}
-              position={position()}
-              cropFrameBorderRadius={shape() === 100 ? "full" : Math.round((shape() / 100) * 128)}
-              cropFrameOpacity={0.5}
-              onImageChange={setImage}
-              onDrag={setPosition}
-              onFileLoad={loadImage}
-              onFileDrop={onFileDrop}
+              cropFrameOpacity={0.8}
+              cropFrameBorderRadius={editor.shape()}
+              {...editor}
             />
           </div>
-          <Show when={image()}>
+
+          <Show when={editor.image()}>
             <div class="flex flex-col gap-4">
               <div class="grid gap-2">
                 <SliderComp
                   label="Zoom"
-                  getValueLabel={(v) => `${Math.round(v.values?.at(0)! * 100)}%`}
+                  getValueLabel={(v) => `${Math.round((v.values?.at(0) ?? 0) * 100)}%`}
                   id="zoom-label"
                   minValue={0}
                   maxValue={1}
                   step={0.01}
                   defaultValue={[1]}
-                  value={[scale() / getMaxScale(image())]}
+                  value={[editor.scale() / editor.getMaxScale(editor.image())]}
                   onChange={(v) => {
                     const normalizedValue = v[0]
-                    const maxScale = getMaxScale(image())
-                    setScale(normalizedValue * maxScale)
+                    const maxScale = editor.getMaxScale(editor.image())
+                    editor.setScale(normalizedValue * maxScale)
                   }}
                   class="w-full"
                 />
@@ -432,16 +444,24 @@ const AvatarEditorDialog: Component<{
                   minValue={-180}
                   maxValue={180}
                   step={1}
-                  defaultValue={[rotation()]}
-                  onChange={(v) => setRotation(v[0])}
+                  defaultValue={[editor.rotation()]}
+                  onChange={(v) => editor.setRotation(v[0])}
                   class="w-full"
                 />
               </div>
               <div class="flex items-center gap-2">
-                <Button variant="secondary" size="sm" onClick={() => setRotation((r) => r - 90)}>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => editor.setRotation((r) => r - 90)}
+                >
                   ↺ 90°
                 </Button>
-                <Button variant="secondary" size="sm" onClick={() => setRotation((r) => r + 90)}>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => editor.setRotation((r) => r + 90)}
+                >
                   ↻ 90°
                 </Button>
                 <Button variant="destructive" size="sm" class="ml-auto" onClick={reset}>

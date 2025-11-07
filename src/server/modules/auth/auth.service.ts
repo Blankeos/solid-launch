@@ -10,8 +10,8 @@ import {
 } from "@/server/lib/emails"
 import { ApiError } from "@/server/lib/error"
 import { AuthDAO } from "@/server/modules/auth/auth.dao"
-import type { InternalSessionDTO, InternalUserDTO } from "./auth.dto"
-import { hashPassword, normalizeUrlOrPath, verifyPassword } from "./auth.utilities"
+import type { InternalSessionDTO, InternalUserDTO, UserMetaClientInputDTO } from "./auth.dto"
+import { normalizeUrlOrPath, verifyPassword } from "./auth.utilities"
 
 type UserSessionResponse = Promise<{ user: InternalUserDTO; session: InternalSessionDTO }>
 
@@ -39,6 +39,13 @@ export class AuthService {
     return userDetails
   }
 
+  async updateUserProfile(userId: string, updates: { metadata?: Partial<UserMetaClientInputDTO> }) {
+    return await this.authDAO.updateUserMetadata({
+      userId,
+      metadata: updates.metadata,
+    })
+  }
+
   // 👉 Email & Password
 
   async emailLogin(params: { email: string; password: string }): UserSessionResponse {
@@ -55,8 +62,7 @@ export class AuthService {
     const existingUser = await this.authDAO.getUserByEmail(email)
 
     if (!existingUser) {
-      // Lie for extra security.
-      throw ApiError.BadRequest("Incorrect email or password")
+      throw ApiError.BadRequest("Incorrect email or password") // Vague for extra security
     }
 
     const validPassword = verifyPassword(existingUser.password_hash, password)
@@ -94,11 +100,9 @@ export class AuthService {
       throw ApiError.BadRequest(`Email ${email} already exists.`)
     }
 
-    const passwordHash = await hashPassword(password)
-
     const user = await this.authDAO.createUserFromEmailAndPassword({
       email,
-      passwordHash,
+      password: password,
     })
     if (!user) {
       throw ApiError.InternalServerError("Something went wrong while creating your user")
@@ -168,7 +172,6 @@ export class AuthService {
     })
     console.debug("🔐 [forgotPasswordSend] Token", token)
 
-    // IMPLEMENT SEND EMAIL
     try {
       const html = renderForgotPasswordEmail({ token: token })
       await sendEmail({ html, subject: "Your Solid Launch OTP", to: user.email })
@@ -187,11 +190,9 @@ export class AuthService {
       throw ApiError.BadRequest("Token for password reset is either invalid or expired")
     }
 
-    const passwordHash = await hashPassword(params.newPassword)
-
     await this.authDAO.updateUserPassword({
       userId,
-      passwordHash,
+      password: params.newPassword,
     })
 
     await this.authDAO.invalidateAllSessionsByUser(userId)
@@ -428,10 +429,9 @@ export class AuthService {
     })
     console.debug("🪙 [emailOtpSend] Token", token)
 
-    // IMPLEMENT SEND EMAIL
     try {
       const html = renderOtpEmail({ email: user.email, otp: token })
-      // await sendEmail({ html, subject: "Your Solid Launch OTP", to: user.email })
+      await sendEmail({ html, subject: "Your Solid Launch OTP", to: user.email })
     } catch (_err) {
       console.error("[emailOtpSend] error", _err)
     }
