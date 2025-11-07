@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  # RustFS is an s3-compatible object storage service.
+  s3:
+    image: rustfs/rustfs:latest
+    container_name: s3
+    restart: always
+    ports:
+      - "9000:9000" # S3 API endpoint (for your application to connect)
+      - "9001:9001" # Console/Web UI endpoint
+    environment:
+      # --- Authentication Keys (IMPORTANT: Change these for a real environment!) ---
+      RUSTFS_ACCESS_KEY: "rustfsadmin" # S3_ACCESS_KEY_ID=""
+      RUSTFS_SECRET_KEY: "rustfsadmin" # S3_SECRET_ACCESS_KEY=""
+      # --- Connection Details for Your App ---
+      # S3_ENDPOINT="http://localhost:9000" (use this host:port in your app)
+      # S3_BUCKET_NAME="" (create bucket via console at http://localhost:9001)
+      # S3_REGION="" (leave empty or set to "us-east-1" for compatibility)
+      # --- Optional Configuration ---
+      RUSTFS_CONSOLE_ENABLE: "true" # Enables the web console on port 9001
+      RUSTFS_ADDRESS: ":9000" # Sets the S3 API listening address
+    volumes:
+      - rustfs_data:/data # Persistent storage for all your S3 object data
+    command: /data # RustFS requires the data volume path as a command argument
+
+volumes:
+  rustfs_data: # Define the named volume for data persistence
