@@ -13,12 +13,13 @@ type SelectTriggerProps<T extends ValidComponent = "button"> =
   SelectPrimitive.SelectTriggerProps<T> & {
     class?: string | undefined
     children?: JSX.Element
+    loading?: boolean
   }
 
 const SelectTrigger = <T extends ValidComponent = "button">(
   props: PolymorphicProps<T, SelectTriggerProps<T>>
 ) => {
-  const [local, others] = splitProps(props as SelectTriggerProps, ["class", "children"])
+  const [local, others] = splitProps(props as SelectTriggerProps, ["class", "children", "loading"])
   return (
     <SelectPrimitive.Trigger
       class={cn(
@@ -28,20 +29,28 @@ const SelectTrigger = <T extends ValidComponent = "button">(
       {...others}
     >
       {local.children}
-      <SelectPrimitive.Icon
-        as="svg"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        class="size-4 opacity-50"
+
+      <Show
+        when={local.loading}
+        fallback={
+          <SelectPrimitive.Icon
+            as="svg"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="size-4 opacity-50"
+          >
+            <path d="M8 9l4 -4l4 4" />
+            <path d="M16 15l-4 4l-4 -4" />
+          </SelectPrimitive.Icon>
+        }
       >
-        <path d="M8 9l4 -4l4 4" />
-        <path d="M16 15l-4 4l-4 -4" />
-      </SelectPrimitive.Icon>
+        <IconLoading class="size-4 shrink-0" />
+      </Show>
     </SelectPrimitive.Trigger>
   )
 }
@@ -206,19 +215,6 @@ export function SelectComp(props: SelectCompProps) {
 
   const placeholderText = createMemo(() => local.placeholder ?? "Select an option")
 
-  // const labelsMap = createMemo(() => {
-  //   if (!local.options) {
-  //     return {}
-  //   }
-  //   return local.options.reduce(
-  //     (acc: Record<string, JSX.Element>, option: { value: string; label?: JSX.Element }) => {
-  //       acc[option.value] = option.label ?? option.value
-  //       return acc
-  //     },
-  //     {} as Record<string, JSX.Element>
-  //   )
-  // })
-
   function renderItemLabel(rawValue: { value: string; label?: JSX.Element }) {
     const label = children(() => rawValue.label)
     return (
@@ -227,14 +223,6 @@ export function SelectComp(props: SelectCompProps) {
       </Show>
     )
   }
-
-  // const normalizedValue = createMemo(() => {
-  //   if (!local.value) return undefined;
-  //   if (typeof local.value === 'string') {
-  //     return local.options?.find((opt: SelectOption) => opt.value === local.value);
-  //   }
-  //   return local.value;
-  // });
 
   return (
     <Select
@@ -250,20 +238,20 @@ export function SelectComp(props: SelectCompProps) {
     >
       <SelectTrigger
         {...local.triggerProps}
-        class={cn("", local.loading && "disabled:cursor-progress")}
+        class={cn("", local.loading && "disabled:cursor-progress", local.triggerProps?.class)}
+        loading={local.loading}
       >
-        <span class="flex items-center gap-2">
-          <Show when={local.loading}>
-            <IconLoading class="size-4" />
-          </Show>
-          <SelectValue<SelectOption>>
-            {(state) =>
-              state
-                .selectedOptions()
-                ?.map((_option) => _option.label)
-                ?.join(", ")
-            }
-          </SelectValue>
+        <span class="flex items-center gap-2 truncate">
+          <span class="truncate">
+            <SelectValue<SelectOption>>
+              {(state) =>
+                state
+                  .selectedOptions()
+                  ?.map((_option) => _option.label)
+                  ?.join(", ")
+              }
+            </SelectValue>
+          </span>
         </span>
       </SelectTrigger>
       <SelectContent {...local.contentProps} />

@@ -21,7 +21,7 @@ function _HorizontalLayoutContextProvider(props: FlowProps) {
   const { sidebarState, _setApi, _onCollapse, _onExpand, _onResize } = useHorizontalLayoutContext()
 
   return (
-    <PanelGroup class="flex h-screen w-full overflow-hidden bg-background" setAPI={_setApi}>
+    <PanelGroup class="flex h-screen max-h-screen w-full overflow-hidden" setAPI={_setApi}>
       <Panel
         // minSize={10}
         // maxSize={50}
@@ -39,8 +39,8 @@ function _HorizontalLayoutContextProvider(props: FlowProps) {
           <div class="h-full w-[1px] bg-sidebar-accent group-active:bg-primary" />
         </ResizeHandle>
       </Show>
-      <Panel id="main-content-panel">
-        <main class="flex max-h-screen flex-grow flex-col overflow-auto">{props.children}</main>
+      <Panel id="main-content-panel" class="overflow-hidden">
+        <main class="flex max-h-screen flex-col overflow-y-auto">{props.children}</main>
       </Panel>
     </PanelGroup>
   )

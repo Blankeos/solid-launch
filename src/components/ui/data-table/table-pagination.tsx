@@ -6,7 +6,6 @@ import {
   IconChevronsLeft,
   IconChevronsRight,
 } from "@/assets/icons"
-import { Button } from "@/components/ui/button"
 import {
   Select,
   SelectContent,
@@ -14,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Button } from "../button"
 
 type TablePaginationProps<TData> = {
   table: Table<TData>
@@ -46,44 +46,45 @@ export function TablePagination<TData>(props: TablePaginationProps<TData>) {
         <div class="flex w-[100px] items-center justify-center font-medium text-sm">
           Page {props.table.getState().pagination.pageIndex + 1} of {props.table.getPageCount()}
         </div>
-        <div class="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            class="hidden size-8 p-0 lg:flex"
-            onClick={() => props.table.setPageIndex(0)}
-            disabled={!props.table.getCanPreviousPage()}
-          >
-            <span class="sr-only">Go to first page</span>
-            <IconChevronsLeft />
-          </Button>
-          <Button
-            variant="outline"
-            class="size-8 p-0"
-            onClick={() => props.table.previousPage()}
-            disabled={!props.table.getCanPreviousPage()}
-          >
-            <span class="sr-only">Go to previous page</span>
-            <IconChevronLeft />
-          </Button>
-          <Button
-            variant="outline"
-            class="size-8 p-0"
-            onClick={() => props.table.nextPage()}
-            disabled={!props.table.getCanNextPage()}
-          >
-            <span class="sr-only">Go to next page</span>
-            <IconChevronRight />
-          </Button>
-          <Button
-            variant="outline"
-            class="hidden size-8 p-0 lg:flex"
-            onClick={() => props.table.setPageIndex(props.table.getPageCount() - 1)}
-            disabled={!props.table.getCanNextPage()}
-          >
-            <span class="sr-only">Go to last page</span>
-            <IconChevronsRight />
-          </Button>
-        </div>
+      </div>
+
+      <div class="flex items-center gap-x-2">
+        <Button
+          variant="outline"
+          class="hidden size-8 p-0 lg:flex"
+          onClick={() => props.table.setPageIndex(0)}
+          disabled={!props.table.getCanPreviousPage()}
+        >
+          <span class="sr-only hidden">Go to first page</span>
+          <IconChevronsLeft />
+        </Button>
+        <Button
+          variant="outline"
+          class="size-8 p-0"
+          onClick={() => props.table.previousPage()}
+          disabled={!props.table.getCanPreviousPage()}
+        >
+          <span class="sr-only hidden">Go to previous page</span>
+          <IconChevronLeft />
+        </Button>
+        <Button
+          variant="outline"
+          class="size-8 p-0"
+          onClick={() => props.table.nextPage()}
+          disabled={!props.table.getCanNextPage()}
+        >
+          <span class="sr-only hidden">Go to next page</span>
+          <IconChevronRight />
+        </Button>
+        <Button
+          variant="outline"
+          class="hidden size-8 p-0 lg:flex"
+          onClick={() => props.table.setPageIndex(props.table.getPageCount() - 1)}
+          disabled={!props.table.getCanNextPage()}
+        >
+          <span class="sr-only hidden">Go to last page</span>
+          <IconChevronsRight />
+        </Button>
       </div>
     </div>
   )

@@ -1,6 +1,7 @@
 // A bit edited, mainly the integration with DataTableToolbarOptions.
 // Quality of life updates:
-// - Disable the toolbar if I want to.
+// - Disable the toolbar when I want to.
+// - Disable pagination when I want to.
 
 import type {
   ColumnDef,
@@ -29,6 +30,7 @@ type DataTableProps<TData, TValue> = {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   toolbar?: DataTableToolbarOptions & { disabled?: boolean }
+  pagination?: { disabled?: boolean }
 }
 
 export function DataTable<TData, TValue>(props: DataTableProps<TData, TValue>) {
@@ -78,6 +80,8 @@ export function DataTable<TData, TValue>(props: DataTableProps<TData, TValue>) {
           table={table}
           filterables={props.toolbar?.filterables}
           searchable={props.toolbar?.searchable}
+          disableViewOptions={props.toolbar?.disableViewOptions}
+          additionalJSX={props.toolbar?.additionalJSX}
         />
       </Show>
       <div class="rounded-md border">
@@ -127,7 +131,9 @@ export function DataTable<TData, TValue>(props: DataTableProps<TData, TValue>) {
           </TableBody>
         </Table>
       </div>
-      <TablePagination table={table} />
+      <Show when={!props.pagination?.disabled}>
+        <TablePagination table={table} />
+      </Show>
     </div>
   )
 }

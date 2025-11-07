@@ -1,9 +1,11 @@
 // NOTE: This was heavily edited to support flexible props. Quality of life updates:
 // - Pass filterables as a prop - selections. (Used to be hardcoded)
 // - Pass searchables as a prop - search input + multiple columns. (Use to be hardcoded and only single column)
+// - Pass disableViewOptions as a prop - if I don't want filtering of view options (Used to be hardcoded and always there)
+// - Pass additionalJSX as a prop - if I want custom actions int the header.
 
 import type { Table } from "@tanstack/solid-table"
-import { type Component, createSignal, For, onCleanup, onMount } from "solid-js"
+import { type Component, createSignal, For, type JSX, Show } from "solid-js"
 import { IconX } from "@/assets/icons"
 import { Button } from "@/components/ui/button"
 import { TextField, TextFieldInput } from "@/components/ui/text-field"
@@ -22,9 +24,9 @@ export type DataTableToolbarOptions = {
     columns: string | string[]
     placeholder: string
     class?: string
-    /** @defaultValue AND (OR is currently broken, so string[] columns doesn't work) */
-    filterMode?: "OR" | "AND"
   }
+  disableViewOptions?: boolean
+  additionalJSX?: () => JSX.Element
 }
 
 export type DataTableToolbarProps<TData> = {
@@ -42,50 +44,13 @@ export function TableToolbar<TData>(props: DataTableToolbarProps<TData>) {
       ? props.searchable.columns
       : ([props.searchable?.columns].filter(Boolean) as string[])
 
-    const filterMode = props.searchable?.filterMode ?? "AND"
-
-    if (filterMode === "OR" && value) {
-      // For OR mode, we apply the filter function to each column individually
-      // TanStack Table expects column filters to be applied per-column
-      columns.forEach((col) => {
-        const column = props.table.getColumn(col)
-        if (column) {
-          column.setFilterValue((rowValue: any) => {
-            const cellValue = String(rowValue ?? "").toLowerCase()
-            return cellValue.includes(value.toLowerCase())
-          })
-        }
-      })
-    } else {
-      columns.forEach((col) => {
-        const column = props.table.getColumn(col)
-        if (column) {
-          column.setFilterValue(value)
-        }
-      })
-    }
-  }
-
-  onMount(() => {
-    onCleanup(() => {
-      const columns = Array.isArray(props.searchable?.columns)
-        ? props.searchable.columns
-        : ([props.searchable?.columns].filter(Boolean) as string[])
-
-      // clear all filters set by OR logic as well
-      const orFilterCol = props.table.getColumn("__global__")
-      if (orFilterCol) {
-        orFilterCol.setFilterValue(undefined)
+    columns.forEach((col) => {
+      const column = props.table.getColumn(col)
+      if (column) {
+        column.setFilterValue(value)
       }
-
-      columns.forEach((col) => {
-        const column = props.table.getColumn(col)
-        if (column) {
-          column.setFilterValue(undefined)
-        }
-      })
     })
-  })
+  }
 
   return (
     <div class="flex items-center justify-between">
@@ -115,12 +80,6 @@ export function TableToolbar<TData>(props: DataTableToolbarProps<TData>) {
           <Button
             variant="ghost"
             onClick={() => {
-              // also clear OR filter on reset
-              const orFilterCol = props.table.getColumn("__global__")
-              if (orFilterCol) {
-                orFilterCol.setFilterValue(undefined)
-              }
-
               props.table.resetColumnFilters()
               setSearchValue("")
             }}
@@ -131,7 +90,10 @@ export function TableToolbar<TData>(props: DataTableToolbarProps<TData>) {
           </Button>
         )}
       </div>
-      <TableViewOptions table={props.table} />
+      <Show when={!props.disableViewOptions}>
+        <TableViewOptions table={props.table} />
+      </Show>
+      {props.additionalJSX?.()}
     </div>
   )
 }
