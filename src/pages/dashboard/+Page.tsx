@@ -1,5 +1,4 @@
 import { useMetadata } from "vike-metadata-solid"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { AccountManagement } from "@/features/auth/account-management"
 import ProtectedRoute from "@/features/auth/protected-route"
 import { OrganizationsManagement } from "@/features/organizations/organizations-management"
@@ -26,7 +25,7 @@ export default function DashboardPage() {
 
           <OrganizationsManagement />
 
-          <Card>
+          {/*<Card>
             <CardHeader>
               <CardTitle class="text-base">Stuff</CardTitle>
               <CardDescription>Cool stuff this template can do</CardDescription>
@@ -42,7 +41,7 @@ export default function DashboardPage() {
                 value={`${textAreaWidth()} x ${textAreaHeight()}`}
               />
             </CardContent>
-          </Card>
+          </Card>*/}
         </div>
       </ProtectedRoute>
     </>

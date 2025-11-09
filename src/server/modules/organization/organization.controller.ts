@@ -110,7 +110,6 @@ export const organizationController = new Hono<{
   // Invite member
   .post(
     "/:orgId/invite",
-
     zValidator("param", z.object({ orgId: z.string() })),
     zValidator(
       "json",
@@ -126,6 +125,33 @@ export const organizationController = new Hono<{
       const user = c.var.user
       const invitation = await orgService.inviteMember(orgId, user.id, email, role)
       return c.json({ invitation }, 201)
+    }
+  )
+
+  // List invitations
+  .get(
+    "/:orgId/invitations",
+    zValidator("param", z.object({ orgId: z.string() })),
+    describeRoute({}),
+    async (c) => {
+      const { orgId } = c.req.valid("param")
+      const user = c.var.user
+      const invitations = await orgService.listInvitations(orgId, user.id)
+      return c.json({ invitations })
+    }
+  )
+
+  // Revoke invitation
+  .delete(
+    "/:orgId/invitations/:invitationId",
+
+    zValidator("param", z.object({ orgId: z.string(), invitationId: z.string() })),
+    describeRoute({}),
+    async (c) => {
+      const { orgId, invitationId } = c.req.valid("param")
+      const user = c.var.user
+      await orgService.revokeInvitation(orgId, invitationId, user.id)
+      return c.json({ success: true })
     }
   )
 
@@ -152,7 +178,12 @@ export const organizationController = new Hono<{
     async (c) => {
       const { orgId } = c.req.valid("param")
       const user = c.var.user
-      await orgService.leaveOrganization(orgId, user.id)
+      await orgService.leaveOrganization({
+        orgId: orgId,
+        userId: user.id,
+        activeOrgId: c.var.session.active_organization_id,
+        sessionId: c.var.session.id,
+      })
       return c.json({ success: true })
     }
   )
@@ -166,7 +197,7 @@ export const organizationController = new Hono<{
     async (c) => {
       const { orgId, userId } = c.req.valid("param")
       const requestedByUserId = c.var.user.id
-      await orgService.removeMember(orgId, userId, requestedByUserId)
+      await orgService.removeMember({ orgId, userId, requestedByUserId })
       return c.json({ success: true })
     }
   )
@@ -188,6 +219,24 @@ export const organizationController = new Hono<{
       const { role } = c.req.valid("json")
       const requestedByUserId = c.var.user.id
       await orgService.updateMemberRole(orgId, userId, role, requestedByUserId)
+      return c.json({ success: true })
+    }
+  )
+
+  // Delete organization
+  .delete(
+    "/:orgId",
+    zValidator("param", z.object({ orgId: z.string() })),
+    describeRoute({}),
+    async (c) => {
+      const { orgId } = c.req.valid("param")
+      const userId = c.var.user.id
+      await orgService.deleteOrganization({
+        orgId: orgId,
+        requestedByUserId: userId,
+        activeOrgId: c.var.session.active_organization_id,
+        sessionId: c.var.session.id,
+      })
       return c.json({ success: true })
     }
   )

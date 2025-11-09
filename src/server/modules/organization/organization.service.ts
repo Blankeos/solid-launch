@@ -1,4 +1,3 @@
-import { sendEmail } from "@/server/lib/emails"
 import { renderOrgInvitationEmail } from "@/server/lib/emails/org-invitation.email"
 import { ApiError } from "@/server/lib/error"
 import { AuthDAO } from "@/server/modules/auth/auth.dao"
@@ -87,6 +86,47 @@ export class OrganizationService {
     return organization
   }
 
+  async deleteOrganization(params: {
+    orgId: string
+    requestedByUserId: string
+    sessionId?: string
+    activeOrgId?: string | null
+  }) {
+    // Verify requester has owner role
+    const requesterMembership = await this.orgDAO.getMembership({
+      organizationId: params.orgId,
+      userId: params.requestedByUserId,
+    })
+    if (!requesterMembership || requesterMembership.role !== "owner") {
+      throw ApiError.Forbidden("Only owners can delete organizations")
+    }
+
+    // Check if user is the only owner
+    const owners = await this.getOrganizationOwners(params.orgId)
+    if (owners.length !== 1 || owners[0].user_id !== params.requestedByUserId) {
+      throw ApiError.BadRequest("Only the sole owner can delete the organization")
+    }
+
+    // Check if organization has any billing records, projects, or other dependencies
+    // const details = await this.orgDAO.getOrganizationById(orgId)
+    // if (details?.metadata?.billing) {
+    //   throw ApiError.BadRequest("Organization cannot be deleted while it has active resources")
+    // }
+
+    // Delete the organization first
+    const deleteResult = await this.orgDAO.deleteOrganization(params.orgId)
+
+    // Then clear active org if it matches the org being deleted
+    if (params.sessionId && params.activeOrgId === params.orgId) {
+      await this.authDAO.updateActiveOrganization({
+        newActiveOrganizationId: null,
+        sessionId: params.sessionId,
+      })
+    }
+
+    return deleteResult
+  }
+
   async inviteMember(
     orgId: string,
     invitedByUserId: string,
@@ -137,39 +177,97 @@ export class OrganizationService {
     }
 
     const html = renderOrgInvitationEmail({ inviteLink: "", inviterName: "", orgName: "" })
-    await sendEmail({
-      html,
-      subject: `You're invited to join ${organization.name}`,
-      to: email,
-    })
+    // await sendEmail({
+    //   html,
+    //   subject: `You're invited to join ${organization.name}`,
+    //   to: email,
+    // })
 
     return invitation
+  }
+
+  async listInvitations(orgId: string, requestedByUserId: string) {
+    const requesterMembership = await this.orgDAO.getMembership({
+      organizationId: orgId,
+      userId: requestedByUserId,
+    })
+    if (!requesterMembership || !["owner", "admin"].includes(requesterMembership.role)) {
+      throw ApiError.Forbidden("Insufficient permissions to view invitations")
+    }
+
+    return await this.orgDAO.listInvitations(orgId)
   }
 
   async acceptInvitation(invitationId: string, userId: string) {
     return await this.orgDAO.acceptInvitation(invitationId, userId)
   }
 
-  async leaveOrganization(orgId: string, userId: string) {
-    return await this.orgDAO.leaveOrganization(orgId, userId)
-  }
-
-  async removeMember(orgId: string, userId: string, requestedByUserId: string) {
+  async revokeInvitation(orgId: string, invitationId: string, requestedByUserId: string) {
     // Verify requester has permissions
     const requesterMembership = await this.orgDAO.getMembership({
       organizationId: orgId,
       userId: requestedByUserId,
     })
     if (!requesterMembership || !["owner", "admin"].includes(requesterMembership.role)) {
+      throw ApiError.Forbidden("Insufficient permissions to revoke invitations")
+    }
+
+    return await this.orgDAO.revokeInvitation(invitationId, requestedByUserId)
+  }
+
+  async leaveOrganization(params: {
+    orgId: string
+    userId: string
+    sessionId?: string
+    activeOrgId?: string | null
+  }) {
+    // Check if user is the only owner
+    const membership = await this.orgDAO.getMembership({
+      organizationId: params.orgId,
+      userId: params.userId,
+    })
+
+    if (!membership) {
+      throw ApiError.Forbidden("User is not a member of this organization")
+    }
+
+    if (membership.role === "owner") {
+      const owners = await this.getOrganizationOwners(params.orgId)
+      if (owners.length === 1 && owners[0].user_id === params.userId) {
+        throw ApiError.BadRequest("Cannot leave organization as the sole owner")
+      }
+    }
+
+    // Remove member from organization
+    const leaveResult = await this.orgDAO.leaveOrganization(params.orgId, params.userId)
+
+    // Clear active org if it matches the org being left
+    if (params.sessionId && params.activeOrgId === params.orgId) {
+      await this.authDAO.updateActiveOrganization({
+        newActiveOrganizationId: null,
+        sessionId: params.sessionId,
+      })
+    }
+
+    return leaveResult
+  }
+
+  async removeMember(params: { orgId: string; userId: string; requestedByUserId: string }) {
+    // Verify requester has permissions
+    const requesterMembership = await this.orgDAO.getMembership({
+      organizationId: params.orgId,
+      userId: params.requestedByUserId,
+    })
+    if (!requesterMembership || !["owner", "admin"].includes(requesterMembership.role)) {
       throw ApiError.Forbidden("Insufficient permissions to remove members")
     }
 
     // Can't remove yourself through this endpoint
-    if (userId === requestedByUserId) {
+    if (params.userId === params.requestedByUserId) {
       throw ApiError.BadRequest("Use leave endpoint to remove yourself")
     }
 
-    return await this.orgDAO.removeMember(orgId, userId)
+    return await this.orgDAO.removeMember(params.orgId, params.userId)
   }
 
   async updateMemberRole(

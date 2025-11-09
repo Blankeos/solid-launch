@@ -11,6 +11,44 @@ type CreateMemberData = Insertable<OrganizationMember>
 type CreateInvitationData = Insertable<OrganizationInvitation>
 
 export class OrganizationDAO {
+  // 👉 Organization CRUD
+  async listUserOrganizations(userId: string) {
+    const rows = await db
+      .selectFrom("organization_member")
+      .innerJoin("organization", "organization_member.organization_id", "organization.id")
+      .select([
+        "organization.id",
+        "organization.name",
+        "organization.slug",
+        "organization.metadata",
+        "organization.created_at",
+        "organization.updated_at",
+        "organization_member.role",
+        "organization_member.created_at as member_created_at",
+      ])
+      .where("organization_member.user_id", "=", userId)
+      .execute()
+
+    return rows.map((row) => ({
+      ...row,
+      metadata: row.metadata
+        ? assertDTO(JSON.parse(row.metadata as string), orgMetaDTO)
+        : undefined,
+    }))
+  }
+
+  async getOrganizationById(id: string) {
+    return await db.selectFrom("organization").selectAll().where("id", "=", id).executeTakeFirst()
+  }
+
+  async getOrganizationBySlug(slug: string) {
+    return await db
+      .selectFrom("organization")
+      .selectAll()
+      .where("slug", "=", slug)
+      .executeTakeFirst()
+  }
+
   async createOrganization(data: { name: string; slug?: string; metadata?: OrgMetaDTO }) {
     const organization = await db
       .insertInto("organization")
@@ -26,31 +64,54 @@ export class OrganizationDAO {
     return organization
   }
 
-  async addOrganizationMember(data: CreateMemberData) {
-    const member = await db
-      .insertInto("organization_member")
-      .values({
-        organization_id: data.organization_id,
-        user_id: data.user_id,
-        role: data.role || "member",
-      })
+  async updateOrganization(
+    organizationId: string,
+    data: { name?: string; slug?: string; metadata?: OrgMetaDTO }
+  ) {
+    const updates: Record<string, unknown> = {}
+    if (data.name !== undefined) updates.name = data.name
+    if (data.slug !== undefined) updates.slug = data.slug
+    if (data.metadata !== undefined) updates.metadata = JSON.stringify(data.metadata)
+    updates.updated_at = new Date().toISOString()
+
+    return await db
+      .updateTable("organization")
+      .set(updates)
+      .where("id", "=", organizationId)
       .returningAll()
       .executeTakeFirstOrThrow()
-
-    return member
   }
 
-  async getOrganizationById(id: string) {
-    return await db.selectFrom("organization").selectAll().where("id", "=", id).executeTakeFirst()
+  async deleteOrganization(organizationId: string) {
+    return await db.transaction().execute(async (trx) => {
+      // Delete all invitations
+      await trx
+        .deleteFrom("organization_invitation")
+        .where("organization_id", "=", organizationId)
+        .execute()
+
+      // Delete all members
+      await trx
+        .deleteFrom("organization_member")
+        .where("organization_id", "=", organizationId)
+        .execute()
+
+      // Delete organization
+      const organization = await trx
+        .deleteFrom("organization")
+        .where("id", "=", organizationId)
+        .returningAll()
+        .executeTakeFirst()
+
+      if (!organization) {
+        throw ApiError.NotFound("Organization not found")
+      }
+
+      return organization
+    })
   }
 
-  async getOrganizationBySlug(slug: string) {
-    return await db
-      .selectFrom("organization")
-      .selectAll()
-      .where("slug", "=", slug)
-      .executeTakeFirst()
-  }
+  // 👉 Member CRUD
 
   async getOrganizationMembers(organizationId: string) {
     const members = await db
@@ -99,29 +160,18 @@ export class OrganizationDAO {
       .execute()
   }
 
-  async listUserOrganizations(userId: string) {
-    const rows = await db
-      .selectFrom("organization_member")
-      .innerJoin("organization", "organization_member.organization_id", "organization.id")
-      .select([
-        "organization.id",
-        "organization.name",
-        "organization.slug",
-        "organization.metadata",
-        "organization.created_at",
-        "organization.updated_at",
-        "organization_member.role",
-        "organization_member.created_at as member_created_at",
-      ])
-      .where("organization_member.user_id", "=", userId)
-      .execute()
+  async addOrganizationMember(data: CreateMemberData) {
+    const member = await db
+      .insertInto("organization_member")
+      .values({
+        organization_id: data.organization_id,
+        user_id: data.user_id,
+        role: data.role || "member",
+      })
+      .returningAll()
+      .executeTakeFirstOrThrow()
 
-    return rows.map((row) => ({
-      ...row,
-      metadata: row.metadata
-        ? assertDTO(JSON.parse(row.metadata as string), orgMetaDTO)
-        : undefined,
-    }))
+    return member
   }
 
   async getMembership(params: { organizationId: string; userId: string }) {
@@ -152,21 +202,53 @@ export class OrganizationDAO {
       .executeTakeFirst()
   }
 
-  async createInvitation(data: CreateInvitationData) {
-    const invitation = await db
-      .insertInto("organization_invitation")
-      .values({
-        id: generateId(),
-        organization_id: data.organization_id,
-        email: data.email,
-        role: data.role || "member",
-        invited_by: data.invited_by,
-        expires_at: data.expires_at,
-      })
-      .returningAll()
-      .executeTakeFirstOrThrow()
+  async leaveOrganization(organizationId: string, userId: string) {
+    // Check if user is the last owner
+    const owners = await db
+      .selectFrom("organization_member")
+      .select("user_id")
+      .where("organization_id", "=", organizationId)
+      .where("role", "=", "owner")
+      .execute()
 
-    return invitation
+    if (owners.length === 1 && owners[0].user_id === userId) {
+      throw ApiError.BadRequest("Cannot leave organization as the last owner")
+    }
+
+    return await this.removeMember(organizationId, userId)
+  }
+
+  // 👉 Invitation CRUD
+
+  async listInvitations(organizationId: string) {
+    const results = await db
+      .selectFrom("organization_invitation")
+      .innerJoin("user", "organization_invitation.invited_by", "user.id")
+      .select([
+        "organization_invitation.id",
+        "organization_invitation.organization_id",
+        "organization_invitation.email",
+        "organization_invitation.role",
+        "organization_invitation.invited_by",
+        "organization_invitation.created_at",
+        "organization_invitation.expires_at",
+        "organization_invitation.accepted_at",
+        "organization_invitation.rejected_at",
+        "user.email as invited_by_email",
+        "user.metadata as invited_by_metadata",
+      ])
+      .where("organization_invitation.organization_id", "=", organizationId)
+      .orderBy("organization_invitation.created_at", "desc")
+      .execute()
+
+    return await Promise.all(
+      results.map(async (result) => ({
+        ...result,
+        invited_by_metadata: await getUserResponseMetaDTO(
+          JSON.parse(result.invited_by_metadata as string) as UserMetaDTO
+        ),
+      }))
+    )
   }
 
   async getInvitationById(id: string) {
@@ -199,6 +281,23 @@ export class OrganizationDAO {
       .where("organization_invitation.rejected_at", "is", null)
       .where("organization_invitation.expires_at", ">", new Date().toISOString())
       .executeTakeFirst()
+  }
+
+  async createInvitation(data: CreateInvitationData) {
+    const invitation = await db
+      .insertInto("organization_invitation")
+      .values({
+        id: generateId(),
+        organization_id: data.organization_id,
+        email: data.email,
+        role: data.role || "member",
+        invited_by: data.invited_by,
+        expires_at: data.expires_at,
+      })
+      .returningAll()
+      .executeTakeFirstOrThrow()
+
+    return invitation
   }
 
   async acceptInvitation(id: string, userId: string) {
@@ -239,20 +338,35 @@ export class OrganizationDAO {
     })
   }
 
-  async leaveOrganization(organizationId: string, userId: string) {
-    // Check if user is the last owner
-    const owners = await db
-      .selectFrom("organization_member")
-      .select("user_id")
-      .where("organization_id", "=", organizationId)
-      .where("role", "=", "owner")
-      .execute()
+  async revokeInvitation(id: string, userId: string) {
+    return await db.transaction().execute(async (trx) => {
+      const invitation = await trx
+        .selectFrom("organization_invitation")
+        .innerJoin(
+          "organization_member",
+          "organization_invitation.organization_id",
+          "organization_member.organization_id"
+        )
+        .select([
+          "organization_invitation.id",
+          "organization_invitation.organization_id",
+          "organization_invitation.accepted_at",
+          "organization_invitation.rejected_at",
+        ])
+        .where("organization_invitation.id", "=", id)
+        .where("organization_member.user_id", "=", userId)
+        .where("organization_member.role", "=", "owner")
+        .executeTakeFirst()
 
-    if (owners.length === 1 && owners[0].user_id === userId) {
-      throw ApiError.BadRequest("Cannot leave organization as the last owner")
-    }
+      if (!invitation || invitation.accepted_at || invitation.rejected_at) {
+        throw ApiError.NotFound("Invitation not found or already resolved")
+      }
 
-    return await this.removeMember(organizationId, userId)
+      return await trx
+        .deleteFrom("organization_invitation")
+        .where("id", "=", id)
+        .returningAll()
+        .executeTakeFirstOrThrow()
+    })
   }
 }
-//

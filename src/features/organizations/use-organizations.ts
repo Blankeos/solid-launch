@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/solid-query"
+import type { InferResponseType } from "hono"
 import { honoClient } from "@/lib/hono-client"
 import { useAuthContext } from "../auth/auth.context"
 
@@ -6,7 +7,16 @@ const OrganizationsQuery = {
   "active-organization": "active-organization",
   "list-organizations": "list-organizations",
   "organization-members": "organization-members",
+  "organization-invitations": "organization-invitations",
 }
+
+export type InvitationListItem = InferResponseType<
+  (typeof honoClient.auth.organizations)[":orgId"]["invitations"]["$get"]
+>["invitations"][number]
+
+export type MembersListItem = InferResponseType<
+  (typeof honoClient.auth.organizations)[":orgId"]["members"]["$get"]
+>["members"][number]
 
 /**
  * Decided to use TanStack Query because at this point, if you need organization-features,
@@ -14,6 +24,7 @@ const OrganizationsQuery = {
  */
 export function useOrganizations(params?: { queriesOnMount: (keyof typeof OrganizationsQuery)[] }) {
   const { user } = useAuthContext()
+
   const queriesOnMount = params?.queriesOnMount ?? ["list-organizations"]
 
   const { refresh } = useAuthContext()
@@ -54,6 +65,20 @@ export function useOrganizations(params?: { queriesOnMount: (keyof typeof Organi
     enabled: queriesOnMount.includes("organization-members") ?? true,
   }))
 
+  const organizationInvitationsQuery = useQuery(() => ({
+    queryKey: [OrganizationsQuery["organization-invitations"], user()?.active_organization_id],
+    queryFn: async () => {
+      const orgId = user()?.active_organization_id
+      if (!orgId) return []
+
+      const response = await honoClient.auth.organizations[":orgId"].invitations.$get({
+        param: { orgId: orgId },
+      })
+      const data = await response.json()
+      return data.invitations ?? []
+    },
+  }))
+
   const setActiveOrganizationMutation = useMutation(() => ({
     mutationFn: async ({ organizationId }: { organizationId: string | null }) => {
       const response = await honoClient.auth.organizations.active.$put({
@@ -82,12 +107,123 @@ export function useOrganizations(params?: { queriesOnMount: (keyof typeof Organi
     },
   }))
 
+  const deleteOrganizationMutation = useMutation(() => ({
+    mutationFn: async ({ orgId }: { orgId: string }) => {
+      const response = await honoClient.auth.organizations[":orgId"].$delete({
+        param: { orgId },
+      })
+
+      await refresh.run()
+      await listOrganizationsQuery.refetch()
+      await activeOrganizationQuery.refetch()
+
+      return response.json()
+    },
+  }))
+
+  const inviteMemberMutation = useMutation(() => ({
+    mutationFn: async ({
+      orgId,
+      email,
+      role,
+    }: {
+      orgId: string
+      email: string
+      role?: "member" | "admin"
+    }) => {
+      const response = await honoClient.auth.organizations[":orgId"].invite.$post({
+        param: { orgId },
+        json: { email, role },
+      })
+      await organizationInvitationsQuery.refetch()
+      return response.json()
+    },
+  }))
+
+  const acceptInvitationMutation = useMutation(() => ({
+    mutationFn: async ({ invitationId }: { invitationId: string }) => {
+      const response = await honoClient.auth.organizations.invite[":invitationId"].accept.$post({
+        param: { invitationId },
+      })
+      await refresh.run()
+      await activeOrganizationQuery.refetch()
+      await organizationMembersQuery.refetch()
+      await organizationInvitationsQuery.refetch()
+      return response.json()
+    },
+  }))
+
+  const revokeInvitationMutation = useMutation(() => ({
+    mutationFn: async ({ orgId, invitationId }: { orgId: string; invitationId: string }) => {
+      const response = await honoClient.auth.organizations[":orgId"].invitations[
+        ":invitationId"
+      ].$delete({
+        param: { orgId, invitationId },
+      })
+      await organizationInvitationsQuery.refetch()
+      return response.json()
+    },
+  }))
+
+  const leaveOrganizationMutation = useMutation(() => ({
+    mutationFn: async ({ orgId }: { orgId: string }) => {
+      const response = await honoClient.auth.organizations[":orgId"].leave.$post({
+        param: { orgId },
+      })
+      await refresh.run()
+      await listOrganizationsQuery.refetch()
+      await activeOrganizationQuery.refetch()
+      return response.json()
+    },
+  }))
+
+  const removeMemberMutation = useMutation(() => ({
+    mutationFn: async ({ orgId, userId }: { orgId: string; userId: string }) => {
+      const response = await honoClient.auth.organizations[":orgId"].members[":userId"].$delete({
+        param: { orgId, userId },
+      })
+      await organizationMembersQuery.refetch()
+      return response.json()
+    },
+  }))
+
+  const updateMemberRoleMutation = useMutation(() => ({
+    mutationFn: async ({
+      orgId,
+      userId,
+      role,
+    }: {
+      orgId: string
+      userId: string
+      role: "member" | "admin" | "owner"
+    }) => {
+      const response = await honoClient.auth.organizations[":orgId"].members[":userId"].role.$patch(
+        {
+          param: { orgId, userId },
+          json: { role },
+        }
+      )
+      await organizationMembersQuery.refetch()
+      return response.json()
+    },
+  }))
+
   return {
     listOrganizationsQuery,
     activeOrganizationQuery,
     organizationMembersQuery,
     setActiveOrganizationMutation,
     createOrganizationMutation,
+    deleteOrganizationMutation,
+
+    organizationInvitationsQuery,
+    inviteMemberMutation,
+    acceptInvitationMutation,
+    revokeInvitationMutation,
+
+    leaveOrganizationMutation,
+    removeMemberMutation,
+    updateMemberRoleMutation,
   }
 }
 

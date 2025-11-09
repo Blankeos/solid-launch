@@ -60,7 +60,7 @@ export async function verifyPassword(passwordHash: string, password: string) {
 }
 
 export function generateId() {
-  return Bun.randomUUIDv7()
+  return createId()
 }
 
 export function generateUniqueToken() {

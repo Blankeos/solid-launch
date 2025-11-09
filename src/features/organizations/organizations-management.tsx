@@ -1,7 +1,7 @@
 import type { ColumnDef } from "@tanstack/solid-table"
 import { useDisclosure } from "bagon-hooks"
-import type { InferResponseType } from "hono"
 import { createMemo, createSignal, Show } from "solid-js"
+import { createStore } from "solid-js/store"
 import { toast } from "solid-sonner"
 import z from "zod"
 import { IconAlertFilled, IconDotsVertical, IconPlus, IconUpload } from "@/assets/icons"
@@ -24,40 +24,84 @@ import { Label } from "@/components/ui/label"
 import { SelectComp, type SelectOption } from "@/components/ui/select"
 import { TagsInputComp } from "@/components/ui/tags-input"
 import { TextFieldComp } from "@/components/ui/text-field"
-import type { honoClient } from "@/lib/hono-client"
 import { formatDate } from "@/utils/format-date"
 import { useAuthContext } from "../auth/auth.context"
-import { useOrganizations } from "./use-organizations"
-
-// const members = [
-//   {
-//     id: "1",
-//     user: { name: "John Doe", email: "john@example.com", image: "https://github.com/shadcn.png" },
-//     joined_at: "2024-01-15",
-//     role: "admin",
-//   },
-//   {
-//     id: "2",
-//     user: { name: "Jane Smith", email: "jane@example.com", image: "https://github.com/shadcn.png" },
-//     joined_at: "2024-02-20",
-//     role: "member",
-//   },
-//   {
-//     id: "019a5f27-7240-7000-9612-83805086ef1f",
-//     user: { name: "Carlo", email: "carlo@gmail.com", image: "https://github.com/shadcn.png" },
-//     joined_at: "2024-03-10",
-//     role: "admin",
-//   },
-// ]
+import {
+  type InvitationListItem,
+  type MembersListItem,
+  useOrganizations,
+} from "./use-organizations"
 
 function InviteForm(props: { onClose?: () => void }) {
-  const [emails, setEmails] = createSignal<string[]>([])
-  const [emailsInput, setEmailsInput] = createSignal("")
-  const [error] = createSignal("carlo@gmail.com is already a member of the organization.")
+  const { user } = useAuthContext()
+  const { inviteMemberMutation } = useOrganizations({ queriesOnMount: [] })
 
-  const handleSubmit = (e: Event) => {
+  const [emails, setEmails] = createStore<string[]>([])
+  const [emailsInput, setEmailsInput] = createSignal("")
+  const [error, setError] = createSignal("")
+  const [isSubmitting, setIsSubmitting] = createSignal(false)
+
+  const handleSubmit = async (e: Event) => {
     e.preventDefault()
-    // Handle invitation logic
+
+    const emailList = emails
+    if (!emailList.length) return
+
+    setIsSubmitting(true)
+    setError("")
+
+    const orgId = user()?.active_organization_id
+    if (!orgId) {
+      setError("No organization selected")
+      setIsSubmitting(false)
+      return
+    }
+
+    const results = await Promise.allSettled(
+      emailList.map((email) => inviteMemberMutation.mutateAsync({ orgId, email }))
+    )
+
+    const failedEmails: string[] = []
+    const alreadyInvitedEmails: string[] = []
+
+    results.forEach((result, index) => {
+      if (result.status === "rejected") {
+        const error = result.reason
+        if (error?.message?.includes("Invitation already sent to this email")) {
+          alreadyInvitedEmails.push(emailList[index])
+        } else {
+          failedEmails.push(emailList[index])
+        }
+      }
+    })
+
+    // Remove successfully invited emails from the emails array
+    setEmails((prevEmails) =>
+      prevEmails.filter((email) => {
+        const index = emailList.indexOf(email)
+        return index !== -1 && results[index].status === "rejected"
+      })
+    )
+
+    if (failedEmails.length === 0 && alreadyInvitedEmails.length === 0) {
+      toast.success("Invitations sent successfully")
+      setEmails([])
+      props.onClose?.()
+    } else if (failedEmails.length > 0) {
+      if (alreadyInvitedEmails.length > 0) {
+        setError(
+          `Failed to invite: ${failedEmails.join(", ")}. ${alreadyInvitedEmails.join(", ")} ${alreadyInvitedEmails.length === 1 ? "has already been invited" : "have already been invited"}.`
+        )
+      } else {
+        setError(`Failed to invite: ${failedEmails.join(", ")}`)
+      }
+    } else if (alreadyInvitedEmails.length > 0) {
+      setError(
+        `${alreadyInvitedEmails.join(", ")} ${alreadyInvitedEmails.length === 1 ? "has already been invited" : "have already been invited"}.`
+      )
+    }
+
+    setIsSubmitting(false)
   }
 
   return (
@@ -68,8 +112,8 @@ function InviteForm(props: { onClose?: () => void }) {
           Enter or paste one or more email addresses, separated by spaces or commas.
         </p>
         <TagsInputComp
-          placeholder={!emails().length ? "example@email.com, example2@gmail.com" : undefined}
-          value={emails()}
+          placeholder={!emails.length ? "example@email.com, example2@gmail.com" : undefined}
+          value={emails}
           onValueChange={(details) => {
             const { success } = z.email().min(1).array().safeParse(details.value)
             if (success) setEmails(() => details.value)
@@ -114,7 +158,6 @@ function InviteForm(props: { onClose?: () => void }) {
         <AlertComp
           variant="destructive"
           icon={<IconAlertFilled />}
-          // description={error()}
           title={error()}
           class="text-sm"
         />
@@ -123,22 +166,29 @@ function InviteForm(props: { onClose?: () => void }) {
         <Button type="button" variant="outline" onClick={props.onClose}>
           Cancel
         </Button>
-        <Button type="submit">Send Invitations</Button>
+        <Button type="submit" loading={isSubmitting()} disabled={!emails.length}>
+          Send Invitations
+        </Button>
       </div>
     </form>
   )
 }
 
-type OrganizationMember = InferResponseType<
-  (typeof honoClient.auth.organizations)[":orgId"]["members"]["$get"]
->["members"][number]
-const OrganizationMembersTable = (props: {
-  data: OrganizationMember[]
-  onOpenInvite?: () => void
-}) => {
+const OrganizationMembersTable = (props: { onOpenInvite?: () => void }) => {
+  const { user } = useAuthContext()
+
+  const {
+    organizationMembersQuery,
+    leaveOrganizationMutation,
+    removeMemberMutation,
+    updateMemberRoleMutation,
+  } = useOrganizations({ queriesOnMount: ["organization-members"] })
+
+  const [memberIdPending, setMemberIdPending] = createSignal()
+
   const { user: currentUser } = useAuthContext()
 
-  const columns: ColumnDef<OrganizationMember>[] = [
+  const columns: ColumnDef<MembersListItem>[] = [
     {
       accessorKey: "email",
       header: "User",
@@ -175,15 +225,19 @@ const OrganizationMembersTable = (props: {
     {
       accessorKey: "joined_at",
       header: "Joined",
-      cell: (info: any) => {
-        const date = new Date(info.getValue())
+      cell: (info) => {
+        const date = new Date(info.row.original.joined_at)
         return date.toLocaleDateString()
       },
     },
     {
       accessorKey: "role",
       header: "Role",
-      cell: (info: any) => {
+      cell: (info) => {
+        const { user } = useAuthContext()
+
+        const member = info.row.original
+
         const [role, setRole] = createSignal(info.getValue())
         const roleOptions: SelectOption[] = [
           { value: "owner", label: "Owner" },
@@ -195,10 +249,25 @@ const OrganizationMembersTable = (props: {
           <SelectComp
             value={roleOptions.find((opt) => opt.value === role()) ?? null}
             onChange={(newVal) => {
-              if (newVal?.value) {
-                setRole(newVal.value)
+              if (newVal?.value && newVal.value !== role()) {
+                setMemberIdPending(member.user_id)
+
+                updateMemberRoleMutation.mutate(
+                  {
+                    orgId: user()?.active_organization_id || "",
+                    userId: member.user_id,
+                    role: newVal.value as "member" | "admin" | "owner",
+                  },
+                  {
+                    onError: (error) => {
+                      toast.error(error.message)
+                    },
+                  }
+                )
               }
             }}
+            loading={member.user_id === memberIdPending() && updateMemberRoleMutation.isPending}
+            disabled={updateMemberRoleMutation.isPending}
             options={roleOptions}
             placeholder="Select role"
             triggerProps={{ class: "text-xs h-8 w-[90px]" }}
@@ -208,17 +277,37 @@ const OrganizationMembersTable = (props: {
     },
     {
       id: "actions",
-      cell: (info: any) => {
+      cell: (info) => {
         const member = info.row.original
         return (
           <DropdownMenuComp
             options={[
               {
                 type: "item",
-                itemDisplay: "Remove",
+                itemDisplay: user()?.id === member.user_id ? "Leave" : "Remove",
                 itemOnSelect: () => {
-                  // Handle remove member
-                  console.log("Remove member", member.user_id)
+                  const orgId = user()?.active_organization_id
+                  if (!orgId) return
+
+                  if (user()?.id === member.user_id) {
+                    leaveOrganizationMutation.mutate(
+                      { orgId: orgId },
+                      {
+                        onError: (error) => {
+                          toast.error(error.message)
+                        },
+                      }
+                    )
+                  } else {
+                    removeMemberMutation.mutate(
+                      { orgId: orgId, userId: member.user_id },
+                      {
+                        onError: (error) => {
+                          toast.error(error.message)
+                        },
+                      }
+                    )
+                  }
                 },
               },
             ]}
@@ -235,7 +324,7 @@ const OrganizationMembersTable = (props: {
   return (
     <DataTable
       columns={columns}
-      data={props.data ?? []}
+      data={organizationMembersQuery.data ?? []}
       toolbar={{
         searchable: {
           columns: ["email"],
@@ -253,12 +342,108 @@ const OrganizationMembersTable = (props: {
   )
 }
 
+const InvitationsTable = () => {
+  const { organizationInvitationsQuery, revokeInvitationMutation } = useOrganizations({
+    queriesOnMount: ["organization-invitations"],
+  })
+
+  const columns: ColumnDef<InvitationListItem>[] = [
+    {
+      accessorKey: "email",
+      header: "Email",
+      cell: (cell) => <span class="font-medium">{cell.getValue() as string}</span>,
+    },
+    {
+      accessorKey: "role",
+      header: "Role",
+      cell: (info: any) => info.getValue(),
+    },
+    {
+      accessorKey: "invited_by",
+      header: "Invited By",
+      cell: (cell) => {
+        const invitedBy = cell.row.original.invited_by_metadata
+        return (
+          <div class="flex items-center gap-2">
+            <AvatarComp
+              class="size-6"
+              src={invitedBy.avatar_url}
+              fallback={invitedBy.name?.charAt(0) ?? "?"}
+            />
+            <span>{invitedBy.name}</span>
+          </div>
+        )
+      },
+    },
+    {
+      accessorKey: "invited_at",
+      header: "Invited Date",
+      cell: (cell) => {
+        const date = new Date(cell.row.original.created_at)
+        return date.toLocaleDateString()
+      },
+    },
+    {
+      id: "actions",
+      cell: (info: any) => {
+        const invite = info.row.original
+        const { user } = useAuthContext()
+
+        return (
+          <DropdownMenuComp
+            options={[
+              {
+                type: "item",
+                itemDisplay: "Revoke",
+                itemOnSelect: () => {
+                  const orgId = user()?.active_organization_id
+                  if (!orgId) return
+                  revokeInvitationMutation.mutate(
+                    { orgId: orgId, invitationId: invite.id },
+                    {
+                      onError: (error) => {
+                        toast.error(error.message)
+                      },
+                    }
+                  )
+                },
+              },
+            ]}
+          >
+            <Button variant="ghost" size="icon" class="h-8 w-8">
+              <IconDotsVertical class="size-4 rotate-90" />
+            </Button>
+          </DropdownMenuComp>
+        )
+      },
+    },
+  ]
+
+  return (
+    <DataTable
+      columns={columns}
+      data={organizationInvitationsQuery.data || []}
+      toolbar={{
+        searchable: {
+          columns: ["email"],
+          placeholder: "Search invitations...",
+        },
+        disableViewOptions: true,
+      }}
+      pagination={{ disabled: true }}
+    />
+  )
+}
+
 export function OrganizationsManagement() {
+  const { user } = useAuthContext()
+
   const {
     listOrganizationsQuery,
     activeOrganizationQuery,
     setActiveOrganizationMutation,
     organizationMembersQuery,
+    deleteOrganizationMutation,
   } = useOrganizations({
     queriesOnMount: ["list-organizations", "active-organization", "organization-members"],
   })
@@ -292,101 +477,6 @@ export function OrganizationsManagement() {
 
     return [personalAccountOption, ...orgs]
   })
-
-  const InvitationsTable = () => {
-    const columns: ColumnDef<{
-      id: string
-      email: string
-      invited_at: string
-      role: string
-      invited_by: { name: string; email: string }
-    }>[] = [
-      {
-        accessorKey: "email",
-        header: "Email",
-        cell: (cell) => <span class="font-medium">{cell.getValue() as string}</span>,
-      },
-      {
-        accessorKey: "role",
-        header: "Role",
-        cell: (info: any) => info.getValue(),
-      },
-      {
-        accessorKey: "invited_by",
-        header: "Invited By",
-        cell: (cell) => {
-          const invitedBy = cell.getValue() as { name: string; email: string }
-          return <span>{invitedBy.name}</span>
-        },
-      },
-      {
-        accessorKey: "invited_at",
-        header: "Invited Date",
-        cell: (info: any) => {
-          const date = new Date(info.getValue())
-          return date.toLocaleDateString()
-        },
-      },
-      {
-        id: "actions",
-        cell: (info: any) => {
-          const invite = info.row.original
-          return (
-            <DropdownMenuComp
-              options={[
-                {
-                  type: "item",
-                  itemDisplay: "Revoke",
-                  itemOnSelect: () => {
-                    // Handle revoke invitation
-                    console.log("Revoke invitation", invite.id)
-                  },
-                },
-              ]}
-            >
-              <Button variant="ghost" size="icon" class="h-8 w-8">
-                <IconDotsVertical class="size-4 rotate-90" />
-              </Button>
-            </DropdownMenuComp>
-          )
-        },
-      },
-    ]
-
-    const invitations = [
-      {
-        id: "1",
-        email: "alice@example.com",
-        invited_at: "2024-05-15",
-        role: "member",
-        invited_by: { name: "John Doe", email: "john@example.com" },
-      },
-      {
-        id: "2",
-        email: "bob@example.com",
-        invited_at: "2024-05-16",
-        role: "admin",
-        invited_by: { name: "Jane Smith", email: "jane@example.com" },
-      },
-    ]
-
-    return (
-      <DataTable
-        columns={columns}
-        data={invitations}
-        toolbar={{
-          searchable: {
-            columns: ["email"],
-            placeholder: "Search invitations...",
-          },
-          disableViewOptions: true,
-        }}
-        pagination={{ disabled: true }}
-      />
-    )
-  }
-
-  const { user } = useAuthContext()
 
   return (
     <div class="">
@@ -476,9 +566,19 @@ export function OrganizationsManagement() {
                 variant="destructive"
                 size="sm"
                 class="self-end"
+                loading={deleteOrganizationMutation.isPending}
                 onClick={() => {
-                  // Handle delete organization
-                  console.log("Delete organization", user()?.active_organization_id)
+                  const orgId = activeOrganizationQuery.data?.organization?.id
+                  if (!orgId) return
+
+                  deleteOrganizationMutation.mutate(
+                    { orgId: orgId },
+                    {
+                      onError: (error) => {
+                        toast.error(error.message)
+                      },
+                    }
+                  )
                 }}
               >
                 Delete
@@ -512,10 +612,7 @@ export function OrganizationsManagement() {
               <br />
               itlog
             </pre>*/}
-            <OrganizationMembersTable
-              data={organizationMembersQuery.data ?? []}
-              onOpenInvite={inviteCollapseActions.open}
-            />
+            <OrganizationMembersTable onOpenInvite={inviteCollapseActions.open} />
           </div>
         </CardContent>
       </Card>
