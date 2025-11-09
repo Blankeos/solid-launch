@@ -3,6 +3,7 @@ import { createId } from "@paralleldrive/cuid2"
 import type { Context } from "hono"
 import { privateEnv } from "@/env.private"
 import { publicEnv } from "@/env.public"
+import { AUTH_CONFIG } from "./auth.config"
 
 export function setSessionTokenCookie(context: Context, token: string, expiresAt: string): void {
   /**
@@ -15,13 +16,13 @@ export function setSessionTokenCookie(context: Context, token: string, expiresAt
   if (privateEnv.NODE_ENV === "production") {
     context.header(
       "Set-Cookie",
-      `session=${token}; HttpOnly; SameSite=Lax; Expires=${new Date(expiresAt).toUTCString()}; Path=/; Secure;`,
+      `${AUTH_CONFIG.session.cookie_name}=${token}; HttpOnly; SameSite=Lax; Expires=${new Date(expiresAt).toUTCString()}; Path=/; Secure;`,
       { append: true }
     )
   } else {
     context.header(
       "Set-Cookie",
-      `session=${token}; HttpOnly; SameSite=Lax; Expires=${new Date(expiresAt).toUTCString()}; Path=/`,
+      `${AUTH_CONFIG.session.cookie_name}=${token}; HttpOnly; SameSite=Lax; Expires=${new Date(expiresAt).toUTCString()}; Path=/`,
       { append: true }
     )
   }
@@ -29,9 +30,15 @@ export function setSessionTokenCookie(context: Context, token: string, expiresAt
 
 export function deleteSessionTokenCookie(context: Context): void {
   if (privateEnv.NODE_ENV === "production") {
-    context.header("Set-Cookie", "session=; HttpOnly; SameSite=Lax; Max-Age=0; Path=/; Secure;")
+    context.header(
+      "Set-Cookie",
+      `${AUTH_CONFIG.session.cookie_name}=; HttpOnly; SameSite=Lax; Max-Age=0; Path=/; Secure;`
+    )
   } else {
-    context.header("Set-Cookie", "session=; HttpOnly; SameSite=Lax; Max-Age=0; Path=/")
+    context.header(
+      "Set-Cookie",
+      `${AUTH_CONFIG.session.cookie_name}=; HttpOnly; SameSite=Lax; Max-Age=0; Path=/`
+    )
   }
 }
 

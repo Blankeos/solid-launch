@@ -48,3 +48,23 @@ const AvatarFallback = <T extends ValidComponent = "span">(
 }
 
 export { Avatar, AvatarFallback, AvatarImage }
+
+// ---
+
+type AvatarCompProps = {
+  src?: string
+  alt?: string
+  fallback?: string
+  class?: string
+}
+
+const AvatarComp = (props: AvatarCompProps) => {
+  return (
+    <Avatar class={props.class}>
+      <AvatarImage src={props.src} alt={props.alt} />
+      <AvatarFallback>{props.fallback}</AvatarFallback>
+    </Avatar>
+  )
+}
+
+export { AvatarComp }

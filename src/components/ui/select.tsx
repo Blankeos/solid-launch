@@ -1,7 +1,7 @@
 import type { PolymorphicProps } from "@kobalte/core/polymorphic"
 import * as SelectPrimitive from "@kobalte/core/select"
 import { cva } from "class-variance-authority"
-import { children, splitProps, type ValidComponent } from "solid-js"
+import { children, For, onMount, splitProps, type ValidComponent } from "solid-js"
 import type { JSX } from "solid-js/jsx-runtime"
 import { cn } from "@/utils/cn"
 
@@ -194,7 +194,7 @@ import { IconLoading } from "@/assets/icons"
 
 export type SelectOption = {
   value: string
-  label?: JSX.Element
+  label?: JSX.Element | (() => JSX.Element)
 }
 
 type SelectCompProps = ComponentProps<typeof Select<SelectOption>> & {
@@ -211,6 +211,7 @@ export function SelectComp(props: SelectCompProps) {
     "options",
     "loading",
     "placeholder",
+    "onChange",
   ])
 
   const placeholderText = createMemo(() => local.placeholder ?? "Select an option")
@@ -224,6 +225,18 @@ export function SelectComp(props: SelectCompProps) {
     )
   }
 
+  // WEIRD WORKAROUND: kobalte calls `onChange` on mount for some reason, so I have to do this.
+  let hasMounted = false
+  const wrappedOnChange: any = (value: any) => {
+    if (!hasMounted) return
+    local.onChange?.(value)
+  }
+  onMount(() => {
+    setTimeout(() => {
+      hasMounted = true
+    }, 80)
+  })
+
   return (
     <Select
       {...rest}
@@ -235,6 +248,7 @@ export function SelectComp(props: SelectCompProps) {
       itemComponent={(props) => (
         <SelectItem item={props.item}>{renderItemLabel(props.item.rawValue as any)}</SelectItem>
       )}
+      onChange={wrappedOnChange}
     >
       <SelectTrigger
         {...local.triggerProps}
@@ -244,12 +258,16 @@ export function SelectComp(props: SelectCompProps) {
         <span class="flex items-center gap-2 truncate">
           <span class="truncate">
             <SelectValue<SelectOption>>
-              {(state) =>
-                state
-                  .selectedOptions()
-                  ?.map((_option) => _option.label)
-                  ?.join(", ")
-              }
+              {(state) => (
+                <For each={state.selectedOptions()}>
+                  {(option, index) => (
+                    <span class="contents">
+                      {option.label as any}
+                      {index() !== state.selectedOptions().length - 1 && ", "}
+                    </span>
+                  )}
+                </For>
+              )}
             </SelectValue>
           </span>
         </span>

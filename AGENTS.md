@@ -1,7 +1,7 @@
 1. Performing Queries and Mutations
 
 - Use `import { honoClient } from '@/lib/hono-client'` for most hono api calls.
-- Use useQuery, don't destructure: `const somethingQuery = useQuery(...)` is preferred over `const { data } = useQuery(...)`
+- Use useQuery, don't destructure: `const somethingQuery = useQuery(...)` is preferred over `const { data } = useQuery(...)`. Remember `create` prefix in solid-js is deprecated so always use useQuery or useMutation.
   - We also prefer `somethingQuery` and `somethingMutation` naming convention.
 - `!response.ok` is handled and thrown by honoClient's internal fetch call, so no need to manually check this.
 - Thrown errors have a standard output:

@@ -10,7 +10,7 @@ import { usePostLoginRedirectUrl } from "./use-post-login-redirect-url"
 // ===========================================================================
 // Mini-TanStack-like mutation helper - so auth.context.tsx is dependencyless
 // ===========================================================================
-type MutationState<TArgs = unknown, TData = unknown, TError = unknown> = {
+export type MutationState<TArgs = unknown, TData = unknown, TError = unknown> = {
   loading: Accessor<boolean>
   error: Accessor<TError | null>
   run: TArgs extends undefined
@@ -18,7 +18,7 @@ type MutationState<TArgs = unknown, TData = unknown, TError = unknown> = {
     : (options: TArgs) => Promise<TData | null>
 }
 
-function createMutation<TArgs = unknown, TData = unknown, TError = unknown>(
+export function createMutation<TArgs = unknown, TData = unknown, TError = unknown>(
   mutationFn: (options: TArgs) => Promise<TData>
 ): MutationState<TArgs, TData, TError> {
   const [loading, setLoading] = createSignal(false)
@@ -54,6 +54,7 @@ export type AuthContextValue = {
   emailRegister: MutationState<{ email: string; password: string }, UserResponseDTO | null>
   forgotPasswordSend: MutationState<{ email: string }, { success: boolean }>
   forgotPasswordVerify: MutationState<{ token: string; newPassword: string }, { success: boolean }>
+  refresh: MutationState<undefined, UserResponseDTO | null>
 
   magicLinkSend: MutationState<{ email: string }, { success: boolean }>
   otpSend: MutationState<{ email: string }, { success: boolean; userId?: string }>
@@ -289,6 +290,26 @@ export const AuthContextProvider: FlowComponent = (props) => {
     }
   }
 
+  const refresh = createMutation<undefined, UserResponseDTO | null>(async () => {
+    try {
+      const response = await honoClient.auth.$get()
+      const result = await response.json()
+
+      if (result.user) {
+        setUser(result.user)
+        return result.user
+      } else {
+        setUser(null)
+        return null
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(`Could not refresh the user: ${error.message}`)
+      }
+      throw error
+    }
+  })
+
   // Gets the current user at the start of the app.
   onMount(async () => {
     // Hydrated
@@ -312,6 +333,7 @@ export const AuthContextProvider: FlowComponent = (props) => {
         emailLogin,
         forgotPasswordSend,
         forgotPasswordVerify,
+        refresh,
 
         magicLinkSend,
         otpSend,

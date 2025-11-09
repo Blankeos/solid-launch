@@ -52,6 +52,7 @@ export class AuthDAO {
         "session.user_id as session_user_id",
         "session.ip_address as session_ip_address",
         "session.user_agent_hash as session_user_agent_hash",
+        "active_organization_id as session_active_organization_id",
       ])
       .selectAll("user")
       .executeTakeFirst()
@@ -65,6 +66,7 @@ export class AuthDAO {
       session_revoke_id,
       session_ip_address,
       session_user_agent_hash,
+      session_active_organization_id,
       ...joinedUser
     } = result
 
@@ -75,6 +77,7 @@ export class AuthDAO {
       user_id: session_user_id,
       ip_address: session_ip_address,
       user_agent_hash: session_user_agent_hash,
+      active_organization_id: session_active_organization_id,
     }
 
     if (!joinedUser.id) {
@@ -173,6 +176,21 @@ export class AuthDAO {
       .updateTable("session")
       .set({
         user_agent_hash: params.userAgentHash,
+      })
+      .where("session.id", "=", params.sessionId)
+      .execute()
+
+    return { success: true }
+  }
+
+  async updateActiveOrganization(params: {
+    sessionId: string
+    newActiveOrganizationId: string | null
+  }) {
+    await db
+      .updateTable("session")
+      .set({
+        active_organization_id: params.newActiveOrganizationId,
       })
       .where("session.id", "=", params.sessionId)
       .execute()

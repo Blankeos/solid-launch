@@ -35,7 +35,7 @@ export type InternalSessionDTO = Selectable<Session>
 // CLIENT AND SERVER: Make sure to edit this and the userMetaDTO as needed! ✍️
 // ===========================================================================
 // Frontend & Server: User passed around in client context.
-export function getUserResponseDTO(user: InternalUserDTO) {
+export function getUserResponseDTO(user: InternalUserDTO, session: InternalSessionDTO) {
   const userMeta = assertDTO(JSON.parse(user.metadata as string), userMetaDTO) // You can also userMetaDTO.omit() if you don't want to show some meta data to the frontend
 
   // EDIT THIS
@@ -46,6 +46,7 @@ export function getUserResponseDTO(user: InternalUserDTO) {
     joined_at: user.joined_at,
     updated_at: user.updated_at,
     metadata: userMeta,
+    active_organization_id: session.active_organization_id,
   }
 }
 export type UserResponseDTO = ReturnType<typeof getUserResponseDTO>

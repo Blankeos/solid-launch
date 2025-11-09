@@ -45,8 +45,7 @@ export const authController = new Hono<{
     const session = c.get("session")
 
     return c.json({
-      user: user ? getUserResponseDTO(user) : null,
-      session: session,
+      user: user ? getUserResponseDTO(user, session) : null,
     })
   })
 
@@ -121,7 +120,7 @@ export const authController = new Hono<{
       setSessionTokenCookie(c, session.id, session.expires_at)
 
       return c.json({
-        user: getUserResponseDTO(user),
+        user: getUserResponseDTO(user, session),
       })
     }
   )
@@ -186,7 +185,7 @@ export const authController = new Hono<{
       setSessionTokenCookie(c, session.id, session.expires_at)
 
       return c.json({
-        user: getUserResponseDTO(user),
+        user: getUserResponseDTO(user, session),
       })
     }
   )
@@ -315,7 +314,7 @@ export const authController = new Hono<{
       setSessionTokenCookie(c, session.id, session.expires_at)
 
       return c.json({
-        user: getUserResponseDTO(user),
+        user: getUserResponseDTO(user, session),
       })
     }
   )

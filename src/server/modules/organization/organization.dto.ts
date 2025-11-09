@@ -10,7 +10,6 @@ export const orgMetaDTO = z
   .object({
     billing_tier: z.enum(["free", "pro", "enterprise"]).optional(),
     features: z.array(z.string()).optional(),
-    logo_object_id: z.string().optional(),
   })
   .optional()
   .nullable()
@@ -32,7 +31,7 @@ export const updateOrganizationDTO = z.object({
 export type UpdateOrganizationDTO = z.infer<typeof updateOrganizationDTO>
 
 export const inviteMemberDTO = z.object({
-  email: z.string().email(),
+  email: z.email(),
   role: z.enum(["owner", "admin", "member"]).optional().default("member"),
 })
 export type InviteMemberDTO = z.infer<typeof inviteMemberDTO>

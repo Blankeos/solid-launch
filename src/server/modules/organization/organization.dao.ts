@@ -1,9 +1,10 @@
-import type { Insertable } from "kysely"
+import { type Insertable, sql } from "kysely"
 import { db } from "@/server/db/kysely"
 import type { OrganizationInvitation, OrganizationMember } from "@/server/db/types"
 import { ApiError } from "@/server/lib/error"
 import { generateId } from "@/server/modules/auth/auth.utilities"
-import type { OrgMetaDTO } from "./organization.dto"
+import { assertDTO } from "@/server/utils/assert-dto"
+import { type OrgMetaDTO, orgMetaDTO } from "./organization.dto"
 
 type CreateMemberData = Insertable<OrganizationMember>
 type CreateInvitationData = Insertable<OrganizationInvitation>
@@ -63,6 +64,7 @@ export class OrganizationDAO {
         "user.email",
         "user.email_verified",
         "user.joined_at",
+        sql<string>`COALESCE(user.metadata->>'name', '')`.as("user_name"),
       ])
       .where("organization_member.organization_id", "=", organizationId)
       .execute()
@@ -106,16 +108,18 @@ export class OrganizationDAO {
 
     return rows.map((row) => ({
       ...row,
-      metadata: row.metadata ? (JSON.parse(row.metadata as string) as OrgMetaDTO) : undefined,
+      metadata: row.metadata
+        ? assertDTO(JSON.parse(row.metadata as string), orgMetaDTO)
+        : undefined,
     }))
   }
 
-  async getMembership(organizationId: string, userId: string) {
+  async getMembership(params: { organizationId: string; userId: string }) {
     return await db
       .selectFrom("organization_member")
       .select(["organization_id", "user_id", "role", "created_at"])
-      .where("organization_id", "=", organizationId)
-      .where("user_id", "=", userId)
+      .where("organization_id", "=", params.organizationId)
+      .where("user_id", "=", params.userId)
       .executeTakeFirst()
   }
 

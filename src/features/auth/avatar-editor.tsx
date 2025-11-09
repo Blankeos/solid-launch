@@ -256,7 +256,6 @@ const AvatarEditor: Component<
 
   /* ---------- render ---------- */
   const size = props.size ?? 256
-  console.log("ITLOG", size)
 
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: It works

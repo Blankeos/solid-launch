@@ -19,19 +19,42 @@ export class OrganizationService {
     return await this.orgDAO.listUserOrganizations(userId)
   }
 
-  async getOrganizationDetails(orgId: string, userId: string) {
-    // Verify user has access
-    const membership = await this.orgDAO.getMembership(orgId, userId)
+  async getOrganizationDetails(params: { orgId: string; userId: string }) {
+    const membership = await this.orgDAO.getMembership({
+      organizationId: params.orgId,
+      userId: params.userId,
+    })
     if (!membership) {
       throw ApiError.Forbidden("User is not a member of this organization")
     }
 
-    const organization = await this.orgDAO.getOrganizationById(orgId)
+    const organization = await this.orgDAO.getOrganizationById(params.orgId)
     if (!organization) {
       throw ApiError.NotFound("Organization not found")
     }
 
     return { organization, membership }
+  }
+
+  async updateActiveOrganization(params: {
+    orgId: string | null
+    sessionId: string
+    userId: string
+  }) {
+    if (params.orgId) {
+      const membership = await this.orgDAO.getMembership({
+        organizationId: params.orgId,
+        userId: params.userId,
+      })
+      if (!membership) {
+        throw ApiError.Forbidden("User is not a member of this organization")
+      }
+    }
+
+    await this.authDAO.updateActiveOrganization({
+      newActiveOrganizationId: params.orgId,
+      sessionId: params.sessionId,
+    })
   }
 
   async createOrganization(userId: string, data: CreateOrganizationDTO) {
@@ -71,7 +94,10 @@ export class OrganizationService {
     role: string = "member"
   ) {
     // Verify inviter has permissions
-    const inviterMembership = await this.orgDAO.getMembership(orgId, invitedByUserId)
+    const inviterMembership = await this.orgDAO.getMembership({
+      organizationId: orgId,
+      userId: invitedByUserId,
+    })
     if (!inviterMembership || !["owner", "admin"].includes(inviterMembership.role)) {
       throw ApiError.Forbidden("Insufficient permissions to invite members")
     }
@@ -79,7 +105,10 @@ export class OrganizationService {
     // Check if user is already a member
     const existingUser = await this.authDAO.getUserByEmail(email)
     if (existingUser) {
-      const existingMembership = await this.orgDAO.getMembership(orgId, existingUser.id)
+      const existingMembership = await this.orgDAO.getMembership({
+        organizationId: orgId,
+        userId: existingUser.id,
+      })
       if (existingMembership) {
         throw ApiError.Conflict("User is already a member of this organization")
       }
@@ -127,7 +156,10 @@ export class OrganizationService {
 
   async removeMember(orgId: string, userId: string, requestedByUserId: string) {
     // Verify requester has permissions
-    const requesterMembership = await this.orgDAO.getMembership(orgId, requestedByUserId)
+    const requesterMembership = await this.orgDAO.getMembership({
+      organizationId: orgId,
+      userId: requestedByUserId,
+    })
     if (!requesterMembership || !["owner", "admin"].includes(requesterMembership.role)) {
       throw ApiError.Forbidden("Insufficient permissions to remove members")
     }
@@ -147,7 +179,10 @@ export class OrganizationService {
     requestedByUserId: string
   ) {
     // Verify requester has owner role
-    const requesterMembership = await this.orgDAO.getMembership(orgId, requestedByUserId)
+    const requesterMembership = await this.orgDAO.getMembership({
+      organizationId: orgId,
+      userId: requestedByUserId,
+    })
     if (!requesterMembership || requesterMembership.role !== "owner") {
       throw ApiError.Forbidden("Only owners can change member roles")
     }
@@ -177,7 +212,10 @@ export class OrganizationService {
 
   async getOrganizationMembers(orgId: string, userId: string) {
     // Verify user has access
-    const membership = await this.orgDAO.getMembership(orgId, userId)
+    const membership = await this.orgDAO.getMembership({
+      organizationId: orgId,
+      userId: userId,
+    })
     if (!membership) {
       throw ApiError.Forbidden("User is not a member of this organization")
     }

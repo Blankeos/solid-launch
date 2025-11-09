@@ -39,8 +39,9 @@ export type Organization = {
      * Optional URL-friendly identifier
      */
     slug: string | null;
+    logo_object_id: string | null;
     /**
-     * For org settings, billing, features handled in application layer
+     * For additional metadata i.e. org settings, billing, features, handled in application layer
      */
     metadata: unknown | null;
     created_at: Generated<string>;
@@ -58,8 +59,11 @@ export type OrganizationInvitation = {
     created_at: Generated<string>;
 };
 export type OrganizationMember = {
-    organization_id: string;
     user_id: string;
+    organization_id: string;
+    /**
+     * owner, admin, member (handled in application layer)
+     */
     role: Generated<string>;
     created_at: Generated<string>;
     updated_at: Generated<string>;
@@ -75,10 +79,14 @@ export type Session = {
      * an alternative id strictly for revoking (not validating) so it's safe to send to frontend
      */
     revoke_id: string;
+    active_organization_id: string | null;
     /**
      * For "new device login" emails
      */
     ip_address: string | null;
+    /**
+     * Hashed user agent string for device fingerprinting in "new device login" emails
+     */
     user_agent_hash: string | null;
 };
 export type User = {

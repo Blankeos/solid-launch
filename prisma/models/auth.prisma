@@ -18,18 +18,18 @@ model User {
 }
 
 model Session {
-  id         String   @id /// Never send this to the frontend (except http-only cookie)
-  user_id    String
-  expires_at DateTime
-  revoke_id  String   @unique /// an alternative id strictly for revoking (not validating) so it's safe to send to frontend
+  id                     String   @id /// Never send this to the frontend (except http-only cookie)
+  user_id                String
+  expires_at             DateTime
+  revoke_id              String   @unique /// an alternative id strictly for revoking (not validating) so it's safe to send to frontend
+  active_organization_id String?
 
   // Some meta
-  active_organization_id String?
   ip_address      String? /// For "new device login" emails
   user_agent_hash String? /// Hashed user agent string for device fingerprinting in "new device login" emails
 
-  user            User    @relation(references: [id], fields: [user_id], onDelete: Cascade)
-  active_organization Organization? @relation(references: [id], fields: [active_organization_id], onDelete: SetNull)
+  user                User          @relation(references: [id], fields: [user_id], onDelete: Cascade)
+  active_organization Organization? @relation(fields: [active_organization_id], references: [id])
 
   @@map("session")
 }
@@ -63,27 +63,29 @@ model OneTimeToken {
 
 /// For Organizations (can remove if not used, but it's non-intrusive)
 model Organization {
-  id       String  @id
-  name     String
-  slug     String? @unique /// Optional URL-friendly identifier
-  metadata Json? /// For org settings, billing, features, images, handled in application layer
+  id             String  @id
+  name           String
+  slug           String? @unique /// Optional URL-friendly identifier
+  logo_object_id String?
+  metadata       Json? /// For additional metadata i.e. org settings, billing, features, handled in application layer
 
   created_at DateTime @default(now())
   updated_at DateTime @default(now()) @updatedAt
 
   members                 OrganizationMember[]
   organizationInvitations OrganizationInvitation[]
-  sessions Session[]
+  sessions                Session[]
 
   @@map("organization")
 }
 
 model OrganizationMember {
-  organization_id String
   user_id         String
-  role            String   @default("member") /// owner, admin, member (handled in application layer)
-  created_at      DateTime @default(now())
-  updated_at      DateTime @default(now()) @updatedAt
+  organization_id String
+  role            String @default("member") /// owner, admin, member (handled in application layer)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now()) @updatedAt
 
   organization Organization @relation(fields: [organization_id], references: [id], onDelete: Cascade)
   user         User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
@@ -97,15 +99,15 @@ model OrganizationInvitation {
   organization_id String
   email           String
   role            String @default("member")
-  invited_by_id      String @map("invited_by")
+  invited_by_id   String @map("invited_by")
 
   expires_at  DateTime
   accepted_at DateTime?
   rejected_at DateTime?
   created_at  DateTime  @default(now())
 
-  organization    Organization @relation(fields: [organization_id], references: [id], onDelete: Cascade)
-  invited_by User         @relation(fields: [invited_by_id], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+  invited_by   User         @relation(fields: [invited_by_id], references: [id], onDelete: Cascade)
 
   @@unique([organization_id, email])
   @@map("organization_invitation")

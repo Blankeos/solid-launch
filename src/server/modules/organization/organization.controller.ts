@@ -1,8 +1,9 @@
 import { Hono } from "hono"
 import { describeRoute, validator as zValidator } from "hono-openapi"
 import { z } from "zod"
-import { requireAuthMiddleware } from "../auth/auth.middleware"
+import { authMiddleware, requireAuthMiddleware } from "../auth/auth.middleware"
 import type { CreateOrganizationDTO } from "./organization.dto"
+import { organizationMiddleware } from "./organization.middleware"
 import { OrganizationService } from "./organization.service"
 
 const orgService = new OrganizationService()
@@ -14,24 +15,61 @@ export const organizationController = new Hono<{
   }
 }>()
   .use(describeRoute({ tags: ["Organization"] }))
+  .use(authMiddleware, requireAuthMiddleware, organizationMiddleware)
 
   // Get user's organizations
-  .get("/", requireAuthMiddleware, describeRoute({}), async (c) => {
-    const user = c.var.user
-    const organizations = await orgService.getUserOrganizations(user.id)
+  .get("/", describeRoute({}), async (c) => {
+    const organizations = await orgService.getUserOrganizations(c.var.user.id)
     return c.json({ organizations })
   })
+
+  // Get active organization details
+  .get("/active", describeRoute({}), async (c) => {
+    const activeOrganizationId = c.var.session?.active_organization_id
+
+    if (!activeOrganizationId) {
+      return c.json({ organization: null, membership: null })
+    }
+
+    const { organization, membership } = await orgService.getOrganizationDetails({
+      orgId: activeOrganizationId,
+      userId: c.var.user.id,
+    })
+
+    return c.json({ organization, membership })
+  })
+
+  // Set active organization
+  .put(
+    "/active",
+    zValidator("json", z.object({ orgId: z.string().nullable() })),
+    describeRoute({}),
+    async (c) => {
+      const { orgId } = c.req.valid("json")
+
+      await orgService.updateActiveOrganization({
+        orgId: orgId,
+        sessionId: c.var.session.id,
+        userId: c.var.user.id,
+      })
+
+      return c.json({ success: true })
+    }
+  )
 
   // Get organization details
   .get(
     "/:orgId",
-    requireAuthMiddleware,
     zValidator("param", z.object({ orgId: z.string() })),
     describeRoute({}),
     async (c) => {
       const { orgId } = c.req.valid("param")
-      const user = c.var.user
-      const { organization, membership } = await orgService.getOrganizationDetails(orgId, user.id)
+
+      const { organization, membership } = await orgService.getOrganizationDetails({
+        orgId: orgId,
+        userId: c.var.user.id,
+      })
+
       return c.json({ organization, membership })
     }
   )
@@ -39,7 +77,6 @@ export const organizationController = new Hono<{
   // Create organization
   .post(
     "/",
-    requireAuthMiddleware,
     zValidator(
       "json",
       z.object({
@@ -60,7 +97,6 @@ export const organizationController = new Hono<{
   // Get organization members
   .get(
     "/:orgId/members",
-    requireAuthMiddleware,
     zValidator("param", z.object({ orgId: z.string() })),
     describeRoute({}),
     async (c) => {
@@ -74,7 +110,7 @@ export const organizationController = new Hono<{
   // Invite member
   .post(
     "/:orgId/invite",
-    requireAuthMiddleware,
+
     zValidator("param", z.object({ orgId: z.string() })),
     zValidator(
       "json",
@@ -96,7 +132,7 @@ export const organizationController = new Hono<{
   // Accept invitation
   .post(
     "/invite/:invitationId/accept",
-    requireAuthMiddleware,
+
     zValidator("param", z.object({ invitationId: z.string() })),
     describeRoute({}),
     async (c) => {
@@ -110,7 +146,7 @@ export const organizationController = new Hono<{
   // Leave organization
   .post(
     "/:orgId/leave",
-    requireAuthMiddleware,
+
     zValidator("param", z.object({ orgId: z.string() })),
     describeRoute({}),
     async (c) => {
@@ -124,7 +160,7 @@ export const organizationController = new Hono<{
   // Remove member
   .delete(
     "/:orgId/members/:userId",
-    requireAuthMiddleware,
+
     zValidator("param", z.object({ orgId: z.string(), userId: z.string() })),
     describeRoute({}),
     async (c) => {
@@ -138,7 +174,7 @@ export const organizationController = new Hono<{
   // Update member role
   .patch(
     "/:orgId/members/:userId/role",
-    requireAuthMiddleware,
+
     zValidator("param", z.object({ orgId: z.string(), userId: z.string() })),
     zValidator(
       "json",

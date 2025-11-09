@@ -4,6 +4,7 @@ import type { Bindings } from "@/server/lib/context"
 import { ApiError } from "@/server/lib/error"
 import { AuthDAO } from "@/server/modules/auth/auth.dao"
 
+import { AUTH_CONFIG } from "./auth.config"
 import type { InternalSessionDTO, InternalUserDTO } from "./auth.dto"
 import {
   deleteSessionTokenCookie,
@@ -22,7 +23,7 @@ export type AuthMiddlewareBindings = Bindings & {
 }
 export const authMiddleware = createMiddleware<AuthMiddlewareBindings>(async (c, next) => {
   // 1. Check cookie session.
-  const sessionId = getCookie(c, "session") ?? null
+  const sessionId = getCookie(c, AUTH_CONFIG.session.cookie_name) ?? null
 
   // 2. Validate sesssion
   const { session, user } = await authDAO.validateSession(sessionId)
