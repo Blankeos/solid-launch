@@ -25,6 +25,7 @@ import { SelectComp, type SelectOption } from "@/components/ui/select"
 import { TagsInputComp } from "@/components/ui/tags-input"
 import { TextFieldComp } from "@/components/ui/text-field"
 import type { honoClient } from "@/lib/hono-client"
+import { formatDate } from "@/utils/format-date"
 import { useAuthContext } from "../auth/auth.context"
 import { useOrganizations } from "./use-organizations"
 
@@ -153,10 +154,14 @@ const OrganizationMembersTable = (props: {
         const userId = cell.row.original.user_id
         return (
           <div class="flex items-center gap-3">
-            <img src={`https://github.com/shadcn.png`} alt={email} class="size-8 rounded-full" />
+            <AvatarComp
+              class="size-8"
+              src={cell.row.original.metadata.avatar_url}
+              fallback={cell.row.original.metadata?.name?.charAt(0)}
+            />
             <div class="flex flex-col">
               <div class="flex items-center gap-2">
-                <span class="font-medium">{cell.row.original.user_name}</span>
+                <span class="font-medium">{cell.row.original.metadata.name}</span>
                 {userId === currentUser()?.id && (
                   <span class="rounded bg-primary/10 px-2 py-0.5 text-primary text-xs">You</span>
                 )}
@@ -391,7 +396,7 @@ export function OrganizationsManagement() {
           <CardDescription>Manage your organizations</CardDescription>
         </CardHeader>
         <CardContent>
-          <div class="space-y-2">
+          <div class="flex flex-col gap-y-3">
             {/* 🪲 DEBUGGER */}
             {/*<pre>{JSON.stringify(user(), null, 2)}</pre>*/}
             {/*<pre>{JSON.stringify(activeOrganizationQuery.data, null, 2)}</pre>*/}
@@ -427,6 +432,58 @@ export function OrganizationsManagement() {
                 Create
               </Button>
             </div>
+
+            <Show when={user()?.active_organization_id}>
+              <div class="flex items-center justify-between">
+                <span class="text-muted-foreground text-sm">Name</span>
+                <span class="font-medium text-sm">
+                  {activeOrganizationQuery.data?.organization?.name}
+                </span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-muted-foreground text-sm">Slug</span>
+                <span class="font-medium text-sm">
+                  {activeOrganizationQuery.data?.organization?.slug}
+                </span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-muted-foreground text-sm">Created</span>
+                <span class="font-medium text-sm">
+                  {formatDate(activeOrganizationQuery.data?.organization?.created_at ?? "")}
+                </span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-muted-foreground text-sm">Members</span>
+                <span class="font-medium text-sm">
+                  {organizationMembersQuery.data?.length || 0}
+                </span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-muted-foreground text-sm">My Role</span>
+                <span class="font-medium text-sm">
+                  {activeOrganizationQuery.data?.membership?.role}
+                </span>
+              </div>
+            </Show>
+
+            {/*<div class="flex items-center justify-between">
+              <span class="text-muted-foreground text-sm">Members</span>
+              <AvatarComp src={activeOrganizationQuery?.data?.organization?.logo_object_id} />
+            </div>*/}
+
+            <Show when={user()?.active_organization_id}>
+              <Button
+                variant="destructive"
+                size="sm"
+                class="self-end"
+                onClick={() => {
+                  // Handle delete organization
+                  console.log("Delete organization", user()?.active_organization_id)
+                }}
+              >
+                Delete
+              </Button>
+            </Show>
           </div>
         </CardContent>
       </Card>

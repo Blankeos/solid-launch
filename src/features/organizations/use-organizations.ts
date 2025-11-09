@@ -75,6 +75,7 @@ export function useOrganizations(params?: { queriesOnMount: (keyof typeof Organi
       })
 
       await refresh.run()
+      await listOrganizationsQuery.refetch()
       await activeOrganizationQuery.refetch()
 
       return response.json()

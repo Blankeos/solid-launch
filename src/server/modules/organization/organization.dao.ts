@@ -1,9 +1,10 @@
-import { type Insertable, sql } from "kysely"
+import type { Insertable } from "kysely"
 import { db } from "@/server/db/kysely"
 import type { OrganizationInvitation, OrganizationMember } from "@/server/db/types"
 import { ApiError } from "@/server/lib/error"
 import { generateId } from "@/server/modules/auth/auth.utilities"
 import { assertDTO } from "@/server/utils/assert-dto"
+import { getUserResponseMetaDTO, type UserMetaDTO } from "../auth/auth.dto"
 import { type OrgMetaDTO, orgMetaDTO } from "./organization.dto"
 
 type CreateMemberData = Insertable<OrganizationMember>
@@ -52,7 +53,7 @@ export class OrganizationDAO {
   }
 
   async getOrganizationMembers(organizationId: string) {
-    return await db
+    const members = await db
       .selectFrom("organization_member")
       .innerJoin("user", "organization_member.user_id", "user.id")
       .select([
@@ -64,10 +65,19 @@ export class OrganizationDAO {
         "user.email",
         "user.email_verified",
         "user.joined_at",
-        sql<string>`COALESCE(user.metadata->>'name', '')`.as("user_name"),
+        "user.metadata",
       ])
       .where("organization_member.organization_id", "=", organizationId)
       .execute()
+
+    return await Promise.all(
+      members.map(async (member) => ({
+        ...member,
+        metadata: await getUserResponseMetaDTO(
+          JSON.parse(member.metadata as string) as UserMetaDTO
+        ),
+      }))
+    )
   }
 
   async getOrganizationOwners(organizationId: string) {
