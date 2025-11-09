@@ -1,5 +1,7 @@
 import type { Selectable } from "kysely"
 import z from "zod"
+import { publicEnv } from "@/env.public"
+import { initHonoClient } from "@/lib/hono-client"
 import type { Session, User } from "@/server/db/types"
 import { assertDTO } from "@/server/utils/assert-dto"
 
@@ -34,8 +36,10 @@ export type InternalSessionDTO = Selectable<Session>
 // ===========================================================================
 // CLIENT AND SERVER: Make sure to edit this and the userMetaDTO as needed! ✍️
 // ===========================================================================
+
 // Frontend & Server: User passed around in client context.
-export function getUserResponseDTO(user: InternalUserDTO, session: InternalSessionDTO) {
+//
+export async function getUserResponseDTO(user: InternalUserDTO, session: InternalSessionDTO) {
   const userMeta = assertDTO(JSON.parse(user.metadata as string), userMetaDTO) // You can also userMetaDTO.omit() if you don't want to show some meta data to the frontend
 
   // EDIT THIS
@@ -45,11 +49,28 @@ export function getUserResponseDTO(user: InternalUserDTO, session: InternalSessi
     email_verified: user.email_verified,
     joined_at: user.joined_at,
     updated_at: user.updated_at,
-    metadata: userMeta,
+    metadata: await getUserResponseMetaDTO(userMeta),
     active_organization_id: session.active_organization_id,
   }
 }
-export type UserResponseDTO = ReturnType<typeof getUserResponseDTO>
+export type UserResponseDTO = Awaited<ReturnType<typeof getUserResponseDTO>>
+
+export async function getUserResponseMetaDTO(
+  userMeta: UserMetaDTO
+): Promise<{ name?: string; avatar_url?: string }> {
+  // When the user has uploaded, don't return the oauth avatar.
+  const avatar_url: string | undefined = userMeta?.avatar_object_id
+    ? initHonoClient(publicEnv.PUBLIC_BASE_URL)
+        .auth.profile.avatar[":uniqueId"].$url({ param: { uniqueId: userMeta.avatar_object_id } })
+        ?.toString()
+    : userMeta?.avatar_url
+
+  return {
+    name: userMeta?.name,
+    avatar_url,
+  }
+}
+export type UserResponseMetaDTO = Awaited<ReturnType<typeof getUserResponseMetaDTO>>
 
 // ===========================================================================
 // Other DTOs

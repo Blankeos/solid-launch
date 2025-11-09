@@ -10,6 +10,7 @@ import {
 import { assertDTO } from "@/server/utils/assert-dto"
 import { AUTH_CONFIG } from "./auth.config"
 import {
+  getUserResponseMetaDTO,
   type InternalSessionDTO,
   type InternalUserDTO,
   type UserMetaDTO,
@@ -242,13 +243,15 @@ export class AuthDAO {
         .execute(),
     ])
 
+    const metadata = user.metadata
+      ? assertDTO(JSON.parse(user.metadata as string), userMetaDTO)
+      : undefined
+
     return {
       id: user.id,
       email: user.email,
       email_verified: Boolean(user.email_verified),
-      metadata: user.metadata
-        ? assertDTO(JSON.parse(user.metadata as string), userMetaDTO)
-        : undefined,
+      metadata: await getUserResponseMetaDTO(metadata),
       joined_at: user.joined_at,
       updated_at: user.updated_at,
       oauth_accounts: oauthAccounts.map((acc) => ({

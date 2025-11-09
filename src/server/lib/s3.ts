@@ -1,7 +1,7 @@
+import { privateEnv } from "@/env.private"
 import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 import { createId } from "@paralleldrive/cuid2"
-import { privateEnv } from "@/env.private"
 
 const _s3Client = new S3Client({
   endpoint: privateEnv.S3_ENDPOINT,
@@ -10,6 +10,7 @@ const _s3Client = new S3Client({
     accessKeyId: privateEnv.S3_ACCESS_KEY_ID,
     secretAccessKey: privateEnv.S3_SECRET_ACCESS_KEY,
   },
+  forcePathStyle: true
 })
 
 /** Wrapped a bunch of QoLs in this extensible class. */

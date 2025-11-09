@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { honoClient } from "@/lib/hono-client"
 import { cn } from "@/utils/cn"
 import { useAuthContext } from "./auth.context"
-import { AvatarEditorDialog } from "./avatar-editor"
+import { AvatarEditorDialog } from "./avatar-editor-dialog"
 
 export function AccountManagement(props: VoidProps<{ class?: string }>) {
   const { user, revokeSession } = useAuthContext()
