@@ -166,7 +166,7 @@ export class OrganizationService {
       organization_id: orgId,
       email: email.toLowerCase(),
       role,
-      invited_by: invitedByUserId,
+      invited_by_id: invitedByUserId,
       expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days
     })
 
@@ -186,7 +186,7 @@ export class OrganizationService {
     return invitation
   }
 
-  async listInvitations(orgId: string, requestedByUserId: string) {
+  async listPendingInvitations(orgId: string, requestedByUserId: string) {
     const requesterMembership = await this.orgDAO.getMembership({
       organizationId: orgId,
       userId: requestedByUserId,
@@ -195,7 +195,20 @@ export class OrganizationService {
       throw ApiError.Forbidden("Insufficient permissions to view invitations")
     }
 
-    return await this.orgDAO.listInvitations(orgId)
+    return await this.orgDAO.listPendingInvitations(orgId)
+  }
+
+  async getPendingInvitation(params: { invitationId: string; email: string }) {
+    const invitation = await this.orgDAO.getPendingInvitation({
+      id: params.invitationId,
+      email: params.email,
+    })
+
+    if (!invitation) {
+      throw ApiError.NotFound("Invitation not found")
+    }
+
+    return invitation
   }
 
   async acceptInvitation(invitationId: string, userId: string) {

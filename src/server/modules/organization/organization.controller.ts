@@ -136,8 +136,24 @@ export const organizationController = new Hono<{
     async (c) => {
       const { orgId } = c.req.valid("param")
       const user = c.var.user
-      const invitations = await orgService.listInvitations(orgId, user.id)
+      const invitations = await orgService.listPendingInvitations(orgId, user.id)
       return c.json({ invitations })
+    }
+  )
+
+  // Get pending invitation details
+  .get(
+    "/invite/:invitationId",
+    zValidator("param", z.object({ invitationId: z.string() })),
+    describeRoute({}),
+    async (c) => {
+      const { invitationId } = c.req.valid("param")
+      const user = c.var.user
+      const invitation = await orgService.getPendingInvitation({
+        invitationId,
+        email: user.email,
+      })
+      return c.json({ invitation })
     }
   )
 

@@ -99,7 +99,7 @@ model OrganizationInvitation {
   organization_id String
   email           String
   role            String @default("member")
-  invited_by_id   String @map("invited_by")
+  invited_by_id   String
 
   expires_at  DateTime
   accepted_at DateTime?

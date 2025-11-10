@@ -220,16 +220,16 @@ export class OrganizationDAO {
 
   // 👉 Invitation CRUD
 
-  async listInvitations(organizationId: string) {
+  async listPendingInvitations(organizationId: string) {
     const results = await db
       .selectFrom("organization_invitation")
-      .innerJoin("user", "organization_invitation.invited_by", "user.id")
+      .innerJoin("user", "organization_invitation.invited_by_id", "user.id")
       .select([
         "organization_invitation.id",
         "organization_invitation.organization_id",
         "organization_invitation.email",
         "organization_invitation.role",
-        "organization_invitation.invited_by",
+        "organization_invitation.invited_by_id",
         "organization_invitation.created_at",
         "organization_invitation.expires_at",
         "organization_invitation.accepted_at",
@@ -251,12 +251,41 @@ export class OrganizationDAO {
     )
   }
 
-  async getInvitationById(id: string) {
-    return await db
+  async getPendingInvitation(params: { id: string; email: string }) {
+    const result = await db
       .selectFrom("organization_invitation")
-      .selectAll()
-      .where("id", "=", id)
+      .innerJoin("user", "organization_invitation.invited_by_id", "user.id")
+      .innerJoin("organization", "organization_invitation.organization_id", "organization.id")
+      .selectAll("organization_invitation")
+      .select((eb) => [
+        "invited_by_id",
+        "user.metadata as invited_by_metadata",
+        "organization.name as organization_name",
+        eb
+          .selectFrom("organization_member")
+          .select(db.fn.count("organization_member.user_id").as("member_count"))
+          .whereRef(
+            "organization_member.organization_id",
+            "=",
+            "organization_invitation.organization_id"
+          )
+          .as("member_count"),
+      ])
+      .where("organization_invitation.id", "=", params.id)
+      .where("organization_invitation.email", "=", params.email)
+      .where("organization_invitation.accepted_at", "is", null)
+      .where("organization_invitation.rejected_at", "is", null)
+      .where("organization_invitation.expires_at", ">", new Date().toISOString())
       .executeTakeFirst()
+
+    if (!result) return undefined
+
+    return {
+      ...result,
+      invited_by_metadata: await getUserResponseMetaDTO(
+        JSON.parse(result.invited_by_metadata as string) as UserMetaDTO
+      ),
+    }
   }
 
   async getInvitationByEmailAndOrg(organizationId: string, email: string) {
@@ -268,21 +297,6 @@ export class OrganizationDAO {
       .executeTakeFirst()
   }
 
-  async getPendingInvitation(organizationId: string, email: string) {
-    return await db
-      .selectFrom("organization_invitation")
-      .innerJoin("organization", "organization_invitation.organization_id", "organization.id")
-      .innerJoin("user", "organization_invitation.invited_by", "user.id")
-      .selectAll("organization_invitation")
-      .select(["organization.name as organization_name", "user.email as invited_by_email"])
-      .where("organization_invitation.organization_id", "=", organizationId)
-      .where("organization_invitation.email", "=", email)
-      .where("organization_invitation.accepted_at", "is", null)
-      .where("organization_invitation.rejected_at", "is", null)
-      .where("organization_invitation.expires_at", ">", new Date().toISOString())
-      .executeTakeFirst()
-  }
-
   async createInvitation(data: CreateInvitationData) {
     const invitation = await db
       .insertInto("organization_invitation")
@@ -291,7 +305,7 @@ export class OrganizationDAO {
         organization_id: data.organization_id,
         email: data.email,
         role: data.role || "member",
-        invited_by: data.invited_by,
+        invited_by_id: data.invited_by_id,
         expires_at: data.expires_at,
       })
       .returningAll()

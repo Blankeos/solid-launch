@@ -73,13 +73,13 @@ CREATE TABLE "organization_invitation" (
     "organization_id" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "role" TEXT NOT NULL DEFAULT 'member',
-    "invited_by" TEXT NOT NULL,
+    "invited_by_id" TEXT NOT NULL,
     "expires_at" DATETIME NOT NULL,
     "accepted_at" DATETIME,
     "rejected_at" DATETIME,
     "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "organization_invitation_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organization" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "organization_invitation_invited_by_fkey" FOREIGN KEY ("invited_by") REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT "organization_invitation_invited_by_id_fkey" FOREIGN KEY ("invited_by_id") REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- CreateIndex

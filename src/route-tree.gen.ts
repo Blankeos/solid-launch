@@ -15,6 +15,7 @@ const pageRoutes = [
   "/",
   "/_components",
   "/about",
+  "/accept-invitation/@invitationId",
   "/dashboard",
   "/dashboard/settings",
   "/forgot-password",

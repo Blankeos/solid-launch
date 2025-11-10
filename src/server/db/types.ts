@@ -52,7 +52,7 @@ export type OrganizationInvitation = {
     organization_id: string;
     email: string;
     role: Generated<string>;
-    invited_by: string;
+    invited_by_id: string;
     expires_at: string;
     accepted_at: string | null;
     rejected_at: string | null;

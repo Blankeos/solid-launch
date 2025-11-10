@@ -8,6 +8,7 @@ const OrganizationsQuery = {
   "list-organizations": "list-organizations",
   "organization-members": "organization-members",
   "organization-invitations": "organization-invitations",
+  "pending-invitation": "pending-invitation",
 }
 
 export type InvitationListItem = InferResponseType<
@@ -22,7 +23,10 @@ export type MembersListItem = InferResponseType<
  * Decided to use TanStack Query because at this point, if you need organization-features,
  * you might probably need TanStack anyway.
  */
-export function useOrganizations(params?: { queriesOnMount: (keyof typeof OrganizationsQuery)[] }) {
+export function useOrganizations(params?: {
+  queriesOnMount: (keyof typeof OrganizationsQuery)[]
+  pendingInvitationId?: string
+}) {
   const { user } = useAuthContext()
 
   const queriesOnMount = params?.queriesOnMount ?? ["list-organizations"]
@@ -77,6 +81,19 @@ export function useOrganizations(params?: { queriesOnMount: (keyof typeof Organi
       const data = await response.json()
       return data.invitations ?? []
     },
+  }))
+
+  const pendingInvitationQuery = useQuery(() => ({
+    queryKey: [OrganizationsQuery["pending-invitation"], params?.pendingInvitationId],
+    queryFn: async ({ queryKey: [, invitationId] }) => {
+      if (!invitationId) return
+      const response = await honoClient.auth.organizations.invite[":invitationId"].$get({
+        param: { invitationId: invitationId },
+      })
+      const data = await response.json()
+      return data.invitation
+    },
+    enabled: !!params?.pendingInvitationId,
   }))
 
   const setActiveOrganizationMutation = useMutation(() => ({
@@ -217,6 +234,7 @@ export function useOrganizations(params?: { queriesOnMount: (keyof typeof Organi
     deleteOrganizationMutation,
 
     organizationInvitationsQuery,
+    pendingInvitationQuery,
     inviteMemberMutation,
     acceptInvitationMutation,
     revokeInvitationMutation,
