@@ -157,7 +157,15 @@ export class OrganizationService {
     // Check for existing pending invitation
     const existingInvitation = await this.orgDAO.getInvitationByEmailAndOrg(orgId, email)
     if (existingInvitation) {
-      throw ApiError.Conflict("Invitation already sent to this email")
+      const now = new Date()
+      const expiresAt = new Date(existingInvitation.expires_at)
+      const isExpired = expiresAt <= now
+      const isPending =
+        !existingInvitation.accepted_at && !existingInvitation.rejected_at && !isExpired
+
+      if (isPending) {
+        throw ApiError.Conflict("An active invitation already exists for this email")
+      }
     }
 
     // Create invitation
