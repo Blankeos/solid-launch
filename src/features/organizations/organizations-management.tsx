@@ -489,7 +489,7 @@ export function OrganizationsManagement() {
   })
 
   return (
-    <div class="">
+    <section class="">
       <Card class="mb-5 overflow-hidden">
         <CardHeader>
           <CardTitle class="text-base">Organizations</CardTitle>
@@ -542,7 +542,7 @@ export function OrganizationsManagement() {
               </div>
               <div class="flex items-center justify-between">
                 <span class="text-muted-foreground text-sm">Slug</span>
-                <span class="font-medium text-sm">
+                <span class="font-medium text-muted-foreground/80 text-sm">
                   {activeOrganizationQuery.data?.organization?.slug}
                 </span>
               </div>
@@ -666,7 +666,7 @@ export function OrganizationsManagement() {
         onConfirm={deleteOrganizationModalData()?.onConfirm ?? (() => {})}
         onOpenChange={(open) => !open && deleteOrganizationModalActions.close()}
       />
-    </div>
+    </section>
   )
 }
 const CreateOrganizationModal = (props?: {

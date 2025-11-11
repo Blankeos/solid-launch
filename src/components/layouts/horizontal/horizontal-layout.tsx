@@ -23,8 +23,8 @@ function _HorizontalLayoutContextProvider(props: FlowProps) {
   return (
     <PanelGroup class="flex h-screen max-h-screen w-full overflow-hidden" setAPI={_setApi}>
       <Panel
-        // minSize={10}
-        // maxSize={50}
+        minSize={5}
+        maxSize={20}
         collapsible
         id={PANEL_ID__SIDEBAR}
         initialSize={sidebarState.lastSize}

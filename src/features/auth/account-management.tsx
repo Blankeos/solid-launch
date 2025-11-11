@@ -47,9 +47,7 @@ export function AccountManagement(props: VoidProps<{ class?: string }>) {
   }
 
   return (
-    <div class={cn("mx-auto w-full max-w-2xl", props.class)}>
-      <h2 class="mb-6 font-semibold text-2xl">Account</h2>
-
+    <section class={cn("mx-auto w-full max-w-2xl", props.class)}>
       <Card class="mb-4 overflow-hidden">
         <CardHeader>
           <CardTitle class="text-base">Profile</CardTitle>
@@ -190,7 +188,7 @@ export function AccountManagement(props: VoidProps<{ class?: string }>) {
         onOpenChange={avatarEditActions.set}
         onSave={() => {}}
       />
-    </div>
+    </section>
   )
 }
 
