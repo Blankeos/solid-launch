@@ -128,7 +128,7 @@ export const organizationController = new Hono<{
     }
   )
 
-  // List invitations
+  // List pending invitations
   .get(
     "/:orgId/invitations",
     zValidator("param", z.object({ orgId: z.string() })),

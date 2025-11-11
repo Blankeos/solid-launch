@@ -96,6 +96,3 @@ CREATE UNIQUE INDEX "onetime_token_code_user_id_key" ON "onetime_token"("code", 
 
 -- CreateIndex
 CREATE UNIQUE INDEX "organization_slug_key" ON "organization"("slug");
-
--- CreateIndex
-CREATE UNIQUE INDEX "organization_invitation_organization_id_email_key" ON "organization_invitation"("organization_id", "email");

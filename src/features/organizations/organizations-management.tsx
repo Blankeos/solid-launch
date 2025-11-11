@@ -259,6 +259,9 @@ const OrganizationMembersTable = (props: { onOpenInvite?: () => void }) => {
                     role: newVal.value as "member" | "admin" | "owner",
                   },
                   {
+                    onSuccess: () => {
+                      toast.success(`Updated role to ${newVal.value}`)
+                    },
                     onError: (error) => {
                       toast.error(error.message)
                     },
@@ -673,6 +676,9 @@ const CreateOrganizationModal = (props?: {
         description: description() || undefined,
       },
       {
+        onSuccess: () => {
+          toast.success(`Created organization`)
+        },
         onError: (error) => {
           toast.error(error.message)
         },

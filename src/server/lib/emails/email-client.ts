@@ -13,7 +13,6 @@ export type SendEmailFunction = (params: {
 // Your custom code here....
 // ===========================================================================
 
-// @ts-expect-error
 import { SendMailClient } from "zeptomail"
 import { privateEnv } from "@/env.private"
 
@@ -46,9 +45,11 @@ export const sendEmail: SendEmailFunction = async (params) => {
     htmlbody: html,
   }
 
+  if (process.env.DEV_DISABLE_EMAILS) return
+
   try {
-    const resp = await client.sendMail(payload)
-    console.log("[sendEmail] Message sent:", resp)
+    const response = await client.sendMail(payload)
+    console.log("[sendEmail] Message sent:", response)
   } catch (err) {
     console.error("[sendEmail] Error:", JSON.stringify(err))
     throw err

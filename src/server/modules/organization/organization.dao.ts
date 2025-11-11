@@ -238,6 +238,8 @@ export class OrganizationDAO {
         "user.metadata as invited_by_metadata",
       ])
       .where("organization_invitation.organization_id", "=", organizationId)
+      .where("organization_invitation.accepted_at", "is", null)
+      .where("organization_invitation.rejected_at", "is", null)
       .orderBy("organization_invitation.created_at", "desc")
       .execute()
 

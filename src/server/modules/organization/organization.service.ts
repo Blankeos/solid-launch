@@ -1,3 +1,4 @@
+import { sendEmail } from "@/server/lib/emails"
 import { renderOrgInvitationEmail } from "@/server/lib/emails/org-invitation.email"
 import { ApiError } from "@/server/lib/error"
 import { AuthDAO } from "@/server/modules/auth/auth.dao"
@@ -185,11 +186,11 @@ export class OrganizationService {
     }
 
     const html = renderOrgInvitationEmail({ inviteLink: "", inviterName: "", orgName: "" })
-    // await sendEmail({
-    //   html,
-    //   subject: `You're invited to join ${organization.name}`,
-    //   to: email,
-    // })
+    await sendEmail({
+      html,
+      subject: `You're invited to join ${organization.name}`,
+      to: email,
+    })
 
     return invitation
   }
@@ -211,10 +212,6 @@ export class OrganizationService {
       id: params.invitationId,
       email: params.email,
     })
-
-    if (!invitation) {
-      throw ApiError.NotFound("Invitation not found")
-    }
 
     return invitation
   }
@@ -281,6 +278,15 @@ export class OrganizationService {
     })
     if (!requesterMembership || !["owner", "admin"].includes(requesterMembership.role)) {
       throw ApiError.Forbidden("Insufficient permissions to remove members")
+    }
+
+    // Admins can't remove owners
+    const memberMembership = await this.orgDAO.getMembership({
+      organizationId: params.orgId,
+      userId: params.userId,
+    })
+    if (memberMembership?.role === "owner" && requesterMembership?.role === "admin") {
+      throw ApiError.Forbidden("Admins cannot remove owners")
     }
 
     // Can't remove yourself through this endpoint

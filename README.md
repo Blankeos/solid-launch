@@ -34,14 +34,17 @@ You can also try my other starters:
     - [ ] Authenticator App
     - [ ] Backup Code
   - [ ] Pass Key
-  - [ ] Organization Auth (easily opt-outable)
-  - [ ] User Management Dashboard
+  - [x] Organization Auth (easily opt-outable)
+    - [x] Active Organization and Switching
+    - [x] Roles (Owner, Admin, Member)
+    - [x] Invitations
+  - [ ] User Management Dashboard (I plan to do this as an external tool that only needs a DB URI to work)
   - [x] Rate Limits + Global Rate Limits
   - [x] Frontend Components and practices ready:
     - [x] Flexible and ssr-compatible `useAuthContext()` and `auth.context.tsx`,
-    - [x] `<ProtectedRoute>`
+    - [x] `<ProtectedRoute>` - w/ UX edge-cases covered (i.e. post-login-redirects)
     - [x] `<AccountManagement>` - like Clerk's <UserProfile />
-    - [x] UX edge-cases covered! (i.e. post-login-redirects vs Redirect-back-to-origin)
+    - [x] `<OrganizationManagement>` - everything for your org management
 
 ### Tech Stack
 
@@ -55,7 +58,7 @@ You can also try my other starters:
 - [x] **Prisma** - Great _migrations_ workflow, but I want to maximize perf.
 - [x] **Kysely** - Great typesafe _query builder_ for SQL, minimally wraps around db connection.
 - [x] **SQLite/LibSQL (Turso)** - Cheapest database, easy to use.
-- [x] **Lucia Book + Arctic** - Makes self-rolling auth easy, and not dependent on any third-party. (You may learn a thing or two with this low-level implementation as well). I chose not to use better-auth, everything is custom built.
+- [x] **Lucia Book + Arctic** - Makes self-rolling auth easy, and not dependent on any third-party. (You may learn a thing or two with this low-level implementation as well). I chose not to use better-auth, everything is custom built, even organizations.
 - [x] **Nodemailer (or any email API/SDK)** - Just customize `email-client.ts`. Send emails w/ any API: SMTP or SDK-specific (Amazon SES, Resend, Zeptomail, etc.). Amazon SES is the cheapest. I personally use Zeptomail. Tip: SDK-specific is preferred because SMTP is unreliable for some services because of the handshake requirement.
 - [x] **Backblaze (or any S3)** - Cheap blob object storage with an S3-compatible API.
 - [x] **Dodo Payments** - Accept payments and pay foreign taxes, cool new payment tech I found.
