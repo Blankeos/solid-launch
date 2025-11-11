@@ -1,10 +1,11 @@
 import type { ColumnDef } from "@tanstack/solid-table"
-import { useDisclosure } from "bagon-hooks"
+import { useDisclosure, useDisclosureData } from "bagon-hooks"
 import { createMemo, createSignal, Show } from "solid-js"
 import { createStore } from "solid-js/store"
 import { toast } from "solid-sonner"
 import z from "zod"
 import { IconAlertFilled, IconDotsVertical, IconPlus, IconUpload } from "@/assets/icons"
+import { ConfirmationDialog } from "@/components/confirm-dialog"
 import { AlertComp } from "@/components/ui/alert"
 import { AvatarComp } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -453,6 +454,12 @@ export function OrganizationsManagement() {
 
   const [inviteCollapseOpen, inviteCollapseActions] = useDisclosure()
   const [createOrganizationModalOpen, createOrganizationModalActions] = useDisclosure()
+  const [deleteOrganizationModalData, deleteOrganizationModalOpen, deleteOrganizationModalActions] =
+    useDisclosureData<{
+      organizationId: string
+      organizationName: string
+      onConfirm: () => void
+    }>()
 
   // Get organizations from the query result
   const organizations = createMemo(() => {
@@ -564,7 +571,12 @@ export function OrganizationsManagement() {
               <AvatarComp src={activeOrganizationQuery?.data?.organization?.logo_object_id} />
             </div>*/}
 
-            <Show when={user()?.active_organization_id}>
+            <Show
+              when={
+                user()?.active_organization_id &&
+                activeOrganizationQuery?.data?.membership?.role === "owner"
+              }
+            >
               <Button
                 variant="destructive"
                 size="sm"
@@ -574,14 +586,20 @@ export function OrganizationsManagement() {
                   const orgId = activeOrganizationQuery.data?.organization?.id
                   if (!orgId) return
 
-                  deleteOrganizationMutation.mutate(
-                    { orgId: orgId },
-                    {
-                      onError: (error) => {
-                        toast.error(error.message)
-                      },
-                    }
-                  )
+                  deleteOrganizationModalActions.open({
+                    organizationId: orgId,
+                    organizationName: activeOrganizationQuery.data?.organization?.name ?? "",
+                    onConfirm: async () => {
+                      await deleteOrganizationMutation.mutateAsync(
+                        { orgId: orgId },
+                        {
+                          onError: (error) => {
+                            toast.error(error.message)
+                          },
+                        }
+                      )
+                    },
+                  })
                 }}
               >
                 Delete
@@ -636,9 +654,17 @@ export function OrganizationsManagement() {
           </div>
         </CardContent>
       </Card>
+
       <CreateOrganizationModal
         open={createOrganizationModalOpen()}
         onOpenChange={createOrganizationModalActions.set}
+      />
+      <ConfirmationDialog
+        title={`Delete: ${deleteOrganizationModalData()?.organizationName}?`}
+        description="This action cannot be reversed. Make sure you have no dependencies (i.e. billing), you are the sole owner, and inform your members."
+        open={deleteOrganizationModalOpen()}
+        onConfirm={deleteOrganizationModalData()?.onConfirm ?? (() => {})}
+        onOpenChange={(open) => !open && deleteOrganizationModalActions.close()}
       />
     </div>
   )

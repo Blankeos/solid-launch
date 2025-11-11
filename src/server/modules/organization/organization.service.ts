@@ -105,7 +105,9 @@ export class OrganizationService {
     // Check if user is the only owner
     const owners = await this.getOrganizationOwners(params.orgId)
     if (owners.length !== 1 || owners[0].user_id !== params.requestedByUserId) {
-      throw ApiError.BadRequest("Only the sole owner can delete the organization")
+      throw ApiError.BadRequest(
+        "Only the sole owner can delete the organization. Remove other owners."
+      )
     }
 
     // Check if organization has any billing records, projects, or other dependencies

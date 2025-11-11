@@ -1,6 +1,6 @@
 import { Hono } from "hono"
-import { describeRoute, validator as zValidator } from "hono-openapi"
 import { getCookie } from "hono/cookie"
+import { describeRoute, validator as zValidator } from "hono-openapi"
 import { z } from "zod"
 import { authMiddleware, requireAuthMiddleware } from "./auth.middleware"
 import { AuthService } from "./auth.service"
@@ -11,10 +11,10 @@ const authService = new AuthService()
 import { publicEnv } from "@/env.public"
 import { ApiError } from "@/server/lib/error"
 import {
-    RATE_LIMIT_EMAIL_SEND,
-    RATE_LIMIT_LOGIN,
-    RATE_LIMIT_REGISTER,
-    rateLimit,
+  RATE_LIMIT_EMAIL_SEND,
+  RATE_LIMIT_LOGIN,
+  RATE_LIMIT_REGISTER,
+  rateLimit,
 } from "@/server/lib/rate-limit"
 import { s3Client } from "@/server/lib/s3"
 import { AuthDAO } from "@/server/modules/auth/auth.dao"
@@ -99,18 +99,17 @@ export const authController = new Hono<{
   )
 
   // Get Avatar URL
-  .get('/profile/avatar/:uniqueId', async (c) => {
-    const uniqueId = c.req.param('uniqueId')
-    if (!uniqueId.startsWith('avatar_'))
-      throw ApiError.BadRequest('This is not a valid avatar unique id.')
+  .get("/profile/avatar/:uniqueId", async (c) => {
+    const uniqueId = c.req.param("uniqueId")
+    if (!uniqueId.startsWith("avatar_"))
+      throw ApiError.BadRequest("This is not a valid avatar unique id.")
 
     const url = await s3Client.getSignedUrlFromKey(uniqueId) // Perform caching if too slow
 
-    if (!url) throw ApiError.NotFound('Avatar image not found in our database.')
+    if (!url) throw ApiError.NotFound("Avatar image not found in our database.")
 
     return c.redirect(url)
   })
-
 
   // Login
   .post(
@@ -199,7 +198,7 @@ export const authController = new Hono<{
       setSessionTokenCookie(c, session.id, session.expires_at)
 
       return c.json({
-        user:await  getUserResponseDTO(user, session),
+        user: await getUserResponseDTO(user, session),
       })
     }
   )
