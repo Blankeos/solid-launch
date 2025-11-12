@@ -12,3 +12,8 @@ export const appRouter = new Hono()
   .route("/testmail", testEmailRouter)
 
 export type AppRouter = typeof appRouter
+
+// Other files you want to include in dts bundle
+import type { ApiErrorResponse } from "./lib/error"
+import type { UserResponseDTO } from "./modules/auth/auth.dto"
+export type { ApiErrorResponse, UserResponseDTO }

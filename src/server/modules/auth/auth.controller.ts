@@ -40,7 +40,7 @@ export const authController = new Hono<{
   .use("/verify-email", rateLimit({ ...RATE_LIMIT_EMAIL_SEND }))
 
   // Get current user
-  .get("/", authMiddleware, async (c) => {
+  .get("/", describeRoute({}), authMiddleware, async (c) => {
     const user = c.get("user")
     const session = c.get("session")
 
@@ -126,7 +126,7 @@ export const authController = new Hono<{
       const { email, password } = c.req.valid("json")
 
       const { user, session } = await authService.emailLogin({
-        email: email,
+        email: email.toLowerCase(),
         password: password,
       })
 
@@ -191,7 +191,7 @@ export const authController = new Hono<{
       const validJson = c.req.valid("json")
 
       const { user, session } = await authService.emailRegister({
-        email: validJson.email,
+        email: validJson.email.toLowerCase(),
         password: validJson.password,
       })
 
@@ -302,7 +302,7 @@ export const authController = new Hono<{
     async (c) => {
       const { email } = c.req.valid("json")
 
-      const { userId } = await authService.emailOTPLoginSend({ email })
+      const { userId } = await authService.emailOTPLoginSend({ email: email.toLowerCase() })
 
       return c.json({ success: true, userId })
     }
@@ -345,7 +345,7 @@ export const authController = new Hono<{
     async (c) => {
       const { email } = c.req.valid("json")
 
-      await authService.magicLinkLoginSend({ email })
+      await authService.magicLinkLoginSend({ email: email.toLowerCase() })
 
       return c.json({ success: true })
     }
@@ -392,7 +392,7 @@ export const authController = new Hono<{
     async (c) => {
       const { email } = c.req.valid("json")
 
-      await authService.forgotPasswordSend({ email })
+      await authService.forgotPasswordSend({ email: email.toLowerCase() })
 
       return c.json({ success: true })
     }
@@ -455,7 +455,7 @@ export const authController = new Hono<{
     async (c) => {
       const { email } = c.req.valid("json")
 
-      await authService.emailVerificationSend({ email })
+      await authService.emailVerificationSend({ email: email.toLowerCase() })
 
       return c.json({ success: true })
     }

@@ -22,6 +22,11 @@ import { HTTPException } from "hono/http-exception"
 import { openAPIRouteHandler } from "hono-openapi"
 
 if (privateEnv.NODE_ENV === "development") {
+  app.get("/api/docs/hono", async (c) => {
+    const content = await Bun.file("./apigen/api.d.ts").text()
+    return c.text(content, 200, { "Content-Type": "text/plain" })
+  })
+
   app.get(
     "/api/docs/json",
     openAPIRouteHandler(app, {

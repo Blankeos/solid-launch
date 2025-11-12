@@ -14,7 +14,7 @@ export default function DashboardPage() {
   return (
     <>
       <ProtectedRoute>
-        <div class="mx-auto flex w-full max-w-5xl flex-col gap-y-8 px-4 py-8">
+        <div class="mx-auto flex w-full max-w-2xl flex-col gap-y-4 px-4 py-8">
           <h1 class="font-semibold text-3xl">Dashboard</h1>
 
           <section class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
