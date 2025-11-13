@@ -221,6 +221,7 @@ declare const appRouter: hono_hono_base.HonoBase<hono_types.BlankEnv, hono_types
             input: {
                 query: {
                     redirect_url?: string | undefined;
+                    clientCodeChallenge?: string | undefined;
                 };
             };
             output: undefined;
@@ -243,6 +244,7 @@ declare const appRouter: hono_hono_base.HonoBase<hono_types.BlankEnv, hono_types
             input: {
                 query: {
                     redirect_url?: string | undefined;
+                    clientCodeChallenge?: string | undefined;
                 };
             };
             output: undefined;
@@ -257,6 +259,33 @@ declare const appRouter: hono_hono_base.HonoBase<hono_types.BlankEnv, hono_types
             output: undefined;
             outputFormat: "redirect";
             status: 302;
+        };
+    };
+} & {
+    "/login/token": {
+        $post: {
+            input: {
+                json: {
+                    code_verifier: string;
+                    auth_code: string;
+                };
+            };
+            output: {
+                user: {
+                    id: string;
+                    email: string;
+                    email_verified: number;
+                    joined_at: string;
+                    updated_at: string;
+                    metadata: {
+                        name?: string | undefined;
+                        avatar_url?: string | undefined;
+                    };
+                    active_organization_id: string | null;
+                };
+            };
+            outputFormat: "json";
+            status: hono_utils_http_status.ContentfulStatusCode;
         };
     };
 } & {

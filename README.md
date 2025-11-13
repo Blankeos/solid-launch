@@ -30,10 +30,10 @@ You can also try my other starters:
   - [x] OAuth (Google, GitHub, extend as you wish) w/ linking
   - [x] Magic Link
   - [x] OTPs
-  - [ ] 2FA
-    - [ ] Authenticator App
-    - [ ] Backup Code
-  - [ ] Pass Key
+  - [ ] 2FA (🟡 Backlog)
+    - [ ] Authenticator App (🟡 Backlog)
+    - [ ] Backup Code (🟡 Backlog)
+  - [ ] Pass Key (🟡 Backlog)
   - [x] Organization Auth (easily opt-outable)
     - [x] Active Organization and Switching
     - [x] Roles (Owner, Admin, Member)
@@ -45,6 +45,7 @@ You can also try my other starters:
     - [x] `<ProtectedRoute>` - w/ UX edge-cases covered (i.e. post-login-redirects)
     - [x] `<AccountManagement>` - like Clerk's <UserProfile />
     - [x] `<OrganizationManagement>` - everything for your org management
+- [x] **Multi-Repo & Mono-Repo Ready** - Have a separate mobile app that needs TypeScript types? Just introspect with `bun run apigen` and `curl localhost:3000/api/docs/hono > api.d.ts`. Uses rollup-plugin-dts under the hood.
 
 ### Tech Stack
 
