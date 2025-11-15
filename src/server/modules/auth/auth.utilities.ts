@@ -160,16 +160,19 @@ export function getSimpleDeviceName(userAgent: string | null): string {
 export function normalizeUrlOrPath(input?: string): string {
   if (!input) return publicEnv.PUBLIC_BASE_URL
 
-  // Check if it looks like a full URL (has protocol)
-  if (/^https?:\/\//i.test(input)) {
+  // Check if it has a scheme/protocol i.e. mobile deeplinks or http.
+  if (/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//i.test(input)) {
     return input
   }
 
-  // Ensure it starts with a slash
+  // Ensure path starts with a slash
   const path = input.startsWith("/") ? input : `/${input}`
 
   // Append the public base URL from environment (assumed to be available)
   // Make sure PUBLIC_BASE_URL ends without trailing slash and path starts with slash
   const baseUrl = publicEnv.PUBLIC_BASE_URL.replace(/\/$/, "") ?? ""
-  return `${baseUrl}${path}`
+
+  const normalizedPath = `${baseUrl}${path}`
+
+  return normalizedPath
 }

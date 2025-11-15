@@ -1,4 +1,5 @@
 import { generateCodeVerifier, generateState, OAuth2RequestError } from "arctic"
+import z from "zod"
 import { privateEnv } from "@/env.private"
 import { publicEnv } from "@/env.public"
 import { github, google } from "@/server/lib/arctic"
@@ -9,7 +10,9 @@ import {
   sendEmail,
 } from "@/server/lib/emails"
 import { ApiError } from "@/server/lib/error"
+import { verifyCodeVerifier } from "@/server/lib/pkce"
 import { AuthDAO } from "@/server/modules/auth/auth.dao"
+import { assertDTO } from "@/server/utils/assert-dto"
 import type { InternalSessionDTO, InternalUserDTO, UserMetaClientInputDTO } from "./auth.dto"
 import { normalizeUrlOrPath, verifyPassword } from "./auth.utilities"
 
@@ -204,18 +207,22 @@ export class AuthService {
 
   // 👉  OAuth
 
-  async githubLogin(params: { redirectUrl?: string } = {}) {
+  async githubLogin(params: { redirectUrl?: string; clientCodeChallenge?: string } = {}) {
     const state = generateState()
-    const url = github.createAuthorizationURL(state, ["user:email", "read:user"])
+    const authUrl = github.createAuthorizationURL(state, ["user:email", "read:user"])
     const normalizedRedirectUrl = normalizeUrlOrPath(params?.redirectUrl)
 
     const stateCookie = `github_oauth_state=${state}; HttpOnly; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}; Path=/; ${privateEnv.NODE_ENV === "production" ? "Secure;" : ""}`
     const redirectUrlCookie = `github_oauth_redirect_url=${normalizedRedirectUrl}; HttpOnly; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}; Path=/; ${privateEnv.NODE_ENV === "production" ? "Secure;" : ""}`
+    const pkceChallengeCookie = params.clientCodeChallenge
+      ? `github_oauth_client_code_challenge=${params.clientCodeChallenge}; HttpOnly; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}; Path=/; ${privateEnv.NODE_ENV === "production" ? "Secure;" : ""}`
+      : undefined
 
     return {
       stateCookie,
       redirectUrlCookie,
-      authorizationUrl: url.toString(),
+      pkceChallengeCookie,
+      authorizationUrl: authUrl.toString(),
     }
   }
 
@@ -224,7 +231,7 @@ export class AuthService {
     code?: string
     storedState?: string
     storedRedirectUrl?: string
-    useOneTimeToken?: boolean
+    storedCodeChallenge?: string
   }): OAuthCallbackResponse {
     const redirectUrl = new URL(params.storedRedirectUrl ?? `${publicEnv.PUBLIC_BASE_URL}`)
 
@@ -288,6 +295,20 @@ export class AuthService {
         },
       })
 
+      if (params.storedCodeChallenge) {
+        const authCode = await this.authDAO.createOneTimeToken({
+          userId,
+          purpose: "pkce",
+          metadata: { code_challenge: params.storedCodeChallenge },
+          expiresInSeconds: 30,
+        })
+        redirectUrl.searchParams.append("auth_code", authCode)
+        return {
+          statusText: "Authenticated via PKCE successfully",
+          redirectUrl: redirectUrl.toString(),
+        }
+      }
+
       const session = await this.authDAO.createSession(userId)
       if (!session) throw new Error("Could not create session.")
 
@@ -315,23 +336,27 @@ export class AuthService {
     }
   }
 
-  async googleLogin(params: { redirectUrl?: string } = {}) {
+  async googleLogin(params: { redirectUrl?: string; clientCodeChallenge?: string } = {}) {
     const state = generateState()
     const codeVerifier = generateCodeVerifier()
-    const url = google.createAuthorizationURL(state, codeVerifier, ["profile", "email"])
+    const authUrl = google.createAuthorizationURL(state, codeVerifier, ["profile", "email"])
     const normalizedRedirectUrl = normalizeUrlOrPath(params?.redirectUrl)
 
     const stateCookie = `google_oauth_state=${state}; HttpOnly; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}; Path=/; ${privateEnv.NODE_ENV === "production" ? "Secure;" : ""}`
     const codeVerifierCookie = `google_oauth_codeverifier=${codeVerifier}; HttpOnly; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}; Path=/; ${privateEnv.NODE_ENV === "production" ? "Secure;" : ""}`
     const redirectUrlCookie = `google_oauth_redirect_url=${normalizedRedirectUrl}; HttpOnly; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}; Path=/; ${privateEnv.NODE_ENV === "production" ? "Secure;" : ""}`
+    const pkceChallengeCookie = params.clientCodeChallenge
+      ? `google_oauth_client_code_challenge=${params.clientCodeChallenge}; HttpOnly; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}; Path=/; ${privateEnv.NODE_ENV === "production" ? "Secure;" : ""}`
+      : undefined
 
-    url.searchParams.append("prompt", "select_account")
+    authUrl.searchParams.append("prompt", "select_account")
 
     return {
       stateCookie,
       codeVerifierCookie,
       redirectUrlCookie,
-      authorizationUrl: url.toString(),
+      pkceChallengeCookie,
+      authorizationUrl: authUrl.toString(),
     }
   }
 
@@ -341,7 +366,7 @@ export class AuthService {
     storedState?: string
     storedCodeVerifier?: string
     storedRedirectUrl?: string
-    useOneTimeToken?: boolean
+    storedCodeChallenge?: string
   }): OAuthCallbackResponse {
     const redirectUrl = new URL(params.storedRedirectUrl ?? `${publicEnv.PUBLIC_BASE_URL}`)
 
@@ -389,6 +414,20 @@ export class AuthService {
         },
       })
 
+      if (params.storedCodeChallenge) {
+        const authCode = await this.authDAO.createOneTimeToken({
+          userId,
+          purpose: "pkce",
+          metadata: { code_challenge: params.storedCodeChallenge },
+          expiresInSeconds: 30,
+        })
+        redirectUrl.searchParams.append("auth_code", authCode)
+        return {
+          statusText: "Authenticated via PKCE successfully",
+          redirectUrl: redirectUrl.toString(),
+        }
+      }
+
       const session = await this.authDAO.createSession(userId)
       if (!session) throw new Error("Could not create session.")
 
@@ -416,10 +455,44 @@ export class AuthService {
     }
   }
 
-  // 👉 OTT Logins (OTP, Magic Link)
+  async pkceLogin(params: { auth_code: string; code_verifier: string }) {
+    const token = await this.authDAO.getOneTimeToken(params.auth_code)
+    if (!token) {
+      throw ApiError.Unauthorized("Invalid or expired PKCE authorization code")
+    }
 
+    if (token.purpose !== "pkce") {
+      throw ApiError.Unauthorized("Invalid token purpose")
+    }
+
+    const tokenMeta = assertDTO(
+      JSON.parse(token?.metadata as string),
+      z.object({ code_challenge: z.string() })
+    )
+
+    const ok = await verifyCodeVerifier(params.code_verifier, tokenMeta.code_challenge)
+    if (!ok) {
+      throw ApiError.Unauthorized("Invalid code verifier")
+    }
+
+    await this.authDAO.consumeOneTimeToken({ token: token.token })
+
+    const user = await this.authDAO.getUserByUserId(token.user_id)
+    const session = await this.authDAO.createSession(token.user_id)
+
+    if (!user || !session) {
+      throw ApiError.InternalServerError("Login failed: user or session missing")
+    }
+
+    return {
+      user,
+      session,
+    }
+  }
+
+  // 👉 OTT Logins (OTP, Magic Link)
   async emailOTPLoginSend(params: { email: string }) {
-    const user = await this.authDAO.getUserByEmail(params.email)
+    const user = await this.authDAO.getOrCreateUserFromEmail(params.email)
     if (!user) throw ApiError.NotFound("User with this email not found")
 
     const token = await this.authDAO.createOneTimeToken({

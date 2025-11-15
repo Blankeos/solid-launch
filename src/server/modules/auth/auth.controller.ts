@@ -206,16 +206,31 @@ export const authController = new Hono<{
   // Google Login [redirect]
   .get(
     "/login/google",
-    zValidator("query", z.object({ redirect_url: z.string().optional() })),
+    zValidator(
+      "query",
+      z.object({
+        redirect_url: z.string().optional(),
+        client_code_challenge: z.string().optional(),
+      })
+    ),
     async (c) => {
-      const { redirect_url } = c.req.valid("query")
+      const { redirect_url, client_code_challenge } = c.req.valid("query")
 
-      const { stateCookie, codeVerifierCookie, redirectUrlCookie, authorizationUrl } =
-        await authService.googleLogin({ redirectUrl: redirect_url })
+      const {
+        stateCookie,
+        codeVerifierCookie,
+        redirectUrlCookie,
+        pkceChallengeCookie,
+        authorizationUrl,
+      } = await authService.googleLogin({
+        redirectUrl: redirect_url,
+        clientCodeChallenge: client_code_challenge,
+      })
 
       c.header("Set-Cookie", stateCookie, { append: true })
       c.header("Set-Cookie", codeVerifierCookie, { append: true })
       c.header("Set-Cookie", redirectUrlCookie, { append: true })
+      if (pkceChallengeCookie) c.header("Set-Cookie", pkceChallengeCookie, { append: true })
 
       return c.redirect(authorizationUrl)
     }
@@ -227,6 +242,7 @@ export const authController = new Hono<{
     const storedState = allCookies.google_oauth_state
     const storedCodeVerifier = allCookies.google_oauth_codeverifier
     const storedRedirectUrl = allCookies.google_oauth_redirect_url
+    const storedCodeChallenge = allCookies.google_oauth_client_code_challenge
 
     const code = c.req.query("code")
     const state = c.req.query("state")
@@ -237,6 +253,7 @@ export const authController = new Hono<{
       storedState,
       storedCodeVerifier,
       storedRedirectUrl,
+      storedCodeChallenge,
     })
 
     if (session) {
@@ -249,18 +266,26 @@ export const authController = new Hono<{
   // GitHub Login [redirect]
   .get(
     "/login/github",
-    zValidator("query", z.object({ redirect_url: z.string().optional() })),
-    describeRoute({}),
-
-    async (c) => {
-      const { redirect_url } = c.req.valid("query")
-
-      const { stateCookie, redirectUrlCookie, authorizationUrl } = await authService.githubLogin({
-        redirectUrl: redirect_url,
+    zValidator(
+      "query",
+      z.object({
+        redirect_url: z.string().optional(),
+        client_code_challenge: z.string().optional(),
       })
+    ),
+    describeRoute({}),
+    async (c) => {
+      const { redirect_url, client_code_challenge } = c.req.valid("query")
+
+      const { stateCookie, redirectUrlCookie, authorizationUrl, pkceChallengeCookie } =
+        await authService.githubLogin({
+          redirectUrl: redirect_url,
+          clientCodeChallenge: client_code_challenge,
+        })
 
       c.header("Set-Cookie", stateCookie, { append: true })
       c.header("Set-Cookie", redirectUrlCookie, { append: true })
+      if (pkceChallengeCookie) c.header("Set-Cookie", pkceChallengeCookie, { append: true })
 
       return c.redirect(authorizationUrl)
     }
@@ -274,12 +299,14 @@ export const authController = new Hono<{
     const cookies = getCookie(c)
     const storedState = cookies.github_oauth_state
     const storedRedirectUrl = cookies.github_oauth_redirect_url
+    const storedCodeChallenge = cookies.github_oauth_client_code_challenge
 
     const { redirectUrl, session } = await authService.githubCallback({
       state,
       code,
       storedState,
       storedRedirectUrl,
+      storedCodeChallenge,
     })
 
     if (session) {
@@ -288,6 +315,31 @@ export const authController = new Hono<{
 
     return c.redirect(redirectUrl)
   })
+
+  // OAuth PKCE Token Exchange
+  .post(
+    "/login/token",
+    zValidator(
+      "json",
+      z.object({
+        auth_code: z.string(),
+        code_verifier: z.string(),
+      })
+    ),
+    async (c) => {
+      console.log(c.req.header("origin"))
+
+      const { code_verifier, auth_code } = c.req.valid("json")
+
+      const { user, session } = await authService.pkceLogin({ auth_code, code_verifier })
+
+      setSessionTokenCookie(c, session.id, session.expires_at)
+
+      return c.json({
+        user: await getUserResponseDTO(user, session),
+      })
+    }
+  )
 
   // Send Email OTP
   .post(

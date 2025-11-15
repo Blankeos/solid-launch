@@ -221,7 +221,7 @@ declare const appRouter: hono_hono_base.HonoBase<hono_types.BlankEnv, hono_types
             input: {
                 query: {
                     redirect_url?: string | undefined;
-                    clientCodeChallenge?: string | undefined;
+                    client_code_challenge?: string | undefined;
                 };
             };
             output: undefined;
@@ -244,7 +244,7 @@ declare const appRouter: hono_hono_base.HonoBase<hono_types.BlankEnv, hono_types
             input: {
                 query: {
                     redirect_url?: string | undefined;
-                    clientCodeChallenge?: string | undefined;
+                    client_code_challenge?: string | undefined;
                 };
             };
             output: undefined;
@@ -266,8 +266,8 @@ declare const appRouter: hono_hono_base.HonoBase<hono_types.BlankEnv, hono_types
         $post: {
             input: {
                 json: {
-                    code_verifier: string;
                     auth_code: string;
+                    code_verifier: string;
                 };
             };
             output: {

@@ -444,6 +444,8 @@ export class AuthDAO {
   }
 
   // 👉 OTTs: Email & Password (Forgot and Verify), OAuth (Cross-Domains OTT), OTT Login (Magic Link, OTP)
+  // REFACTOR: big problem w/ this... Once you getOrCreate for the first time... The user can't create a user w/ email-pass instead.
+  // alternative approach in my head is to: just use onetimetoken to pass the `email` then getOrCreate the user later. That means onetimetoken's user.id is optional.
   async getOrCreateUserFromEmail(email: string, metadata?: UserMetaDTO) {
     const existingUser = await this.getUserByEmail(email)
     if (existingUser) return existingUser
@@ -475,6 +477,8 @@ export class AuthDAO {
   }
 
   async createOneTimeToken(params: {
+    /** Alternatively use a specific custom token. @defaultValue generateUniqueToken() */
+    token?: string
     userId: string
     purpose: string
     /** @defaultValue 300 (5 minutes) */
@@ -485,7 +489,7 @@ export class AuthDAO {
   }) {
     const expiresAt = new Date(Date.now() + (params.expiresInSeconds ?? 300) * 1000)
 
-    const token = generateUniqueToken()
+    const token = params?.token ?? generateUniqueToken()
 
     let code: string | undefined
     if (params.tokenType === "shortcode") {
