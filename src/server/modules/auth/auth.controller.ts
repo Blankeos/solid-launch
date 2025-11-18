@@ -327,8 +327,6 @@ export const authController = new Hono<{
       })
     ),
     async (c) => {
-      console.log(c.req.header("origin"))
-
       const { code_verifier, auth_code } = c.req.valid("json")
 
       const { user, session } = await authService.pkceLogin({ auth_code, code_verifier })

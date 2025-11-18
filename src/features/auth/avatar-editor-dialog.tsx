@@ -1,9 +1,9 @@
+import { type Component, onCleanup, onMount, Show } from "solid-js"
+import { toast } from "solid-sonner"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { SliderComp } from "@/components/ui/slider"
 import { honoClient } from "@/lib/hono-client"
-import { type Component, onCleanup, onMount, Show } from "solid-js"
-import { toast } from "solid-sonner"
 import {
   Dialog,
   DialogContent,
@@ -46,7 +46,6 @@ const AvatarEditorDialog: Component<{
   })
 
   const handleSave = async () => {
-    console.log("Hmmm")
     const blob = await editor.getCroppedImage()
     if (!blob) return
 
@@ -55,7 +54,7 @@ const AvatarEditorDialog: Component<{
     // STEP 1: Upload to S3
     let avatarObjectId: string | undefined
     if (blob) {
-      const toastId = toast.loading('Uploading avatar...')
+      const toastId = toast.loading("Uploading avatar...")
 
       const uploadSignedUrlResponse = await honoClient.auth.profile.avatar["upload-url"].$post()
       const { objectKey, uploadUrl } = await uploadSignedUrlResponse.json()
@@ -63,21 +62,21 @@ const AvatarEditorDialog: Component<{
       try {
         // Use native fetch instead of axios
         const uploadResponse = await fetch(uploadUrl, {
-          method: 'PUT',
+          method: "PUT",
           body: blob,
           headers: {
-            'Content-Type': blob.type,
-          }
+            "Content-Type": blob.type,
+          },
         })
         if (!uploadResponse.ok) {
-          throw new Error(await uploadResponse.text() ?? "Failed to upload")
+          throw new Error((await uploadResponse.text()) ?? "Failed to upload")
         }
 
         avatarObjectId = objectKey
-        toast.success('Avatar uploaded successfully!', { id: toastId })
+        toast.success("Avatar uploaded successfully!", { id: toastId })
       } catch (error) {
-        console.error('Avatar upload failed:', error)
-        toast.error('Failed to upload avatar.', { id: toastId })
+        console.error("Avatar upload failed:", error)
+        toast.error("Failed to upload avatar.", { id: toastId })
         return
       }
     }
@@ -88,18 +87,17 @@ const AvatarEditorDialog: Component<{
       return
     }
 
-    const toastId2 = toast.loading('Saving account settings...')
+    const toastId2 = toast.loading("Saving account settings...")
     await honoClient.auth.profile.$put({
       json: {
-        avatar_object_id: avatarObjectId
+        avatar_object_id: avatarObjectId,
       },
     })
-
 
     // Invalidate
     await refresh.run()
 
-    toast.success('User profile updated successfully.', { id: toastId2 })
+    toast.success("User profile updated successfully.", { id: toastId2 })
     props.onOpenChange?.(false)
   }
 
