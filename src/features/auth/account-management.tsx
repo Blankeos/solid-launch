@@ -246,6 +246,7 @@ function SessionItem(props: {
         </div>
       </div>
       <Button
+        type="button"
         variant="ghost"
         size="sm"
         onClick={() => props.onRevoke(props.session.revoke_id)}

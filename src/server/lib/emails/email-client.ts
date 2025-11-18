@@ -36,11 +36,16 @@ const client = new SendMailClient({
 })
 
 export const sendEmail: SendEmailFunction = async (params) => {
-  const { from = FROM, to, subject, html } = params
+  const { from, to, subject, html } = params
+
+  const fromWithDefault = {
+    ...FROM,
+    ...from,
+  }
 
   const payload = {
-    from,
-    to: [{ email_address: { address: to } }],
+    from: fromWithDefault,
+    to: [{ email_address: { address: to } }] as any, // Weird that it needs `name` for email_addresses, but it works so I just any
     subject,
     htmlbody: html,
   }

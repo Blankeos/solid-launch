@@ -1,0 +1,16 @@
+diff --git a/package.json b/package.json
+index f0ade5fbff6b44d561cd9bfe9a5f6c2f246ec24b..0a1e97746c864c87e867827214b357a768464f36 100644
+--- a/package.json
++++ b/package.json
+@@ -5,7 +5,10 @@
+   "main": "./index.js",
+   "exports": {
+     ".": {
+-        "import": "./lib/js/init.js",
++        "import": {
++          "types": "./lib/js/types/index.d.ts",
++          "default": "./lib/js/init.js"
++        },
+         "require": "./lib/js/init.cjs"
+     },
+     "./package.json": "./package.json"
