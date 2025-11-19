@@ -364,16 +364,16 @@ export const authController = new Hono<{
     zValidator(
       "json",
       z.object({
-        userId: z.string(),
+        identifier: z.string(),
         code: z.string(),
       })
     ),
     describeRoute({}),
     async (c) => {
-      const { userId, code } = c.req.valid("json")
+      const { identifier, code } = c.req.valid("json")
 
       const { user, session } = await authService.verifyOTPOrTokenLogin({
-        identifier: userId,
+        identifier,
         code,
       })
 

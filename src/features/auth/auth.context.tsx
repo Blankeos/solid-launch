@@ -57,8 +57,8 @@ export type AuthContextValue = {
   refresh: MutationState<undefined, UserResponseDTO | null>
 
   magicLinkSend: MutationState<{ email: string }, { success: boolean }>
-  otpSend: MutationState<{ email: string }, { success: boolean; userId?: string }>
-  otpVerify: MutationState<{ userId: string; code: string }, UserResponseDTO | null>
+  otpSend: MutationState<{ email: string }, { success: boolean; identifier?: string }>
+  otpVerify: MutationState<{ identifier: string; code: string }, UserResponseDTO | null>
 
   googleLogin: MutationState<{ newWindow?: boolean }, { success: boolean }>
   githubLogin: MutationState<{ newWindow?: boolean }, { success: boolean }>
@@ -244,21 +244,21 @@ export const AuthContextProvider: FlowComponent = (props) => {
     }
   )
 
-  const otpSend = createMutation<{ email: string }, { success: boolean; userId?: string }>(
+  const otpSend = createMutation<{ email: string }, { success: boolean; identifier?: string }>(
     async ({ email }) => {
       const response = await honoClient.auth.login.otp.$post({
         json: { email },
       })
       const result = await response.json()
-      if (result.success) return { success: true, userId: result.userId }
+      if (result.success) return { success: true, identifier: result.identifier }
       return { success: false }
     }
   )
 
-  const otpVerify = createMutation<{ userId: string; code: string }, UserResponseDTO | null>(
-    async ({ userId, code }) => {
+  const otpVerify = createMutation<{ identifier: string; code: string }, UserResponseDTO | null>(
+    async ({ identifier, code }) => {
       const response = await honoClient.auth.login.otp.verify.$post({
-        json: { userId, code },
+        json: { identifier, code },
       })
       const result = await response.json()
       if (result.user) {

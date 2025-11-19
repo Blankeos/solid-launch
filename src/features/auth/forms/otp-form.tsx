@@ -10,7 +10,6 @@ export function OTPForm() {
   const { otpVerify, otpSend } = useAuthContext()
   const [code, setCode] = createSignal("")
   const [hasSent, setHasSent] = createSignal(false)
-  const [userId, setUserId] = createSignal("")
   const [email, setEmail] = createSignal("")
 
   const postLoginRedirectUrl = usePostLoginRedirectUrl()
@@ -19,8 +18,7 @@ export function OTPForm() {
     toast.promise(
       async () => {
         const result = await otpSend.run({ email: email() })
-        if (result?.userId) {
-          setUserId(result.userId!)
+        if (result?.success) {
           setHasSent(true)
         }
       },
@@ -35,7 +33,7 @@ export function OTPForm() {
   const handleOTPVerify = async () => {
     toast.promise(
       async () => {
-        const result = await otpVerify.run({ userId: userId(), code: code() })
+        const result = await otpVerify.run({ identifier: email(), code: code() })
         if (result) navigate(postLoginRedirectUrl())
       },
       {
