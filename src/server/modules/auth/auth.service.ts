@@ -50,7 +50,6 @@ export class AuthService {
   }
 
   // 👉 Email & Password
-
   async emailLogin(params: { email: string; password: string }): UserSessionResponse {
     const { email, password } = params
 
@@ -133,7 +132,7 @@ export class AuthService {
     }
 
     const token = await this.authDAO.createOneTimeToken({
-      userId: user.id,
+      identifier: user.id,
       purpose: "email_verification",
     })
     console.debug("📧 [emailVerificationSend] Token", token)
@@ -149,16 +148,17 @@ export class AuthService {
   }
 
   async emailVerificationVerify(params: { token: string }) {
-    const { consumed, userId } = await this.authDAO.consumeOneTimeToken({
+    const { consumed, identifier } = await this.authDAO.consumeOneTimeToken({
       token: params.token,
       purpose: "email_verification",
     })
 
-    if (!consumed || !userId) {
+    if (!consumed || !identifier) {
       throw ApiError.BadRequest("Token for email verification is either invalid or expired")
     }
 
-    await this.authDAO.updateUserVerifiedEmail({ userId })
+    // Identifier is always assumed as userId since user always exists.
+    await this.authDAO.updateUserVerifiedEmail({ userId: identifier })
 
     return {
       success: true,
@@ -170,7 +170,7 @@ export class AuthService {
     if (!user) throw ApiError.NotFound("User with this email not found")
 
     const token = await this.authDAO.createOneTimeToken({
-      userId: user.id,
+      identifier: user.id,
       purpose: "reset_password",
     })
     console.debug("🔐 [forgotPasswordSend] Token", token)
@@ -184,21 +184,22 @@ export class AuthService {
   }
 
   async forgotPasswordVerify(params: { token: string; newPassword: string }) {
-    const { consumed, userId } = await this.authDAO.consumeOneTimeToken({
+    const { consumed, identifier } = await this.authDAO.consumeOneTimeToken({
       token: params.token,
       purpose: "reset_password",
     })
 
-    if (!consumed || !userId) {
+    if (!consumed || !identifier) {
       throw ApiError.BadRequest("Token for password reset is either invalid or expired")
     }
 
+    // Identifier is always assumed as userId since user always exists.
     await this.authDAO.updateUserPassword({
-      userId,
+      userId: identifier,
       password: params.newPassword,
     })
 
-    await this.authDAO.invalidateAllSessionsByUser(userId)
+    await this.authDAO.invalidateAllSessionsByUser(identifier)
 
     return {
       success: true,
@@ -206,7 +207,6 @@ export class AuthService {
   }
 
   // 👉  OAuth
-
   async githubLogin(params: { redirectUrl?: string; clientCodeChallenge?: string } = {}) {
     const state = generateState()
     const authUrl = github.createAuthorizationURL(state, ["user:email", "read:user"])
@@ -297,7 +297,7 @@ export class AuthService {
 
       if (params.storedCodeChallenge) {
         const authCode = await this.authDAO.createOneTimeToken({
-          userId,
+          identifier: userId,
           purpose: "pkce",
           metadata: { code_challenge: params.storedCodeChallenge },
           expiresInSeconds: 30,
@@ -416,7 +416,7 @@ export class AuthService {
 
       if (params.storedCodeChallenge) {
         const authCode = await this.authDAO.createOneTimeToken({
-          userId,
+          identifier: userId,
           purpose: "pkce",
           metadata: { code_challenge: params.storedCodeChallenge },
           expiresInSeconds: 30,
@@ -465,6 +465,10 @@ export class AuthService {
       throw ApiError.Unauthorized("Invalid token purpose")
     }
 
+    if (!token.identifier) {
+      throw ApiError.InternalServerError("Something went wrong on our server")
+    }
+
     const tokenMeta = assertDTO(
       JSON.parse(token?.metadata as string),
       z.object({ code_challenge: z.string() })
@@ -477,8 +481,8 @@ export class AuthService {
 
     await this.authDAO.consumeOneTimeToken({ token: token.token })
 
-    const user = await this.authDAO.getUserByUserId(token.user_id)
-    const session = await this.authDAO.createSession(token.user_id)
+    const user = await this.authDAO.getUserByUserId(token.identifier)
+    const session = await this.authDAO.createSession(token.identifier)
 
     if (!user || !session) {
       throw ApiError.InternalServerError("Login failed: user or session missing")
@@ -492,60 +496,54 @@ export class AuthService {
 
   // 👉 OTT Logins (OTP, Magic Link)
   async emailOTPLoginSend(params: { email: string }) {
-    const user = await this.authDAO.getOrCreateUserFromEmail(params.email)
-    if (!user) throw ApiError.NotFound("User with this email not found")
-
     const token = await this.authDAO.createOneTimeToken({
-      userId: user.id,
       tokenType: "shortcode",
       purpose: "otp",
+      identifier: params.email,
+      metadata: { email: params.email },
     })
     console.debug("🪙 [emailOtpSend] Token", token)
 
     try {
-      const html = renderOtpEmail({ email: user.email, otp: token })
-      await sendEmail({ html, subject: "Your Solid Launch OTP", to: user.email })
+      const html = renderOtpEmail({ email: params.email, otp: token })
+      await sendEmail({ html, subject: "Your Solid Launch OTP", to: params.email })
     } catch (_err) {
       console.error("[emailOtpSend] error", _err)
     }
 
-    return { userId: user.id }
+    return { identifier: params.email }
   }
 
   async magicLinkLoginSend(params: { email: string }) {
-    const user = await this.authDAO.getOrCreateUserFromEmail(params.email)
-    if (!user) throw ApiError.NotFound("User with this email not found")
-
     const token = await this.authDAO.createOneTimeToken({
-      userId: user.id,
       purpose: "otp",
+      identifier: params.email,
+      metadata: { email: params.email },
     })
     console.debug("🪙 [magiclinkOtpSend] Token", token)
 
     try {
       const html = renderMagicLinkEmail({ token: token })
-      await sendEmail({ html, subject: "Your Solid Launch Magic Link", to: user.email })
+      await sendEmail({ html, subject: "Your Solid Launch Magic Link", to: params.email })
     } catch (_err) {
       console.error("[magiclinkOtpSend] error", _err)
     }
 
-    return { userId: user.id }
+    return { identifier: params.email }
   }
 
   /** @notimplemented */
-  async smsOTPLoginSend(_params: { phone: string; email?: string }) {
+  async smsOTPLoginSend(_params: { phone: string }) {
     //   const normalizedPhone = normalizePhoneNumber(params.phone)
     //   const existingUserFromPhone = await this.authDAO.getUserByPhoneNumber(params.phone)
     //   if (!existingUserFromPhone && !params.email) {
     //     throw ApiError.BadRequest("New users must have an email to register.")
     //   }
     //
-    //   const user = await this.authDAO.getOrCreateUserByEmail(existingUserFromPhone?.email ?? params.email)
-    //   if (!user) throw ApiError.NotFound("User not found.")
-    //
     //   const token = await this.authDAO.createOneTimeToken({
     //     userId: user.id,
     //     purpose: "otp",
+    //     metadata: { email: params.email },
     //   })
     //   console.debug("🪙 [smsOtpSend] Token", token)
     //   // IMPLEMENT SMS
@@ -559,47 +557,51 @@ export class AuthService {
 
   async validateTokenIsNotExpired(token: string) {
     const _token = await this.authDAO.getOneTimeToken(token)
-    if (!_token?.expires_at) {
+    if (!_token) {
+      throw ApiError.BadRequest("No token found")
+    }
+    if (new Date() >= new Date(_token.expires_at)) {
+      // IMRPOVEMENT: DELETE the token.
       throw ApiError.BadRequest("Token expired or invalid")
     }
     return true
   }
 
   async verifyOTPOrTokenLogin(params: {
-    userId?: string
+    identifier?: string
     token?: string
     code?: string
   }): UserSessionResponse {
-    const { userId, token, code } = params
+    const { identifier, token, code } = params
 
     if (!token && !code) {
       throw ApiError.BadRequest("Either token or code must be provided")
     }
-    if (code && !userId) {
+    if (code && !identifier) {
       throw ApiError.BadRequest("Both code and userId must be provided")
     }
 
-    const { consumed, userId: resolvedUserId } = await this.authDAO.consumeOneTimeToken({
+    const { consumed, metadata } = await this.authDAO.consumeOneTimeToken({
       token,
       code,
-      userId,
+      identifier,
       purpose: "otp",
     })
+
+    const resolvedMetadata = metadata as { email: string } // LAZY but maybe zod this
 
     if (!consumed) {
       throw ApiError.BadRequest("Token or code for login is either invalid or expired")
     }
 
-    const finalUserId = userId ?? resolvedUserId
-    if (!finalUserId) {
+    const user = await this.authDAO.getOrCreateUserFromEmail(resolvedMetadata.email)
+    if (!user) {
       throw ApiError.InternalServerError("Login failed: unable to determine user")
     }
 
-    const user = await this.authDAO.getUserByUserId(finalUserId)
-    const session = await this.authDAO.createSession(finalUserId)
-
-    if (!user || !session) {
-      throw ApiError.InternalServerError("Login failed: user or session missing")
+    const session = await this.authDAO.createSession(user.id)
+    if (!session) {
+      throw ApiError.InternalServerError("Login failed: session missing")
     }
 
     return {

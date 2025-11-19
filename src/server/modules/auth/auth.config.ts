@@ -19,10 +19,10 @@ type RedirectUrlsConfig = {
   magicLinkVerify: (token: string) => string
   /** Gives the email verify URL with token. Redirects to serverside. */
   emailVerify: (token: string) => string
-  /** Gives the forgot-password URL step 1 with token. Redirects to forgotPasswordVerify2 if successful. */
-  forgotPasswordVerify1: (token: string) => string
-  /** Gives the forgot-password URL step 2 with token. Redirects to serverside. */
-  forgotPasswordVerify2: (token: string) => string
+  /** Gives the forgot-password URL step 1 with token. Redirects to forgotPasswordVerifyInput if successful. Used in EMAIL. */
+  forgotPasswordVerifyServerCheck: (token: string) => string
+  /** Gives the forgot-password URL step 2 with token. Redirects to frontend. */
+  forgotPasswordVerifyInputPage: (token: string) => string
   organizationInvitation: (token: string) => string
 }
 
@@ -65,13 +65,11 @@ export const AUTH_CONFIG = createAuthConfig({
       initHonoClient(publicEnv.PUBLIC_BASE_URL)
         .auth["verify-email"].verify.$url({ query: { token: token } })
         .toString(),
-    forgotPasswordVerify1: (token: string) =>
+    forgotPasswordVerifyServerCheck: (token: string) =>
       initHonoClient(publicEnv.PUBLIC_BASE_URL)
-        .auth["forgot-password"].verify.$url({
-          query: { token: token },
-        })
+        .auth["forgot-password"].verify.$url({ query: { token: token } })
         .toString(),
-    forgotPasswordVerify2: (token: string) =>
+    forgotPasswordVerifyInputPage: (token: string) =>
       `${publicEnv.PUBLIC_BASE_URL}${getRoute("/forgot-password/verify", { search: { token: token } })}`,
     organizationInvitation: () => "",
   },

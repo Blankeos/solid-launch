@@ -479,7 +479,7 @@ export class AuthDAO {
   async createOneTimeToken(params: {
     /** Alternatively use a specific custom token. @defaultValue generateUniqueToken() */
     token?: string
-    userId: string
+    identifier: string
     purpose: string
     /** @defaultValue 300 (5 minutes) */
     expiresInSeconds?: number
@@ -502,7 +502,7 @@ export class AuthDAO {
         token,
         code,
         expires_at: expiresAt.toISOString(),
-        user_id: params.userId,
+        identifier: params.identifier,
         purpose: params.purpose,
         metadata: params.metadata ? JSON.stringify(params.metadata) : undefined,
       })
@@ -519,11 +519,11 @@ export class AuthDAO {
   async consumeOneTimeToken(params: {
     token?: string
     code?: string
-    userId?: string
+    identifier?: string
     purpose?: string
   }) {
     if (!params.token && !params.code) {
-      return { consumed: false, userId: undefined }
+      return { consumed: false, identifier: undefined, metadata: undefined }
     }
 
     return await db.transaction().execute(async (trx) => {
@@ -535,12 +535,12 @@ export class AuthDAO {
 
       if (params.token) {
         query = query.where("onetime_token.token", "=", params.token)
-      } else if (params.code && params.userId) {
+      } else if (params.code && params.identifier) {
         query = query
           .where("onetime_token.code", "=", params.code)
-          .where("onetime_token.user_id", "=", params.userId)
+          .where("onetime_token.identifier", "=", params.identifier)
       } else {
-        return { consumed: false, userId: undefined }
+        return { consumed: false, identifier: undefined, metadata: undefined }
       }
 
       // If the token is not used for its purpose, make sure to not allow consumption.
@@ -551,7 +551,7 @@ export class AuthDAO {
       const tokenRow = await query.executeTakeFirst()
 
       if (!tokenRow) {
-        return { consumed: false, userId: undefined }
+        return { consumed: false, identifier: undefined, metadata: undefined }
       }
 
       // Delete the token
@@ -560,7 +560,7 @@ export class AuthDAO {
         .where("onetime_token.token", "=", tokenRow.token)
         .execute()
 
-      return { consumed: true, userId: tokenRow.user_id }
+      return { consumed: true, identifier: tokenRow.identifier, metadata: tokenRow.metadata }
     })
   }
 }

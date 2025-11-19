@@ -22,13 +22,13 @@ export type OneTimeToken = {
      */
     code: string | null;
     expires_at: string;
-    user_id: string;
+    identifier: string;
     /**
      * e.g. 'password_reset', 'magic_link', 'otp', etc. (managed in application layer)
      */
     purpose: string;
     /**
-     * Might be needed for consumption i.e. a phone number
+     * Might be needed for data consumption i.e. a phone number
      */
     metadata: unknown | null;
 };

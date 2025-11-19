@@ -8,20 +8,21 @@ model User {
   joined_at  DateTime @default(now())
   updated_at DateTime @default(now()) @updatedAt
 
-  sessions                Session[]
-  oauth_accounts          OAuthAccount[]
-  onetime_tokens          OneTimeToken[]
-  organizationMembers     OrganizationMember[]
-  organizationInvitations OrganizationInvitation[]
+  sessions       Session[]
+  oauth_accounts OAuthAccount[]
+
+  organization_members     OrganizationMember[]
+  organization_invitations OrganizationInvitation[]
 
   @@map("user")
 }
 
 model Session {
-  id                     String   @id /// Never send this to the frontend (except http-only cookie)
-  user_id                String
-  expires_at             DateTime
-  revoke_id              String   @unique /// an alternative id strictly for revoking (not validating) so it's safe to send to frontend
+  id         String   @id /// Never send this to the frontend (except http-only cookie)
+  user_id    String
+  expires_at DateTime
+  revoke_id  String   @unique /// an alternative id strictly for revoking (not validating) so it's safe to send to frontend
+
   active_organization_id String?
 
   // Some meta
@@ -50,14 +51,12 @@ model OneTimeToken {
   token      String   @unique /// Always populated, globally unique
   code       String? /// Optional shorter digit alias, scoped to user (so not globally unique)
   expires_at DateTime
-  user_id    String
+  identifier String // Can be email, user id, etc.
   purpose    String /// e.g. 'password_reset', 'magic_link', 'otp', etc. (managed in application layer)
-  metadata   Json? /// Might be needed for consumption i.e. a phone number
-
-  user User @relation(references: [id], fields: [user_id], onDelete: Cascade)
+  metadata   Json? /// Might be needed for data consumption i.e. a phone number
 
   @@id([token])
-  @@unique([code, user_id]) // when code exists, unique per user
+  @@unique([code, identifier]) // when code exists, unique per identifier
   @@map("onetime_token")
 }
 
@@ -72,9 +71,9 @@ model Organization {
   created_at DateTime @default(now())
   updated_at DateTime @default(now()) @updatedAt
 
-  members                 OrganizationMember[]
-  organizationInvitations OrganizationInvitation[]
-  sessions                Session[]
+  members                  OrganizationMember[]
+  organization_invitations OrganizationInvitation[]
+  sessions                 Session[]
 
   @@map("organization")
 }

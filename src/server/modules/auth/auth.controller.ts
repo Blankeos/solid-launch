@@ -352,9 +352,9 @@ export const authController = new Hono<{
     async (c) => {
       const { email } = c.req.valid("json")
 
-      const { userId } = await authService.emailOTPLoginSend({ email: email.toLowerCase() })
+      const { identifier } = await authService.emailOTPLoginSend({ email: email.toLowerCase() })
 
-      return c.json({ success: true, userId })
+      return c.json({ success: true, identifier })
     }
   )
 
@@ -372,7 +372,10 @@ export const authController = new Hono<{
     async (c) => {
       const { userId, code } = c.req.valid("json")
 
-      const { user, session } = await authService.verifyOTPOrTokenLogin({ userId, code })
+      const { user, session } = await authService.verifyOTPOrTokenLogin({
+        identifier: userId,
+        code,
+      })
 
       setSessionTokenCookie(c, session.id, session.expires_at)
 
@@ -416,7 +419,7 @@ export const authController = new Hono<{
       const { token, fallback_url } = c.req.valid("query")
 
       try {
-        const { user, session } = await authService.verifyOTPOrTokenLogin({ token })
+        const { session } = await authService.verifyOTPOrTokenLogin({ token })
 
         setSessionTokenCookie(c, session.id, session.expires_at)
       } catch (error: any) {
@@ -448,7 +451,7 @@ export const authController = new Hono<{
     }
   )
 
-  // Forgot Password Verify [redirect]
+  // Forgot Password Verify [redirect] (refactor...)
   .get(
     "/forgot-password/verify",
     zValidator(
@@ -469,10 +472,11 @@ export const authController = new Hono<{
         return c.redirect(fallbackUrl.toString())
       }
 
-      const redirectUrl = AUTH_CONFIG.redirectUrls.forgotPasswordVerify2(token)
+      const redirectUrl = AUTH_CONFIG.redirectUrls.forgotPasswordVerifyInputPage(token)
       return c.redirect(redirectUrl)
     }
   )
+
   // Forgot Password Verify
   .post(
     "/forgot-password/verify",

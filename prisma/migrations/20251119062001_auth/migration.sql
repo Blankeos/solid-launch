@@ -37,10 +37,9 @@ CREATE TABLE "onetime_token" (
     "token" TEXT NOT NULL PRIMARY KEY,
     "code" TEXT,
     "expires_at" DATETIME NOT NULL,
-    "user_id" TEXT NOT NULL,
+    "identifier" TEXT NOT NULL,
     "purpose" TEXT NOT NULL,
-    "metadata" JSONB,
-    CONSTRAINT "onetime_token_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    "metadata" JSONB
 );
 
 -- CreateTable
@@ -92,7 +91,7 @@ CREATE UNIQUE INDEX "session_revoke_id_key" ON "session"("revoke_id");
 CREATE UNIQUE INDEX "onetime_token_token_key" ON "onetime_token"("token");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "onetime_token_code_user_id_key" ON "onetime_token"("code", "user_id");
+CREATE UNIQUE INDEX "onetime_token_code_identifier_key" ON "onetime_token"("code", "identifier");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "organization_slug_key" ON "organization"("slug");
