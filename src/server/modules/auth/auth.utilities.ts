@@ -176,3 +176,24 @@ export function normalizeUrlOrPath(input?: string): string {
 
   return normalizedPath
 }
+
+/**
+ * Little util so JSON.parse() can technically work for sqlite vs postgres and mysql without changing much code.
+ * sqlite stores as text.
+ */
+export function jsonDecode(input: any): any {
+  if (typeof input === "string") {
+    return JSON.parse(input)
+  }
+  return input
+}
+
+/** Little util so JSON.stringify might be needed for json, if you need it.
+ * - sqlite (TEXT) - yes
+ * - postgres/mysql (JSONB/JSON) no so it does nothing.
+ *
+ * currently unused
+ */
+export function jsonEncode(input: any): any {
+  return input
+}

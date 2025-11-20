@@ -40,7 +40,7 @@ export type InternalSessionDTO = Selectable<Session>
 // Frontend & Server: User passed around in client context.
 //
 export async function getUserResponseDTO(user: InternalUserDTO, session: InternalSessionDTO) {
-  const userMeta = assertDTO(JSON.parse(user.metadata as string), userMetaDTO) // You can also userMetaDTO.omit() if you don't want to show some meta data to the frontend
+  const userMeta = assertDTO(jsonDecode(user.metadata as string), userMetaDTO) // You can also userMetaDTO.omit() if you don't want to show some meta data to the frontend
 
   // EDIT THIS
   return {

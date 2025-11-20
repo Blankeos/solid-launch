@@ -244,7 +244,7 @@ export class AuthDAO {
     ])
 
     const metadata = user.metadata
-      ? assertDTO(JSON.parse(user.metadata as string), userMetaDTO)
+      ? assertDTO(jsonDecode(user.metadata as string), userMetaDTO)
       : undefined
 
     return {
@@ -282,7 +282,7 @@ export class AuthDAO {
         .executeTakeFirst()
 
       const existingMeta = current?.metadata
-        ? assertDTO(JSON.parse(current.metadata as string), userMetaDTO)
+        ? assertDTO(jsonDecode(current.metadata as string), userMetaDTO)
         : ({} as UserMetaDTO)
 
       const mergedMeta: UserMetaDTO = { ...existingMeta, ...params.metadata }

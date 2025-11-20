@@ -15,7 +15,7 @@ import { AuthDAO } from "@/server/modules/auth/auth.dao"
 import { assertDTO } from "@/server/utils/assert-dto"
 import { AUTH_CONFIG } from "./auth.config"
 import type { InternalSessionDTO, InternalUserDTO, UserMetaClientInputDTO } from "./auth.dto"
-import { normalizeUrlOrPath, verifyPassword } from "./auth.utilities"
+import { jsonDecode, normalizeUrlOrPath, verifyPassword } from "./auth.utilities"
 
 type UserSessionResponse = Promise<{ user: InternalUserDTO; session: InternalSessionDTO }>
 
@@ -471,7 +471,7 @@ export class AuthService {
     }
 
     const tokenMeta = assertDTO(
-      JSON.parse(token?.metadata as string),
+      jsonDecode(token?.metadata as string),
       z.object({ code_challenge: z.string() })
     )
 
@@ -597,7 +597,7 @@ export class AuthService {
       throw ApiError.BadRequest("Token or code for login is either invalid or expired")
     }
 
-    const resolvedMetadata = JSON.parse(metadata as any) as { email: string } // LAZY but maybe zod this
+    const resolvedMetadata = jsonDecode(metadata as any) as { email: string } // LAZY but maybe zod this
 
     const user = await this.authDAO.getOrCreateUserFromEmail(resolvedMetadata.email)
     if (!user) {

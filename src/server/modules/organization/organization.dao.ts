@@ -2,7 +2,7 @@ import type { Insertable } from "kysely"
 import { db } from "@/server/db/kysely"
 import type { OrganizationInvitation, OrganizationMember } from "@/server/db/types"
 import { ApiError } from "@/server/lib/error"
-import { generateId } from "@/server/modules/auth/auth.utilities"
+import { generateId, jsonDecode } from "@/server/modules/auth/auth.utilities"
 import { assertDTO } from "@/server/utils/assert-dto"
 import { getUserResponseMetaDTO, type UserMetaDTO } from "../auth/auth.dto"
 import { type OrgMetaDTO, orgMetaDTO } from "./organization.dto"
@@ -32,7 +32,7 @@ export class OrganizationDAO {
     return rows.map((row) => ({
       ...row,
       metadata: row.metadata
-        ? assertDTO(JSON.parse(row.metadata as string), orgMetaDTO)
+        ? assertDTO(jsonDecode(row.metadata as string), orgMetaDTO)
         : undefined,
     }))
   }
@@ -135,7 +135,7 @@ export class OrganizationDAO {
       members.map(async (member) => ({
         ...member,
         metadata: await getUserResponseMetaDTO(
-          JSON.parse(member.metadata as string) as UserMetaDTO
+          jsonDecode(member.metadata as string) as UserMetaDTO
         ),
       }))
     )
@@ -247,7 +247,7 @@ export class OrganizationDAO {
       results.map(async (result) => ({
         ...result,
         invited_by_metadata: await getUserResponseMetaDTO(
-          JSON.parse(result.invited_by_metadata as string) as UserMetaDTO
+          jsonDecode(result.invited_by_metadata as string) as UserMetaDTO
         ),
       }))
     )
@@ -285,7 +285,7 @@ export class OrganizationDAO {
     return {
       ...result,
       invited_by_metadata: await getUserResponseMetaDTO(
-        JSON.parse(result.invited_by_metadata as string) as UserMetaDTO
+        jsonDecode(result.invited_by_metadata as string) as UserMetaDTO
       ),
     }
   }

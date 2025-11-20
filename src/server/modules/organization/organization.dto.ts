@@ -3,6 +3,7 @@ import z from "zod"
 import type { Organization, OrganizationInvitation } from "@/server/db/types"
 import { assertDTO } from "@/server/utils/assert-dto"
 import type { UserMetaDTO } from "../auth/auth.dto"
+import { jsonDecode } from "../auth/auth.utilities"
 
 // ===========================================================================
 // Shared metadata DTO (re-usable, like userMetaDTO)
@@ -54,7 +55,7 @@ export function getOrganizationMemberMetaResponseDTO(user_meta: UserMetaDTO) {
 }
 
 export function getOrganizationResponseDTO(org: Selectable<Organization>) {
-  const orgMeta = assertDTO(JSON.parse(org.metadata as string), orgMetaDTO) as OrgMetaDTO
+  const orgMeta = assertDTO(jsonDecode(org.metadata as string), orgMetaDTO) as OrgMetaDTO
   return {
     id: org.id,
     name: org.name,
