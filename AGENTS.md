@@ -1,4 +1,8 @@
-1. Performing Queries and Mutations
+1. Files
+
+- Always use kebab-case.
+
+2. Performing Queries and Mutations
 
 - Use `import { honoClient } from '@/lib/hono-client'` for most hono api calls.
 - Use useQuery, don't destructure: `const somethingQuery = useQuery(...)` is preferred over `const { data } = useQuery(...)`. Remember `create` prefix in solid-js is deprecated so always use useQuery or useMutation.
@@ -8,14 +12,14 @@
   - error.message will always contain a readable error message that can be rendered in toasts or UI.
   - error.cause can contain `{ data: any, error: Error }` type with `data` being any type of data that might be relevant to the operation. (Almost always not needed, but we have that option to do that)
 
-2. Components
+3. Components
 
 We use a bunch under `src/components/ui` for Shadcn (the standard location), if the UI can use that, it's preferred. With some enhancements too. i.e.
 
 - Button has a `loading` prop.
 - For link buttons, use <Button as="a" href={...}>...</Button> will work.
 
-3. Adding Icons
+4. Adding Icons
 
 Powered by iconmate (i also wrote). NOTE: Edit this based on the setup.
 
@@ -23,7 +27,7 @@ Adding icons via command: `iconmate add --folder=src/assets/icons --preset=svg -
 
 Or if you want the TUI, just use `iconmate` (but AI won't utilize this)
 
-4. Creating backend modules.
+5. Creating backend modules.
 
 - Almost always create 4 files in modules:
   - `server/modules/<module>` a folder

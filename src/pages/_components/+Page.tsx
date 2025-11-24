@@ -1,3 +1,9 @@
+import type { ColumnDef } from "@tanstack/solid-table"
+import { useDisclosure, useToggle } from "bagon-hooks"
+import { createEffect, createSignal, type FlowProps, For } from "solid-js"
+import type { JSX } from "solid-js/jsx-runtime"
+import { toast } from "solid-sonner"
+import { followCursor } from "tippy.js"
 import { IconMoonDuo, IconSunDuo } from "@/assets/icons"
 import { AccordionComp } from "@/components/ui/accordion"
 import { AlertComp } from "@/components/ui/alert"
@@ -32,12 +38,6 @@ import { Timeline } from "@/components/ui/timeline"
 import { useThemeContext } from "@/contexts/theme.context"
 import { Tippy } from "@/lib/solid-tippy"
 import { cn } from "@/utils/cn"
-import type { ColumnDef } from "@tanstack/solid-table"
-import { useDisclosure, useToggle } from "bagon-hooks"
-import { createEffect, createSignal, type FlowProps, For } from "solid-js"
-import type { JSX } from "solid-js/jsx-runtime"
-import { toast } from "solid-sonner"
-import { followCursor } from "tippy.js"
 import { DragExample } from "./drag-example"
 import { ScrollPaginationExample } from "./scroll-pagination-example"
 
@@ -433,30 +433,36 @@ export default function ComponentsPage() {
       <ComponentCard label="Context Menu">
         <ContextMenuComp
           options={[
-            { label: "Nice" },
-            { separator: true },
+            { type: "label", label: "Nice" },
+            { type: "separator" },
             {
+              type: "item",
               itemId: "2",
               itemDisplay: "Test 1",
               itemTip: "Cmd + 1",
             },
             {
+              type: "item",
               itemId: "3",
               itemDisplay: "Test 2",
             },
             {
+              type: "sub",
               subTrigger: "Invite users",
               subOptions: [
                 {
+                  type: "item",
                   itemId: "invite-item-1",
                   itemDisplay: "Email message",
                 },
                 {
+                  type: "item",
                   itemId: "invite-item-2",
                   itemDisplay: "Message via social",
                 },
-                { separator: true },
+                { type: "separator" },
                 {
+                  type: "item",
                   itemId: "invite-item-3",
                   itemDisplay: "More...",
                 },

@@ -258,55 +258,121 @@ export {
 }
 
 // ---
-
 type OptionItem = {
-  itemId: string
+  type: "item"
+  itemId?: string
   itemDisplay?: JSX.Element
-  itemOnSelect?: (id: string) => void
+  itemOnSelect?: (id?: string) => void
   itemTip?: JSX.Element
+  hide?: boolean
+} & ContextMenuItemProps
+
+type OptionSeparator = { type: "separator"; hide?: boolean }
+
+type OptionLabel = { type: "label"; label: JSX.Element; hide?: boolean }
+
+type OptionSub = {
+  type: "sub"
+  subTrigger: JSX.Element
+  subOptions: ContextMenuOption[]
   hide?: boolean
 }
 
-type OptionSeparator = { separator: true }
-
-type OptionLabel = { label: JSX.Element }
-
-type OptionSub = {
-  subTrigger: JSX.Element
-  subOptions: ContextMenuOption[]
+type OptionCheckboxItem = {
+  type: "checkbox"
+  checked?: boolean
+  onChange?: (checked: boolean) => void
+  children?: JSX.Element
+  label?: JSX.Element
+  hide?: boolean
 }
 
-export type ContextMenuOption = OptionItem | OptionSeparator | OptionLabel | OptionSub
+type OptionRadioGroup = {
+  type: "radio"
+  value?: string
+  onChange?: (value: string) => void
+  options: OptionRadioItem[]
+  hide?: boolean
+}
+
+type OptionRadioItem = {
+  value: string
+  label?: JSX.Element
+  hide?: boolean
+}
+
+export type ContextMenuOption =
+  | OptionLabel
+  | OptionItem
+  | OptionSeparator
+  | OptionSub
+  | OptionCheckboxItem
+  | OptionRadioGroup
 
 const _ContextMenuSubComp: Component<{ options: ContextMenuOption[] }> = (props) => {
   return (
     <For each={props.options}>
       {(option) => {
-        if ("separator" in option && option.separator === true) {
-          return <ContextMenuSeparator />
-        } else if ("label" in option) {
-          return <ContextMenuLabel>{option.label}</ContextMenuLabel>
-        } else if ("subTrigger" in option && "subOptions" in option) {
-          const sub = option as OptionSub
-          return (
-            <ContextMenuSub>
-              <ContextMenuSubTrigger>{sub.subTrigger}</ContextMenuSubTrigger>
-              <ContextMenuPortal>
-                <ContextMenuSubContent>
-                  <_ContextMenuSubComp options={sub.subOptions} />
-                </ContextMenuSubContent>
-              </ContextMenuPortal>
-            </ContextMenuSub>
-          )
-        } else {
-          const item = option as OptionItem
-          if (item.hide) return null
-          return (
-            <ContextMenuItem onSelect={() => item.itemOnSelect?.(item.itemId)}>
-              {item.itemDisplay}
-              {item.itemTip && <ContextMenuShortcut>{item.itemTip}</ContextMenuShortcut>}
-            </ContextMenuItem>
-          )
+        if (option.hide) return null
+
+        switch (option.type) {
+          case "separator":
+            return <ContextMenuSeparator />
+          case "label":
+            return <ContextMenuLabel>{option.label}</ContextMenuLabel>
+          case "sub": {
+            const sub = option as OptionSub
+            return (
+              <ContextMenuSub>
+                <ContextMenuSubTrigger>{sub.subTrigger}</ContextMenuSubTrigger>
+                <ContextMenuPortal>
+                  <ContextMenuSubContent>
+                    <_ContextMenuSubComp options={sub.subOptions} />
+                  </ContextMenuSubContent>
+                </ContextMenuPortal>
+              </ContextMenuSub>
+            )
+          }
+          case "item": {
+            const item = option as OptionItem
+            return (
+              <ContextMenuItem onSelect={() => item.itemOnSelect?.(item.itemId)} {...item}>
+                {item.itemDisplay}
+                {item.itemTip && (
+                  <ContextMenuShortcut class="pl-2">{item.itemTip}</ContextMenuShortcut>
+                )}
+              </ContextMenuItem>
+            )
+          }
+          case "checkbox": {
+            const item = option as OptionCheckboxItem
+            return (
+              <ContextMenuCheckboxItem checked={item.checked} onChange={item.onChange}>
+                {item.children || item.label}
+              </ContextMenuCheckboxItem>
+            )
+          }
+          case "radio": {
+            const group = option as OptionRadioGroup
+            return (
+              <ContextMenuGroup>
+                <ContextMenuRadioGroup value={group.value} onChange={group.onChange}>
+                  <For each={group.options}>
+                    {(radioOption) => {
+                      if (radioOption.hide) return null
+                      return (
+                        <ContextMenuRadioItem value={radioOption.value}>
+                          {radioOption.label || radioOption.value}
+                        </ContextMenuRadioItem>
+                      )
+                    }}
+                  </For>
+                </ContextMenuRadioGroup>
+              </ContextMenuGroup>
+            )
+          }
+          default:
+            return null
         }
       }}
     </For>
