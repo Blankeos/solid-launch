@@ -6,6 +6,7 @@ import {
   generateUniqueToken,
   getSimpleDeviceName,
   hashPassword,
+  jsonDecode,
 } from "@/server/modules/auth/auth.utilities"
 import { assertDTO } from "@/server/utils/assert-dto"
 import { AUTH_CONFIG } from "./auth.config"

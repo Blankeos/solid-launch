@@ -4,6 +4,7 @@ import { publicEnv } from "@/env.public"
 import { initHonoClient } from "@/lib/hono-client"
 import type { Session, User } from "@/server/db/types"
 import { assertDTO } from "@/server/utils/assert-dto"
+import { jsonDecode } from "./auth.utilities"
 
 // ===========================================================================
 // SERVER ONLY
