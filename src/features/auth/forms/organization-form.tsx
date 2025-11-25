@@ -1,10 +1,10 @@
+import { toast } from "solid-sonner"
+import { navigate } from "vike/client/router"
+import { z } from "zod"
 import { TextField, useAppForm } from "@/components/form"
 import { Button } from "@/components/ui/button"
 import { useAuthContext } from "@/features/auth/auth.context"
 import { usePostLoginRedirectUrl } from "@/features/auth/use-post-login-redirect-url"
-import { toast } from "solid-sonner"
-import { navigate } from "vike/client/router"
-import { z } from "zod"
 
 export function EmailAndPasswordLoginForm() {
   const { emailLogin: login } = useAuthContext()
