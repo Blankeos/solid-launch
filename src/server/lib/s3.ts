@@ -1,4 +1,9 @@
-import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3"
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 import { createId } from "@paralleldrive/cuid2"
 import { privateEnv } from "@/env.private"
@@ -62,6 +67,19 @@ class S3CustomClient {
     return null
   }
 
+  async deleteObject(objectKey: string): Promise<void> {
+    try {
+      const command = new DeleteObjectCommand({
+        Bucket: privateEnv.S3_BUCKET_NAME,
+        Key: objectKey,
+      })
+      await _s3Client.send(command)
+    } catch (err) {
+      console.error("Error deleting object", err)
+      throw err
+    }
+  }
+
   /**
    * Check if a signed URL is expired
    * @param signedUrl - The signed URL to check
@@ -98,7 +116,7 @@ class S3CustomClient {
       )
 
       // Calculate expiration time
-      const expirationTime = new Date(startTime.getTime() + parseInt(expires) * 1000)
+      const expirationTime = new Date(startTime.getTime() + parseInt(expires, 10) * 1000)
 
       // Check if expired (with buffer for safety)
       const now = new Date()
@@ -141,7 +159,7 @@ class S3CustomClient {
           "Z"
       )
 
-      const expirationTime = new Date(startTime.getTime() + parseInt(expires) * 1000)
+      const expirationTime = new Date(startTime.getTime() + parseInt(expires, 10) * 1000)
       const remainingTime = expirationTime.getTime() - Date.now()
 
       return Math.max(0, remainingTime)
