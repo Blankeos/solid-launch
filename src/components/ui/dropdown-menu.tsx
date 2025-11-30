@@ -384,12 +384,13 @@ const _DropdownMenuSubComp: Component<{ options: DropdownMenuOption[] }> = (prop
 export const DropdownMenuComp: Component<
   ComponentProps<typeof DropdownMenu> & {
     options: DropdownMenuOption[]
+    triggerProps?: ComponentProps<typeof DropdownMenuTrigger<"button">>
   }
 > = (props) => {
-  const [, rest] = splitProps(props, ["options", "children"])
+  const [, rest] = splitProps(props, ["options", "children", "triggerProps"])
   return (
     <DropdownMenu {...rest}>
-      <DropdownMenuTrigger>{props.children}</DropdownMenuTrigger>
+      <DropdownMenuTrigger {...props.triggerProps}>{props.children}</DropdownMenuTrigger>
       <DropdownMenuContent>
         <_DropdownMenuSubComp options={props.options} />
       </DropdownMenuContent>
