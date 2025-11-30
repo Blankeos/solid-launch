@@ -2,7 +2,7 @@ import type { PolymorphicProps } from "@kobalte/core"
 import * as TextFieldPrimitive from "@kobalte/core/text-field"
 import { cva } from "class-variance-authority"
 import type { JSX, ValidComponent } from "solid-js"
-import { createSignal, mergeProps, splitProps } from "solid-js"
+import { children, createSignal, mergeProps, Show, splitProps } from "solid-js"
 
 import { IconEye, IconEyeOff } from "@/assets/icons"
 import { cn } from "@/utils/cn"
@@ -168,7 +168,6 @@ export type TextFieldCompProps<T extends ValidComponent = "div"> = TextFieldRoot
   onBlur?: JSX.EventHandlerUnion<HTMLInputElement | HTMLTextAreaElement, FocusEvent> | undefined
   placeholder?: string
 }
-
 const TextFieldComp = <T extends ValidComponent = "div">(
   props: PolymorphicProps<T, TextFieldCompProps<T>>
 ) => {
@@ -187,11 +186,13 @@ const TextFieldComp = <T extends ValidComponent = "div">(
   const isPassword = () => local.type === "password"
   const inputType = () => (isPassword() && isPasswordVisible() ? "text" : local.type)
 
+  const resolvedLabel = children(() => local.label)
+
   return (
     <TextField class={local.class} {...others}>
-      <TextFieldLabel>{local.label}</TextFieldLabel>
+      <Show when={resolvedLabel()}>{(label) => <TextFieldLabel>{label()}</TextFieldLabel>}</Show>
       {local.multiline ? (
-        <TextFieldTextArea onBlur={local.onBlur} />
+        <TextFieldTextArea onBlur={local.onBlur} placeholder={local.placeholder} />
       ) : (
         <div class="relative">
           <TextFieldInput
