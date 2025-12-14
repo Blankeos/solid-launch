@@ -68,7 +68,7 @@ export class AuthService {
       throw ApiError.BadRequest("Incorrect email or password") // Vague for extra security
     }
 
-    const validPassword = verifyPassword(existingUser.password_hash, password)
+    const validPassword = await verifyPassword(existingUser.password_hash, password)
     if (!validPassword) {
       throw ApiError.BadRequest("Incorrect email or password") // Vague for extra security.
     }
