@@ -37,8 +37,11 @@ export class AuthService {
     this.authDAO = new AuthDAO()
   }
 
-  async getUserDetails(userId: string) {
-    const userDetails = await this.authDAO.getUserDetails(userId)
+  async getUserDetails(params: { userId: string; currentSessionId?: string }) {
+    const userDetails = await this.authDAO.getUserDetails({
+      userId: params.userId,
+      currentSessionId: params.currentSessionId,
+    })
     if (!userDetails) throw ApiError.NotFound("No user found")
     return userDetails
   }

@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/solid-query"
 import { useDisclosure } from "bagon-hooks"
+import type { InferResponseType } from "hono"
 import { Index, Show, type VoidProps } from "solid-js"
 import { toast } from "solid-sonner"
 import { IconGitHub, IconGoogle } from "@/assets/icons"
@@ -12,6 +13,8 @@ import { honoClient } from "@/lib/hono-client"
 import { cn } from "@/utils/cn"
 import { useAuthContext } from "./auth.context"
 import { AvatarEditorDialog } from "./avatar-editor-dialog"
+
+type ProfileQueryResponse = InferResponseType<typeof honoClient.auth.profile.$get>
 
 export function AccountManagement(props: VoidProps<{ class?: string }>) {
   const { user, revokeSession } = useAuthContext()
@@ -194,13 +197,7 @@ export function AccountManagement(props: VoidProps<{ class?: string }>) {
 
 function SessionItem(props: {
   // Can be improved (get from the server via a type)
-  session: {
-    device_name?: string | null
-    display_id?: string | null
-    expires_at: string
-    ip_address?: string | null
-    revoke_id: string
-  }
+  session: ProfileQueryResponse["user"]["active_sessions"][number]
   onRevoke: (id: string) => void
   loading: boolean
 }) {
@@ -237,7 +234,14 @@ function SessionItem(props: {
       <div class="flex items-center gap-3">
         <span class="text-lg text-muted-foreground">{deviceEmoji()}</span>
         <div>
-          <p class="font-medium text-sm">{props.session.display_id || "Unknown Device"}</p>
+          <p class="font-medium text-sm">
+            {props.session.display_id || "Unknown Device"}
+            {props.session.is_current && (
+              <Badge variant="secondary" class="ml-2">
+                Current
+              </Badge>
+            )}
+          </p>
           <p class="text-xs">
             {props.session.device_name} ·{" "}
             <span class={expiresText().class}>{expiresText().text}</span>
@@ -250,7 +254,7 @@ function SessionItem(props: {
         variant="ghost"
         size="sm"
         onClick={() => props.onRevoke(props.session.revoke_id)}
-        disabled={props.loading}
+        disabled={props.loading || props.session.is_current}
       >
         {props.loading ? "Revoking…" : "Revoke"}
       </Button>

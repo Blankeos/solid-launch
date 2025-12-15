@@ -52,7 +52,10 @@ export const authController = new Hono<{
   // Get authenticated user profile
   .get("/profile", authMiddleware, requireAuthMiddleware, describeRoute({}), async (c) => {
     const user = c.var.user
-    const userDetails = await authService.getUserDetails(user.id)
+    const userDetails = await authService.getUserDetails({
+      userId: user.id,
+      currentSessionId: c.var.session.id,
+    })
 
     return c.json({
       user: userDetails,

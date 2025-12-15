@@ -221,11 +221,11 @@ export class AuthDAO {
     return user
   }
 
-  async getUserDetails(userId: string) {
+  async getUserDetails(params: { userId: string; currentSessionId?: string }) {
     const user = await db
       .selectFrom("user")
       .selectAll()
-      .where("user.id", "=", userId)
+      .where("user.id", "=", params.userId)
       .executeTakeFirst()
 
     if (!user) return null
@@ -234,12 +234,12 @@ export class AuthDAO {
       db
         .selectFrom("oauth_account")
         .select(["provider_id", "provider_user_id"])
-        .where("oauth_account.user_id", "=", userId)
+        .where("oauth_account.user_id", "=", params.userId)
         .execute(),
       db
         .selectFrom("session")
         .select(["id", "revoke_id", "expires_at", "ip_address", "session.user_agent_hash"])
-        .where("session.user_id", "=", userId)
+        .where("session.user_id", "=", params.userId)
         .where("session.expires_at", ">", new Date().toISOString())
         .execute(),
     ])
@@ -265,6 +265,7 @@ export class AuthDAO {
         expires_at: s.expires_at,
         ip_address: s.ip_address,
         device_name: getSimpleDeviceName(s.user_agent_hash),
+        is_current: params.currentSessionId ? s.id === params.currentSessionId : false,
       })),
     }
   }
