@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button"
 import { CalloutComp } from "@/components/ui/callout"
 import { CheckboxComp } from "@/components/ui/checkbox"
 import { Collapsible } from "@/components/ui/collapsible"
+import { ComboboxComp, type ComboboxOption } from "@/components/ui/combobox"
 import { ContextMenuComp } from "@/components/ui/context-menu"
 import { DataTable } from "@/components/ui/data-table/data-table"
 import { TableColumnHeader } from "@/components/ui/data-table/table-column-header"
@@ -195,6 +196,62 @@ export default function ComponentsPage() {
                 onChange={(newValue) => {
                   setValue(newValue.map((_opt) => _opt.value))
                 }}
+              />
+            </>
+          )
+        })()}
+      </ComponentCard>
+
+      <ComponentCard label="Combobox" class="w-94">
+        <span class="text-xs">Basic (w/ triggerMode focus)</span>
+        <ComboboxComp
+          placeholder="Select fruit..."
+          triggerMode="focus"
+          options={[
+            { value: "apple", label: "🍎 Apple" },
+            { value: "orange", label: "🍊 Orange" },
+            { value: "grape", label: "🍇 Grape" },
+          ]}
+        />
+        <span class="text-xs">Multiple w/ sections</span>
+        <ComboboxComp
+          placeholder="Select fruit..."
+          multiple
+          options={[
+            {
+              label: "Citrus",
+              options: [
+                { value: "lemon", label: "🍋 Lemon" },
+                { value: "orange", label: "🍊 Orange" },
+                { value: "pineapple", label: "🍍 Pineapple", disabled: true },
+              ],
+            },
+            {
+              label: "Berries",
+              options: [
+                { value: "strawberry", label: "🍓 Strawberry" },
+                { value: "blueberry", label: "🫐 Blueberry" },
+              ],
+            },
+          ]}
+        />
+        {(() => {
+          const [value, setValue] = createSignal<string | null>(null)
+          const options: ComboboxOption[] = [
+            { value: "apple", label: "🍎 Apple" },
+            { value: "orange", label: "🍊 Orange" },
+            { value: "grape", label: "🍇 Grape" },
+          ]
+          return (
+            <>
+              <span class="text-xs">
+                Controlled {value() ? `- ${JSON.stringify(value())}` : null}
+              </span>
+              <ComboboxComp
+                placeholder="Select fruit..."
+                options={options}
+                value={options.find((opt) => opt.value === value())}
+                onChange={setValue}
               />
             </>
           )
