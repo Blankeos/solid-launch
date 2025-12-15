@@ -118,8 +118,4 @@ app.onError((error, c) => {
   return c.json(errorResponse, status)
 })
 
-function _serve() {
-  if (privateEnv.NODE_ENV === "development") return serve(app, { port: privateEnv.PORT })
-  serve(app, { port: privateEnv.PORT })
-}
-export default _serve()
+export default serve(app, { port: privateEnv.PORT })
