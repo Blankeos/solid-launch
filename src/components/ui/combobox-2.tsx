@@ -20,7 +20,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "./popover"
 
 export interface ComboboxItem {
   value: string
-  label: string
+  label: string | JSX.Element
 }
 
 export interface Combobox2CommandProps extends ComponentProps<typeof Command> {
@@ -141,6 +141,7 @@ export interface Combobox2CompProps extends ComponentProps<typeof Popover> {
   multiple?: boolean
 }
 
+/** Lots of edge cases right now but good for 70% of usecases. */
 export const Combobox2Comp: Component<Combobox2CompProps> = (props) => {
   const [local, rest] = splitProps(props, [
     "items",
@@ -175,9 +176,27 @@ export const Combobox2Comp: Component<Combobox2CompProps> = (props) => {
     if (local.multiple && currentValue) {
       const selectedValues = currentValue.split(",")
       const selectedItems = local.items.filter((item) => selectedValues.includes(item.value))
-      return selectedItems.map((item) => item.label).join(", ")
+
+      // Create an array of labels, with string labels separated by ", "
+      const labels = selectedItems.map((item, index) => {
+        if (typeof item.label === "string") {
+          // Add comma separator for string labels (except the last one)
+          return index === selectedItems.length - 1 ? item.label : `${item.label}, `
+        }
+        // For JSX elements, wrap them with a span and add comma if not the last item
+        return (
+          <span>
+            {item.label}
+            {index < selectedItems.length - 1 && ", "}
+          </span>
+        )
+      })
+
+      // Return the array of labels (mixed string/JSX)
+      return labels
     } else {
-      return local.items.find((item) => item.value === currentValue)?.label
+      const foundItem = local.items.find((item) => item.value === currentValue)
+      return foundItem?.label
     }
   }
 
@@ -192,9 +211,11 @@ export const Combobox2Comp: Component<Combobox2CompProps> = (props) => {
         aria-expanded={open()}
         disabled={local.disabled}
       >
-        <Show when={selectedValue()} fallback={local.placeholder ?? "Select item..."}>
-          {getDisplayText()}
-        </Show>
+        <span class="text-start">
+          <Show when={selectedValue()} fallback={local.placeholder ?? "Select item..."}>
+            {getDisplayText()}
+          </Show>
+        </span>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
