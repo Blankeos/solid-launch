@@ -25,20 +25,67 @@ export interface ComboboxItem {
 
 export interface Combobox2CommandProps extends ComponentProps<typeof Command> {
   items: ComboboxItem[]
-  value: string
-  onValueChange: (value: string) => void
+  selectedValue: string
+  onSelectedValueChange: (value: string | string[]) => void
   searchPlaceholder?: string
   onClose?: () => void
+  disallowEmptySelection?: boolean
+  multiple?: boolean
 }
 
 export const Combobox2Command: Component<Combobox2CommandProps> = (props) => {
   const [local, rest] = splitProps(props, [
     "items",
-    "value",
-    "onValueChange",
+    "selectedValue",
+    "onSelectedValueChange",
     "searchPlaceholder",
     "onClose",
+    "disallowEmptySelection",
+    "multiple",
   ])
+
+  const [internalSelectedValue, setInternalSelectedValue] = createSignal(local.selectedValue || "")
+
+  const currentSelectedValue = () =>
+    local.selectedValue !== undefined ? local.selectedValue : internalSelectedValue()
+
+  const handleValueChange = (value: string) => {
+    if (local.multiple) {
+      // For multiple selection, treat selectedValue as a comma-separated string
+      const currentValues = currentSelectedValue() ? currentSelectedValue().split(",") : []
+      const newValues = currentValues.includes(value)
+        ? currentValues.filter((v) => v !== value)
+        : [...currentValues, value]
+
+      const newValueString = newValues.join(",")
+
+      if (local.onSelectedValueChange) {
+        local.onSelectedValueChange(newValues)
+      } else {
+        setInternalSelectedValue(newValueString)
+      }
+    } else {
+      // Single selection logic
+      const newValue =
+        currentSelectedValue() === value && !local.disallowEmptySelection ? "" : value
+      if (local.onSelectedValueChange) {
+        local.onSelectedValueChange(newValue)
+      } else {
+        setInternalSelectedValue(newValue)
+      }
+
+      local.onClose?.()
+    }
+  }
+
+  const isItemSelected = (value: string) => {
+    if (local.multiple) {
+      const currentValues = currentSelectedValue() ? currentSelectedValue().split(",") : []
+      return currentValues.includes(value)
+    } else {
+      return currentSelectedValue() === value
+    }
+  }
 
   return (
     <Command {...rest}>
@@ -51,8 +98,7 @@ export const Combobox2Command: Component<Combobox2CommandProps> = (props) => {
               <CommandItem
                 value={item.value}
                 onSelect={(value) => {
-                  local.onValueChange(value)
-                  local.onClose?.()
+                  handleValueChange(value)
                 }}
               >
                 <svg
@@ -65,7 +111,7 @@ export const Combobox2Command: Component<Combobox2CommandProps> = (props) => {
                   stroke-linejoin="round"
                   class={cn(
                     "mr-2 h-4 w-4",
-                    local.value === item.value ? "opacity-100" : "opacity-0"
+                    isItemSelected(item.value) ? "opacity-100" : "opacity-0"
                   )}
                 >
                   <path d="M5 12l5 5l10 -10" />
@@ -84,7 +130,7 @@ export const Combobox2Command: Component<Combobox2CommandProps> = (props) => {
 export interface Combobox2CompProps extends ComponentProps<typeof Popover> {
   items: ComboboxItem[]
   value?: string
-  onValueChange?: (value: string) => void
+  onValueChange?: (value: string | string[]) => void
   placeholder?: string
   searchPlaceholder?: string
   triggerClass?: string
@@ -92,6 +138,7 @@ export interface Combobox2CompProps extends ComponentProps<typeof Popover> {
   disabled?: boolean
   children?: JSX.Element
   disallowEmptySelection?: boolean
+  multiple?: boolean
 }
 
 export const Combobox2Comp: Component<Combobox2CompProps> = (props) => {
@@ -107,19 +154,30 @@ export const Combobox2Comp: Component<Combobox2CompProps> = (props) => {
     "children",
     "sameWidth",
     "disallowEmptySelection",
+    "multiple",
   ])
   const [open, setOpen] = createSignal(false)
   const [internalValue, setInternalValue] = createSignal(local.value || "")
 
-  const currentValue = () => (local.value !== undefined ? local.value : internalValue())
+  // Update internal value when prop changes
+  const selectedValue = () => (local.value !== undefined ? local.value : internalValue())
 
-  const handleValueChange = (value: string) => {
-    // Toggle: if the same value is selected again, clear it
-    const newValue = currentValue() === value && !local.disallowEmptySelection ? "" : value
-    if (local.onValueChange) {
-      local.onValueChange(newValue)
+  const handleValueChange = (value: string | string[]) => {
+    const newValue = Array.isArray(value) ? value.join(",") : value
+    setInternalValue(newValue)
+    local.onValueChange?.(value)
+  }
+
+  const getDisplayText = () => {
+    const currentValue = selectedValue()
+    if (!currentValue) return local.placeholder ?? "Select item..."
+
+    if (local.multiple && currentValue) {
+      const selectedValues = currentValue.split(",")
+      const selectedItems = local.items.filter((item) => selectedValues.includes(item.value))
+      return selectedItems.map((item) => item.label).join(", ")
     } else {
-      setInternalValue(newValue)
+      return local.items.find((item) => item.value === currentValue)?.label
     }
   }
 
@@ -134,8 +192,8 @@ export const Combobox2Comp: Component<Combobox2CompProps> = (props) => {
         aria-expanded={open()}
         disabled={local.disabled}
       >
-        <Show when={currentValue()} fallback={local.placeholder ?? "Select item..."}>
-          {local.items.find((item) => item.value === currentValue())?.label}
+        <Show when={selectedValue()} fallback={local.placeholder ?? "Select item..."}>
+          {getDisplayText()}
         </Show>
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -162,10 +220,12 @@ export const Combobox2Comp: Component<Combobox2CompProps> = (props) => {
       >
         <Combobox2Command
           items={local.items}
-          value={currentValue()}
-          onValueChange={handleValueChange}
+          selectedValue={selectedValue()}
+          onSelectedValueChange={handleValueChange}
           searchPlaceholder={local.searchPlaceholder}
           onClose={() => setOpen(false)}
+          disallowEmptySelection={local.disallowEmptySelection}
+          multiple={local.multiple}
         />
       </PopoverContent>
     </Popover>

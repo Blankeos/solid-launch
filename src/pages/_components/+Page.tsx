@@ -279,6 +279,16 @@ export default function ComponentsPage() {
             { value: "grape", label: "🍇 Grape" },
           ]}
         />
+        <span class="text-xs">Basic multiple</span>
+        <Combobox2Comp
+          placeholder="Select fruit..."
+          multiple
+          items={[
+            { value: "apple", label: "🍎 Apple" },
+            { value: "orange", label: "🍊 Orange" },
+            { value: "grape", label: "🍇 Grape" },
+          ]}
+        />
         {(() => {
           const [value, setValue] = createSignal("")
           const items = [
