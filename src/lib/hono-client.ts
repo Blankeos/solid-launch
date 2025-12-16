@@ -37,12 +37,15 @@ export const initHonoClient = (
 
       // This is where we proxy it back.
       for (const [key, value] of response.headers) {
-        // Don't set back the Content-Type header (Otherwise, content-type HTML would become a json).
-        if (key.toLowerCase() === "content-type") continue
-        // Don't set back the Content-Length header (otherwise, content-length 16 would error 500).
-        if (key.toLowerCase() === "content-length") continue
+        const lowerKey = key.toLowerCase()
 
-        ssrProxyParams?.responseHeaders?.set(key, value) // Even Set-Cookie will be set here.
+        // 🟢 ONLY copy cookies. Everything else belongs to the internal request.
+        if (lowerKey === "set-cookie") {
+          ssrProxyParams?.responseHeaders?.append(key, value) // Use append, not set, for multiple cookies
+        }
+
+        // If you specifically need to proxy specific custom headers, add them here.
+        // if (lowerKey === "x-my-custom-header") { ... }
       }
 
       return response
