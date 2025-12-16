@@ -22,7 +22,7 @@ const PopoverContent = <T extends ValidComponent = "div">(
     <PopoverPrimitive.Portal>
       <PopoverPrimitive.Content
         class={cn(
-          "z-50 w-72 origin-[var(--kb-popover-content-transform-origin)] rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none data-[closed]:animate-flyUpAndScaleExit data-[expanded]:animate-flyUpAndScale",
+          "z-50 origin-[var(--kb-popover-content-transform-origin)] rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none data-[closed]:animate-flyUpAndScaleExit data-[expanded]:animate-flyUpAndScale",
           local.class
         )}
         {...others}

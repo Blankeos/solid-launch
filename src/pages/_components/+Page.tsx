@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button"
 import { CalloutComp } from "@/components/ui/callout"
 import { CheckboxComp } from "@/components/ui/checkbox"
 import { Collapsible } from "@/components/ui/collapsible"
-import { ComboboxComp, type ComboboxOption } from "@/components/ui/combobox"
+import { Combobox2Comp } from "@/components/ui/combobox-2"
 import { ContextMenuComp } from "@/components/ui/context-menu"
 import { DataTable } from "@/components/ui/data-table/data-table"
 import { TableColumnHeader } from "@/components/ui/data-table/table-column-header"
@@ -202,7 +202,7 @@ export default function ComponentsPage() {
         })()}
       </ComponentCard>
 
-      <ComponentCard label="Combobox" class="w-94">
+      {/*<ComponentCard label="Combobox" class="w-94">
         <span class="text-xs">Basic (w/ triggerMode focus)</span>
         <ComboboxComp
           placeholder="Select fruit..."
@@ -256,7 +256,52 @@ export default function ComponentsPage() {
             </>
           )
         })()}
+      </ComponentCard>*/}
+
+      <ComponentCard label="Combobox2" class="w-94">
+        <span class="text-xs">Basic</span>
+        <Combobox2Comp
+          placeholder="Select fruit..."
+          items={[
+            { value: "apple", label: "🍎 Apple" },
+            { value: "orange", label: "🍊 Orange" },
+            { value: "grape", label: "🍇 Grape" },
+          ]}
+        />
+        <span class="text-xs">Basic small width (it's sameWidth) + disallowEmptySelection</span>
+        <Combobox2Comp
+          placeholder="Select fruit..."
+          triggerClass="w-[200px]"
+          disallowEmptySelection
+          items={[
+            { value: "apple", label: "🍎 Apple" },
+            { value: "orange", label: "🍊 Orange" },
+            { value: "grape", label: "🍇 Grape" },
+          ]}
+        />
+        {(() => {
+          const [value, setValue] = createSignal("")
+          const items = [
+            { value: "apple", label: "🍎 Apple" },
+            { value: "orange", label: "🍊 Orange" },
+            { value: "grape", label: "🍇 Grape" },
+          ]
+          return (
+            <>
+              <span class="text-xs">
+                Controlled {value() ? `- ${JSON.stringify(value())}` : null}
+              </span>
+              <Combobox2Comp
+                placeholder="Select fruit..."
+                items={items}
+                value={value()}
+                onValueChange={setValue}
+              />
+            </>
+          )
+        })()}
       </ComponentCard>
+
       <ComponentCard label="Slider" class="gap-5">
         <SliderComp
           label="Money"
