@@ -62,7 +62,10 @@ You can also try my other starters:
 - [x] **Lucia Book + Arctic** - Makes self-rolling auth easy, and not dependent on any third-party. (You may learn a thing or two with this low-level implementation as well). I chose not to use better-auth, everything is custom built, even organizations.
 - [x] **Nodemailer (or any email API/SDK)** - Just customize `email-client.ts`. Send emails w/ any API: SMTP or SDK-specific (Amazon SES, Resend, Zeptomail, etc.). Amazon SES is the cheapest. I personally use Zeptomail. Tip: SDK-specific is preferred because SMTP is unreliable for some services because of the handshake requirement.
 - [x] **Backblaze (or any S3)** - Cheap blob object storage with an S3-compatible API.
-- [x] **Dodo Payments** - Accept payments and pay foreign taxes, cool new payment tech I found.
+- [x] **Dodo Payments** - Accept payments and pay foreign taxes, cool new payment tech I found. With complete implementations for:
+  - [x] Checkout Handler
+  - [x] Webhook - handling at least success, fail, cancel
+  - [ ] Customer Portal - Allow customers to manage subscriptions and details. (I chose the easiest setup, a temporary link to a portal session, but Dodo Payments Billing SDK is there too if you want granular control + in-app experience)
 
 ### QuickStart
 

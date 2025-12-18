@@ -44,7 +44,7 @@ export const privateEnv = createEnv({
     /** Development|Prod. For payments. */
     DODO_PAYMENTS_API_KEY: z.string(),
     /** Development|Prod. For payments. */
-    DODO_PAYMENTS_WEBOOK_SECRET: z.string(),
+    DODO_PAYMENTS_WEBHOOK_SECRET: z.string(),
     /** Development|Prod. For payments. */
     DODO_PAYMENTS_ENV: z.enum(["test_mode", "live_mode"]).default("test_mode"),
 

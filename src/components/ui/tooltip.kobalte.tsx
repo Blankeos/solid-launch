@@ -38,7 +38,7 @@ export { Tooltip, TooltipContent, TooltipTrigger }
 
 /**
  * Gotchas, when using a button inside, make sure to set as="div" to it to avoid SSR issues.
- * TODO: followCursor should support custom placement + extra gutter and shift.
+ * @deprecated, I'm polishing solid-tippy instead.
  */
 export function TooltipComp(
   props: ParentProps &
