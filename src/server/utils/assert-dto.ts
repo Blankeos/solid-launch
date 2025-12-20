@@ -1,4 +1,5 @@
 import type { z } from "zod"
+import { formatZodIssues } from "@/utils/format-zod-issues"
 import { ApiError } from "../lib/error"
 
 export function assertDTO<T extends z.ZodType<any>>(
@@ -12,7 +13,9 @@ export function assertDTO<T extends z.ZodType<any>>(
     if (error instanceof Error) {
       throw error
     }
-    throw ApiError.InternalServerError(error || `Invalid DTO: ${JSON.stringify(result.error)}`)
+    throw ApiError.InternalServerError(
+      error || `Invalid DTO: ${formatZodIssues(result.error.issues)}`
+    )
   }
 
   return result.data as z.infer<T>

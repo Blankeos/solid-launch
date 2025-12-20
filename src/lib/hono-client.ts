@@ -3,6 +3,7 @@ import { HTTPException } from "hono/http-exception"
 import type { ContentfulStatusCode } from "hono/utils/http-status"
 import type { AppRouter } from "@/server/_app"
 import type { ApiErrorResponse } from "@/server/lib/error"
+import { formatZodIssues } from "@/utils/format-zod-issues"
 
 /** Use this on ssr. */
 export const initHonoClient = (
@@ -23,7 +24,7 @@ export const initHonoClient = (
         const errorMessage: string | undefined = (() => {
           // Attempt to parse ZodError as a readable message
           if ((json as any)?.error?.name === "ZodError")
-            return _formatZodIssues((json as any).error.issues)
+            return formatZodIssues((json as any).error.issues)
 
           return json.error.message
         })()
@@ -55,12 +56,3 @@ export const initHonoClient = (
 const baseurl = typeof window === "undefined" ? "" : (window?.location?.origin ?? "")
 /** Use this on the client. */
 export const honoClient = initHonoClient(baseurl)
-
-/** Helper to format Zod issues into a readable message */
-function _formatZodIssues(
-  issues?: Array<{ code: string; message: string; path: string[] }>
-): string | undefined {
-  if (!issues?.length) return undefined
-
-  return issues.map((issue) => `${issue.path.join(".")}: ${issue.message}`).join(", ")
-}
