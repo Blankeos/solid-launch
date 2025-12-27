@@ -11,7 +11,8 @@ export function usePostLoginRedirectUrl() {
   // ===========================================================================
   // Make sure to edit me ✍️
   // ===========================================================================
-  const postLoginRedirectUrl = () => pageContext.urlParsed.search["to"] ?? getRoute("/dashboard")
+  const postLoginRedirectUrl = () =>
+    decodeURIComponent(pageContext.urlParsed.search.to ?? getRoute("/dashboard"))
 
   return postLoginRedirectUrl
 }

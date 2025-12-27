@@ -15,7 +15,7 @@ import { AuthDAO } from "@/server/modules/auth/auth.dao"
 import { assertDTO } from "@/server/utils/assert-dto"
 import { AUTH_CONFIG } from "./auth.config"
 import type { InternalSessionDTO, InternalUserDTO, UserMetaClientInputDTO } from "./auth.dto"
-import { jsonDecode, normalizeUrlOrPath, verifyPassword } from "./auth.utilities"
+import { getOAuthRedirectUrl, jsonDecode, verifyPassword } from "./auth.utilities"
 
 type UserSessionResponse = Promise<{ user: InternalUserDTO; session: InternalSessionDTO }>
 
@@ -214,7 +214,8 @@ export class AuthService {
   async githubLogin(params: { redirectUrl?: string; clientCodeChallenge?: string } = {}) {
     const state = generateState()
     const authUrl = github.createAuthorizationURL(state, ["user:email", "read:user"])
-    const normalizedRedirectUrl = normalizeUrlOrPath(params?.redirectUrl)
+
+    const normalizedRedirectUrl = getOAuthRedirectUrl(params?.redirectUrl)
 
     const stateCookie = `github_oauth_state=${state}; HttpOnly; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}; Path=/; ${privateEnv.NODE_ENV === "production" ? "Secure;" : ""}`
     const redirectUrlCookie = `github_oauth_redirect_url=${normalizedRedirectUrl}; HttpOnly; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}; Path=/; ${privateEnv.NODE_ENV === "production" ? "Secure;" : ""}`
@@ -344,7 +345,8 @@ export class AuthService {
     const state = generateState()
     const codeVerifier = generateCodeVerifier()
     const authUrl = google.createAuthorizationURL(state, codeVerifier, ["profile", "email"])
-    const normalizedRedirectUrl = normalizeUrlOrPath(params?.redirectUrl)
+
+    const normalizedRedirectUrl = getOAuthRedirectUrl(params?.redirectUrl)
 
     const stateCookie = `google_oauth_state=${state}; HttpOnly; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}; Path=/; ${privateEnv.NODE_ENV === "production" ? "Secure;" : ""}`
     const codeVerifierCookie = `google_oauth_codeverifier=${codeVerifier}; HttpOnly; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}; Path=/; ${privateEnv.NODE_ENV === "production" ? "Secure;" : ""}`

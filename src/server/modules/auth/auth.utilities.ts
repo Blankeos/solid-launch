@@ -3,6 +3,7 @@ import { createId } from "@paralleldrive/cuid2"
 import type { Context } from "hono"
 import { privateEnv } from "@/env.private"
 import { publicEnv } from "@/env.public"
+import { ApiError } from "@/server/lib/error"
 import { AUTH_CONFIG } from "./auth.config"
 
 export function setSessionTokenCookie(context: Context, token: string, expiresAt: string): void {
@@ -157,7 +158,7 @@ export function getSimpleDeviceName(userAgent: string | null): string {
  * Used for oAuth redirect urls.
  * An easy util to parse paths (assumed local, so automatically appends base url to them) or actual urls.
  */
-export function normalizeUrlOrPath(input?: string): string {
+function normalizeUrlOrPath(input?: string): string {
   if (!input) return publicEnv.PUBLIC_BASE_URL
 
   // Check if it has a scheme/protocol i.e. mobile deeplinks or http.
@@ -166,7 +167,7 @@ export function normalizeUrlOrPath(input?: string): string {
   }
 
   // Ensure path starts with a slash
-  const path = input.startsWith("/") ? input : `/${input}`
+  const path = input.startsWith("/") ? input : `/${input ?? ""}`
 
   // Append the public base URL from environment (assumed to be available)
   // Make sure PUBLIC_BASE_URL ends without trailing slash and path starts with slash
@@ -175,6 +176,48 @@ export function normalizeUrlOrPath(input?: string): string {
   const normalizedPath = `${baseUrl}${path}`
 
   return normalizedPath
+}
+
+/**
+ * Converts a glob pattern to a RegExp for URL validation.
+ * Supports:
+ * - *: matches any characters except /
+ * - **: matches any characters including /
+ * - All other characters are treated as literals (regex special chars are escaped)
+ */
+function globToRegex(pattern: string): RegExp {
+  const regex = pattern
+    // Escape regex special characters except * and ?
+    .replace(/[.+?^${}()|[\]\\]/g, "\\$&")
+    // Use temporary marker for ** to avoid conflict with * replacement
+    .replace(/\*\*/g, "\0GLOB_DOUBLE_STAR\0")
+    // Convert * to [^/]* (match any characters except /)
+    .replace(/\*/g, "[^/]*")
+    // Replace temporary marker with .*? (lazy match for any characters including /)
+    // Using lazy match ensures /** at end of pattern matches base path
+    .replace(/\0GLOB_DOUBLE_STAR\0/g, ".*?")
+    // Optional trailing slash for patterns ending with /**
+    .replace(/\/\.\*\?$/, "(?:/.*)?")
+
+  return new RegExp(`^${regex}$`)
+}
+
+/**
+ * Validates and returns an OAuth redirect URL.
+ * Throws an error if the URL is not in the allowed list.
+ */
+export function getOAuthRedirectUrl(redirectUrl?: string): string {
+  console.log("tititltog", typeof redirectUrl, redirectUrl)
+  const normalizedUrl = normalizeUrlOrPath(redirectUrl)
+  const isAllowed = AUTH_CONFIG.oauthRedirectUrls.allowed.some((pattern) =>
+    globToRegex(pattern).test(normalizedUrl)
+  )
+  if (!isAllowed) {
+    throw ApiError.BadRequest(`Invalid redirect URL. Must match one of the allowed patterns.`, {
+      data: { normalizedUrl },
+    })
+  }
+  return normalizedUrl
 }
 
 /**
