@@ -72,7 +72,7 @@ export default function PricingPage() {
                 }`}
               >
                 {plan.popular && (
-                  <div class="-top-3 -translate-x-1/2 absolute left-1/2">
+                  <div class="absolute -top-3 left-1/2 -translate-x-1/2">
                     <span class="rounded-full bg-primary px-3 py-1 font-medium text-primary-foreground text-xs">
                       Most Popular
                     </span>

@@ -124,7 +124,7 @@ const SliderThumbWithTip = (
       class="group/thumb relative flex justify-center transition active:z-10 active:scale-93"
     >
       <Show when={props.thumbTip && value() !== undefined}>
-        <span class="-bottom-8 -translate-x-1/2 pointer-events-none absolute left-1/2 z-20 transform animate-fadeOut rounded bg-black/90 px-2 py-1 text-white text-xs shadow-lg backdrop-blur group-focus-within:/thumb:animate-fadeIn group-active/thumb:animate-fadeIn">
+        <span class="pointer-events-none absolute -bottom-8 left-1/2 z-20 -translate-x-1/2 transform animate-fadeOut rounded bg-black/90 px-2 py-1 text-white text-xs shadow-lg backdrop-blur group-focus-within:/thumb:animate-fadeIn group-active/thumb:animate-fadeIn">
           {props.thumbTip?.(value()!)}
         </span>
       </Show>

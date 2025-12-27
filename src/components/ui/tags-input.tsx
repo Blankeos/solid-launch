@@ -134,7 +134,7 @@ const TagsInputClearTrigger = <T extends ValidComponent = "button">(
   return (
     <TagsInputPrimitive.ClearTrigger
       class={cn(
-        "-translate-y-1/2 absolute top-1/2 right-2 p-1 opacity-0 transition-opacity hover:opacity-100 focus:opacity-100 focus:outline-none group-focus-within:opacity-100",
+        "absolute top-1/2 right-2 -translate-y-1/2 p-1 opacity-0 transition-opacity hover:opacity-100 focus:opacity-100 focus:outline-none group-focus-within:opacity-100",
         local.class
       )}
       {...others}
