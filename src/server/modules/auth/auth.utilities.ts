@@ -87,10 +87,10 @@ export function generateUniqueCode() {
 
 export function getClientIP(c: Context): string | null {
   const headersToCheck = [
+    "cf-connecting-ip", // Cloudflare - most reliable, check first, especially if our domain is using cloudflare's dns (This contains the local IP and not the proxied IP).
     "x-forwarded-for",
     "x-real-ip",
     "x-client-ip",
-    "cf-connecting-ip", // Cloudflare
     "x-forwarded",
     "forwarded-for",
     "forwarded",
