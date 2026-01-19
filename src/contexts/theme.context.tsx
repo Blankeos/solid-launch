@@ -8,6 +8,29 @@ import {
 } from "solid-js"
 import { createStrictContext } from "@/utils/create-strict-context"
 
+/**
+ * Blocking Theme Script (for `<head>`)
+ *
+ * This script must be inlined in `<head>` and should be blocking to prevent
+ * flash of incorrect theme (FOUC). It runs synchronously before the page renders.
+ */
+export const themeInitScript = `
+(function() {
+  const themes = ["light", "dark"]
+  const themeKey = "app-theme"
+  const savedTheme = localStorage.getItem(themeKey)
+  const theme = savedTheme && themes.includes(savedTheme) ? savedTheme :
+    window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+
+  themes.forEach(function(t) {
+    if (t === theme) {
+      document.documentElement.classList.add(t)
+    } else {
+      document.documentElement.classList.remove(t)
+    }
+  })
+})()
+`
 // ===========================================================================
 // Context & Hook
 // ===========================================================================

@@ -116,17 +116,18 @@ export default function ComponentsPage() {
       <ComponentCard label="Switch" class="gap-y-5">
         <SwitchComp label="Enable" />
         {(() => {
-          const { theme, toggleTheme } = useThemeContext()
+          const { inferredTheme, toggleTheme } = useThemeContext()
 
           return (
             <SwitchComp
               label={
-                theme() === "light" ? (
+                inferredTheme() === "light" ? (
                   <IconMoonDuo class="h-5 w-5" />
                 ) : (
                   <IconSunDuo class="h-5 w-5" />
                 )
               }
+              checked={inferredTheme() === "light"}
               onChange={toggleTheme}
             />
           )

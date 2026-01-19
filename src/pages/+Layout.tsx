@@ -7,6 +7,7 @@ import "@/styles/bprogress.css"
 
 import { useMetadata } from "vike-metadata-solid"
 import Wrapper from "@/components/layouts/wrapper"
+import { themeInitScript } from "@/contexts/theme.context"
 
 useMetadata.setGlobalDefaults({
   title: "Home | Solid Launch",
@@ -23,6 +24,7 @@ useMetadata.setGlobalDefaults({
     return (
       <>
         <link rel="icon" href="/icon-logo.svg" />
+        <script innerHTML={themeInitScript} />
       </>
     )
   },
