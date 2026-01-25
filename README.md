@@ -65,7 +65,7 @@ You can also try my other starters:
 - [x] **Dodo Payments** - Accept payments and pay foreign taxes, cool new payment tech I found. With complete implementations for:
   - [x] Checkout Handler
   - [x] Webhook - handling at least success, fail, cancel
-  - [ ] Customer Portal - Allow customers to manage subscriptions and details. (I chose the easiest setup, a temporary link to a portal session, but Dodo Payments Billing SDK is there too if you want granular control + in-app experience)
+  - [x] Customer Portal - Allow customers to manage subscriptions and details. (I chose the easiest setup, a temporary link to a portal session, but Dodo Payments Billing SDK is there too if you want granular control + in-app experience)
 
 ### QuickStart
 
