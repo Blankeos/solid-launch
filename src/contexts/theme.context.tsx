@@ -12,13 +12,18 @@ import { createStrictContext } from "@/utils/create-strict-context"
  * Blocking Theme Script (for `<head>`)
  *
  * This script must be inlined in `<head>` and should be blocking to prevent
- * flash of incorrect theme (FOUC). It runs synchronously before the page renders.
+ * flash of incorrect theme (FOUT). It runs synchronously before the page renders.
  */
 export const themeInitScript = `
 (function() {
   const themes = ["light", "dark"]
   const themeKey = "app-theme"
-  const savedTheme = localStorage.getItem(themeKey)
+  let savedTheme = null
+  try {
+    savedTheme = JSON.parse(localStorage.getItem(themeKey) || 'null')
+  } catch (e) {
+    savedTheme = null
+  }
   const theme = savedTheme && themes.includes(savedTheme) ? savedTheme :
     window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
 
