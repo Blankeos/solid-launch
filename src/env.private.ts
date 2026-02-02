@@ -12,12 +12,6 @@ export const privateEnv = createEnv({
     // Database
     /** Development|Prod. Url of the database. */
     DATABASE_URL: z.string(),
-    /** Development(Optional)|Prod. https://docs.turso.tech/local-development#sqlite. */
-    DATABASE_AUTH_TOKEN: z
-      .string()
-      .optional()
-      .refine((val) => (process.env.NODE_ENV !== "development" ? !!val : true)),
-
     // Auth
     /** Development|Prod. GitHub OAuth client ID. */
     GITHUB_CLIENT_ID: z.string(),

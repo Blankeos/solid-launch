@@ -22,7 +22,7 @@ export type OneTimeToken = {
    * Optional shorter digit alias, scoped to user (so not globally unique)
    */
   code: string | null
-  expires_at: string
+  expires_at: Timestamp
   identifier: string
   /**
    * e.g. 'password_reset', 'magic_link', 'otp', etc. (managed in application layer)
@@ -45,8 +45,8 @@ export type Organization = {
    * For additional metadata i.e. org settings, billing, features, handled in application layer
    */
   metadata: unknown | null
-  created_at: Generated<string>
-  updated_at: Generated<string>
+  created_at: Generated<Timestamp>
+  updated_at: Generated<Timestamp>
 }
 export type OrganizationInvitation = {
   id: string
@@ -54,10 +54,10 @@ export type OrganizationInvitation = {
   email: string
   role: Generated<string>
   invited_by_id: string
-  expires_at: string
-  accepted_at: string | null
-  rejected_at: string | null
-  created_at: Generated<string>
+  expires_at: Timestamp
+  accepted_at: Timestamp | null
+  rejected_at: Timestamp | null
+  created_at: Generated<Timestamp>
 }
 export type OrganizationMember = {
   user_id: string
@@ -66,8 +66,8 @@ export type OrganizationMember = {
    * owner, admin, member (handled in application layer)
    */
   role: Generated<string>
-  created_at: Generated<string>
-  updated_at: Generated<string>
+  created_at: Generated<Timestamp>
+  updated_at: Generated<Timestamp>
 }
 export type Session = {
   /**
@@ -75,7 +75,7 @@ export type Session = {
    */
   id: string
   user_id: string
-  expires_at: string
+  expires_at: Timestamp
   /**
    * an alternative id strictly for revoking (not validating) so it's safe to send to frontend
    */
@@ -93,11 +93,11 @@ export type Session = {
 export type User = {
   id: string
   email: string
-  email_verified: Generated<number>
+  email_verified: Generated<boolean>
   password_hash: string
   metadata: unknown | null
-  joined_at: Generated<string>
-  updated_at: Generated<string>
+  joined_at: Generated<Timestamp>
+  updated_at: Generated<Timestamp>
 }
 export type DB = {
   oauth_account: OAuthAccount

@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: solid-launch-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: "solid"
+      POSTGRES_PASSWORD: "solid"
+      POSTGRES_DB: "solid_launch"
+      # DATABASE_URL="postgresql://solid:solid@localhost:5432/solid_launch?schema=public"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

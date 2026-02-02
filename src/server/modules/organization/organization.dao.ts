@@ -2,7 +2,7 @@ import type { Insertable } from "kysely"
 import { db } from "@/server/db/kysely"
 import type { OrganizationInvitation, OrganizationMember } from "@/server/db/types"
 import { ApiError } from "@/server/lib/error"
-import { generateId, jsonDecode } from "@/server/modules/auth/auth.utilities"
+import { generateId, jsonDecode, jsonEncode } from "@/server/modules/auth/auth.utilities"
 import { assertDTO } from "@/server/utils/assert-dto"
 import { getUserResponseMetaDTO, type UserMetaDTO } from "../auth/auth.dto"
 import { type OrgMetaDTO, orgMetaDTO } from "./organization.dto"
@@ -56,7 +56,7 @@ export class OrganizationDAO {
         id: generateId(),
         name: data.name,
         slug: data.slug,
-        metadata: JSON.stringify(data.metadata || {}),
+        metadata: jsonEncode(data.metadata || {}),
       })
       .returningAll()
       .executeTakeFirstOrThrow()
@@ -71,8 +71,8 @@ export class OrganizationDAO {
     const updates: Record<string, unknown> = {}
     if (data.name !== undefined) updates.name = data.name
     if (data.slug !== undefined) updates.slug = data.slug
-    if (data.metadata !== undefined) updates.metadata = JSON.stringify(data.metadata)
-    updates.updated_at = new Date().toISOString()
+    if (data.metadata !== undefined) updates.metadata = jsonEncode(data.metadata)
+    updates.updated_at = new Date()
 
     return await db
       .updateTable("organization")
@@ -186,7 +186,7 @@ export class OrganizationDAO {
   async updateMembership(organizationId: string, userId: string, role: string) {
     return await db
       .updateTable("organization_member")
-      .set({ role, updated_at: new Date().toISOString() })
+      .set({ role, updated_at: new Date() })
       .where("organization_id", "=", organizationId)
       .where("user_id", "=", userId)
       .returningAll()
@@ -277,7 +277,7 @@ export class OrganizationDAO {
       .where("organization_invitation.email", "=", params.email)
       .where("organization_invitation.accepted_at", "is", null)
       .where("organization_invitation.rejected_at", "is", null)
-      .where("organization_invitation.expires_at", ">", new Date().toISOString())
+      .where("organization_invitation.expires_at", ">", new Date())
       .executeTakeFirst()
 
     if (!result) return undefined
@@ -325,7 +325,7 @@ export class OrganizationDAO {
         .where("id", "=", id)
         .where("accepted_at", "is", null)
         .where("rejected_at", "is", null)
-        .where("expires_at", ">", new Date().toISOString())
+        .where("expires_at", ">", new Date())
         .executeTakeFirst()
 
       if (!invitation) {
@@ -346,7 +346,7 @@ export class OrganizationDAO {
       // Mark invitation as accepted
       await trx
         .updateTable("organization_invitation")
-        .set({ accepted_at: new Date().toISOString() })
+        .set({ accepted_at: new Date() })
         .where("id", "=", id)
         .execute()
 

@@ -5,15 +5,15 @@ CREATE TABLE "user" (
     "email_verified" BOOLEAN NOT NULL DEFAULT false,
     "password_hash" TEXT NOT NULL,
     "metadata" JSONB,
-    "joined_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    "joined_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- CreateTable
 CREATE TABLE "session" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "user_id" TEXT NOT NULL,
-    "expires_at" DATETIME NOT NULL,
+    "expires_at" TIMESTAMP(3) NOT NULL,
     "revoke_id" TEXT NOT NULL,
     "active_organization_id" TEXT,
     "ip_address" TEXT,
@@ -36,7 +36,7 @@ CREATE TABLE "oauth_account" (
 CREATE TABLE "onetime_token" (
     "token" TEXT NOT NULL PRIMARY KEY,
     "code" TEXT,
-    "expires_at" DATETIME NOT NULL,
+    "expires_at" TIMESTAMP(3) NOT NULL,
     "identifier" TEXT NOT NULL,
     "purpose" TEXT NOT NULL,
     "metadata" JSONB
@@ -49,8 +49,8 @@ CREATE TABLE "organization" (
     "slug" TEXT,
     "logo_object_id" TEXT,
     "metadata" JSONB,
-    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- CreateTable
@@ -58,8 +58,8 @@ CREATE TABLE "organization_member" (
     "user_id" TEXT NOT NULL,
     "organization_id" TEXT NOT NULL,
     "role" TEXT NOT NULL DEFAULT 'member',
-    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY ("organization_id", "user_id"),
     CONSTRAINT "organization_member_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organization" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
@@ -73,10 +73,10 @@ CREATE TABLE "organization_invitation" (
     "email" TEXT NOT NULL,
     "role" TEXT NOT NULL DEFAULT 'member',
     "invited_by_id" TEXT NOT NULL,
-    "expires_at" DATETIME NOT NULL,
-    "accepted_at" DATETIME,
-    "rejected_at" DATETIME,
-    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "expires_at" TIMESTAMP(3) NOT NULL,
+    "accepted_at" TIMESTAMP(3),
+    "rejected_at" TIMESTAMP(3),
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "organization_invitation_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organization" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "organization_invitation_invited_by_id_fkey" FOREIGN KEY ("invited_by_id") REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
