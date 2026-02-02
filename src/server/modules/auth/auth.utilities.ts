@@ -6,7 +6,11 @@ import { publicEnv } from "@/env.public"
 import { ApiError } from "@/server/lib/error"
 import { AUTH_CONFIG } from "./auth.config"
 
-export function setSessionTokenCookie(context: Context, token: string, expiresAt: string): void {
+export function setSessionTokenCookie(
+  context: Context,
+  token: string,
+  expiresAt: Date | string
+): void {
   /**
    * NOTE: If you're surprised that auth fails in an http ipv4 address after building and previewing. This is the reason.
    *
@@ -222,7 +226,7 @@ export function getOAuthRedirectUrl(redirectUrl?: string): string {
 
 /**
  * Little util so JSON.parse() can technically work for sqlite vs postgres and mysql without changing much code.
- * sqlite stores as text.
+ * SQLite stores JSON as text, Postgres returns jsonb objects.
  */
 export function jsonDecode(input: any): any {
   if (typeof input === "string") {

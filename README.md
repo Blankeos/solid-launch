@@ -84,13 +84,15 @@ cd <your-app-name>
    cp .env.example .env
    ```
 
-3. Replace the `<absolute_url>` in the local database with:
+3. Start Postgres (or point `DATABASE_URL` at your existing database):
 
    ```sh
-   pwd # If it outputs: /User/Projects/solid-launch
+   docker compose up -d
+   ```
 
+   ```sh
    # Replace the .env with:
-   DATABASE_URL="file:/User/Projects/solid-launch/local.db"
+   DATABASE_URL="postgresql://solid:solid@localhost:5432/solid_launch?schema=public"
    ```
 
 4. Generate

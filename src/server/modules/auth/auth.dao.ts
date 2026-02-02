@@ -7,6 +7,7 @@ import {
   getSimpleDeviceName,
   hashPassword,
   jsonDecode,
+  jsonEncode,
 } from "@/server/modules/auth/auth.utilities"
 import { assertDTO } from "@/server/utils/assert-dto"
 import { AUTH_CONFIG } from "./auth.config"
@@ -32,7 +33,7 @@ export class AuthDAO {
         user_id: userId,
         expires_at: new Date(
           Date.now() + AUTH_CONFIG.session.expiresInDays * 24 * 60 * 60 * 1000
-        ).toISOString(),
+        ),
       })
       .returningAll()
       .executeTakeFirst()
@@ -114,7 +115,7 @@ export class AuthDAO {
     ) {
       session.expires_at = new Date(
         Date.now() + 1000 * 60 * 60 * 24 * AUTH_CONFIG.session.expiresInDays
-      ).toISOString()
+      )
 
       await db
         .updateTable("session")
@@ -240,7 +241,7 @@ export class AuthDAO {
         .selectFrom("session")
         .select(["id", "revoke_id", "expires_at", "ip_address", "session.user_agent_hash"])
         .where("session.user_id", "=", params.userId)
-        .where("session.expires_at", ">", new Date().toISOString())
+        .where("session.expires_at", ">", new Date())
         .execute(),
     ])
 
@@ -271,8 +272,8 @@ export class AuthDAO {
   }
 
   async updateUserMetadata(params: { userId: string; metadata?: Partial<UserMetaDTO> }) {
-    const updates: Partial<{ metadata: string; updated_at: string }> = {
-      updated_at: new Date().toISOString(),
+    const updates: Partial<{ metadata: UserMetaDTO; updated_at: Date }> = {
+      updated_at: new Date(),
     }
 
     if (params.metadata !== undefined) {
@@ -289,7 +290,7 @@ export class AuthDAO {
 
       const mergedMeta: UserMetaDTO = { ...existingMeta, ...params.metadata }
 
-      updates.metadata = JSON.stringify(mergedMeta)
+      updates.metadata = jsonEncode(mergedMeta)
     }
 
     await db.updateTable("user").set(updates).where("user.id", "=", params.userId).execute()
@@ -312,7 +313,7 @@ export class AuthDAO {
         id: userId,
         password_hash: await hashPassword(params.password),
         email: params.email,
-        metadata: params.metadata ? JSON.stringify(params.metadata) : undefined,
+        metadata: params.metadata ? jsonEncode(params.metadata) : undefined,
       })
       .returningAll()
       .executeTakeFirst()
@@ -325,7 +326,7 @@ export class AuthDAO {
       .updateTable("user")
       .set({
         password_hash: await hashPassword(params.password),
-        updated_at: new Date().toISOString(),
+        updated_at: new Date(),
       })
       .where("user.id", "=", params.userId)
       .execute()
@@ -337,8 +338,8 @@ export class AuthDAO {
     await db
       .updateTable("user")
       .set({
-        email_verified: 1,
-        updated_at: new Date().toISOString(),
+        email_verified: true,
+        updated_at: new Date(),
       })
       .where("user.id", "=", params.userId)
       .execute()
@@ -361,9 +362,9 @@ export class AuthDAO {
         .values({
           id: userId,
           email: params.email,
-          email_verified: 1, // oAuth users are always really verified
+          email_verified: true, // oAuth users are always really verified
           password_hash: await hashPassword(generateId()), // Just a random password, that's never guessable usually.
-          metadata: params.metadata ? JSON.stringify(params.metadata) : undefined,
+          metadata: params.metadata ? jsonEncode(params.metadata) : undefined,
         })
         .returningAll()
         .execute()
@@ -458,9 +459,9 @@ export class AuthDAO {
       .values({
         id: userId,
         email,
-        email_verified: 0,
+        email_verified: false,
         password_hash: await hashPassword(generateId()), // random placeholder
-        metadata: metadata ? JSON.stringify(metadata) : undefined,
+        metadata: metadata ? jsonEncode(metadata) : undefined,
       })
       .returningAll()
       .executeTakeFirst()
@@ -503,10 +504,10 @@ export class AuthDAO {
       .values({
         token,
         code,
-        expires_at: expiresAt.toISOString(),
+        expires_at: expiresAt,
         identifier: params.identifier,
         purpose: params.purpose,
-        metadata: params.metadata ? JSON.stringify(params.metadata) : undefined,
+        metadata: params.metadata ? jsonEncode(params.metadata) : undefined,
       })
       .returning(["token", "code"])
       .executeTakeFirst()
@@ -533,7 +534,7 @@ export class AuthDAO {
       let query = trx
         .selectFrom("onetime_token")
         .selectAll()
-        .where("onetime_token.expires_at", ">", new Date().toISOString())
+        .where("onetime_token.expires_at", ">", new Date())
 
       if (params.token) {
         query = query.where("onetime_token.token", "=", params.token)

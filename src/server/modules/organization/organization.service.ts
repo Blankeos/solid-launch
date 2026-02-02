@@ -178,7 +178,7 @@ export class OrganizationService {
       email: email.toLowerCase(),
       role,
       invited_by_id: invitedByUserId,
-      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days
+      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
     })
 
     // Fetch the organization details
