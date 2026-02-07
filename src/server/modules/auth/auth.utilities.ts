@@ -86,42 +86,23 @@ export function generateUniqueCode() {
 }
 
 export function getClientIP(c: Context): string | null {
-  const headersToCheck = [
-    "cf-connecting-ip", // Cloudflare - most reliable, check first, especially if our domain is using cloudflare's dns (This contains the local IP and not the proxied IP).
-    "x-forwarded-for",
-    "x-real-ip",
-    "x-client-ip",
-    "x-forwarded",
-    "forwarded-for",
-    "forwarded",
-  ] as const
+  const candidates = [
+    (c.req as any).ip,
+    (c.env as any)?.remoteAddr,
+    (c.req.raw as any)?.remoteAddress,
+    (c.req.raw as any)?.socket?.remoteAddress,
+  ]
 
-  for (const header of headersToCheck) {
-    const value = c.req.header(header)
-    if (!value) continue
+  for (const candidate of candidates) {
+    if (!candidate || typeof candidate !== "string") continue
 
-    // Handle comma-separated IPs (take the first one)
-    const ip = value.split(",")[0].trim()
-
-    // Validate it's a real IP (basic validation)
-    if (isValidIP(ip)) return ip
-  }
-
-  // Fallback to remote address if no valid IP found in headers
-  const remoteAddr = (c.env as any)?.remoteAddr || c.req.raw.headers.get("x-remote-addr")
-  if (remoteAddr && isValidIP(remoteAddr)) {
-    return remoteAddr
-  }
-
-  // Last resort: use c.req.raw.cf?.colo (Cloudflare) or c.req.raw.socket?.remoteAddress if available
-  const cf = (c.req.raw as any).cf
-  if (cf?.colo) {
-    return cf.colo
-  }
-
-  const socket = (c.req.raw as any).socket
-  if (socket?.remoteAddress) {
-    return socket.remoteAddress
+    const ip = candidate
+      .split(",")[0]
+      .trim()
+      .replace(/^::ffff:/, "")
+    if (isValidIP(ip)) {
+      return ip
+    }
   }
 
   return null
@@ -206,18 +187,37 @@ function globToRegex(pattern: string): RegExp {
  * Validates and returns an OAuth redirect URL.
  * Throws an error if the URL is not in the allowed list.
  */
-export function getOAuthRedirectUrl(redirectUrl?: string): string {
-  console.log("tititltog", typeof redirectUrl, redirectUrl)
+function isAllowedOAuthRedirectUrl(url: string): boolean {
+  return AUTH_CONFIG.oauthRedirectUrls.allowed.some((pattern) => globToRegex(pattern).test(url))
+}
+
+type OAuthRedirectUrlOptions = {
+  allowDefaultRedirect?: boolean
+  defaultRedirectUrl?: string
+}
+
+export function getOAuthRedirectUrl(
+  redirectUrl?: string,
+  options: OAuthRedirectUrlOptions = {}
+): string {
   const normalizedUrl = normalizeUrlOrPath(redirectUrl)
-  const isAllowed = AUTH_CONFIG.oauthRedirectUrls.allowed.some((pattern) =>
-    globToRegex(pattern).test(normalizedUrl)
-  )
-  if (!isAllowed) {
+
+  if (isAllowedOAuthRedirectUrl(normalizedUrl)) {
+    return normalizedUrl
+  }
+
+  if (!options.allowDefaultRedirect) {
     throw ApiError.BadRequest(`Invalid redirect URL. Must match one of the allowed patterns.`, {
       data: { normalizedUrl },
     })
   }
-  return normalizedUrl
+
+  const normalizedDefaultRedirectUrl = normalizeUrlOrPath(options.defaultRedirectUrl ?? "/")
+  if (isAllowedOAuthRedirectUrl(normalizedDefaultRedirectUrl)) {
+    return normalizedDefaultRedirectUrl
+  }
+
+  return publicEnv.PUBLIC_BASE_URL
 }
 
 /**

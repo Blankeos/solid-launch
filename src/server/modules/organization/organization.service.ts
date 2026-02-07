@@ -218,8 +218,12 @@ export class OrganizationService {
     return invitation
   }
 
-  async acceptInvitation(invitationId: string, userId: string) {
-    return await this.orgDAO.acceptInvitation(invitationId, userId)
+  async acceptInvitation(invitationId: string, userId: string, userEmail: string) {
+    return await this.orgDAO.acceptInvitation({
+      invitationId,
+      userId,
+      email: userEmail.toLowerCase(),
+    })
   }
 
   async revokeInvitation(orgId: string, invitationId: string, requestedByUserId: string) {

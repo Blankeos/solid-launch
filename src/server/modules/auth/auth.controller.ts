@@ -4,7 +4,11 @@ import { describeRoute, validator as zValidator } from "hono-openapi"
 import { z } from "zod"
 import { authMiddleware, requireAuthMiddleware } from "./auth.middleware"
 import { AuthService } from "./auth.service"
-import { deleteSessionTokenCookie, setSessionTokenCookie } from "./auth.utilities"
+import {
+  deleteSessionTokenCookie,
+  getOAuthRedirectUrl,
+  setSessionTokenCookie,
+} from "./auth.utilities"
 
 const authService = new AuthService()
 
@@ -142,7 +146,7 @@ export const authController = new Hono<{
   )
 
   // Logout
-  .get("/logout", authMiddleware, requireAuthMiddleware, describeRoute({}), async (c) => {
+  .post("/logout", authMiddleware, requireAuthMiddleware, describeRoute({}), async (c) => {
     const session = c.var.session
 
     await authDAO.invalidateSession(session.id)
@@ -414,24 +418,27 @@ export const authController = new Hono<{
       "query",
       z.object({
         token: z.string(),
+        redirect_url: z.string().optional(),
         fallback_url: z.string().optional(),
       })
     ),
     describeRoute({}),
     async (c) => {
-      const { token, fallback_url } = c.req.valid("query")
+      const { token, redirect_url, fallback_url } = c.req.valid("query")
+      const redirectUrl = redirect_url ?? fallback_url
+      const safeRedirectUrl = getOAuthRedirectUrl(redirectUrl, { allowDefaultRedirect: true })
 
       try {
         const { session } = await authService.verifyOTPOrTokenLogin({ token })
 
         setSessionTokenCookie(c, session.id, session.expires_at)
       } catch (error: any) {
-        const fallbackUrl = new URL(fallback_url || "/", publicEnv.PUBLIC_BASE_URL)
-        fallbackUrl.searchParams.set("error", error.message || "Magic link verification failed")
-        return c.redirect(fallbackUrl.toString())
+        const redirectUrl = new URL(safeRedirectUrl)
+        redirectUrl.searchParams.set("error", error.message || "Magic link verification failed")
+        return c.redirect(redirectUrl.toString())
       }
 
-      return c.redirect(fallback_url || "/")
+      return c.redirect(safeRedirectUrl)
     }
   )
 
@@ -525,20 +532,23 @@ export const authController = new Hono<{
       "query",
       z.object({
         token: z.string(),
+        redirect_url: z.string().optional(),
         fallback_url: z.string().optional(),
       })
     ),
     async (c) => {
-      const { token, fallback_url } = c.req.valid("query")
+      const { token, redirect_url, fallback_url } = c.req.valid("query")
+      const redirectUrl = redirect_url ?? fallback_url
+      const safeRedirectUrl = getOAuthRedirectUrl(redirectUrl, { allowDefaultRedirect: true })
 
       try {
         await authService.emailVerificationVerify({ token })
       } catch (error: any) {
-        const redirectUrl = new URL(fallback_url || "/", publicEnv.PUBLIC_BASE_URL)
+        const redirectUrl = new URL(safeRedirectUrl)
         redirectUrl.searchParams.set("error", error.message || "Email verification failed")
         return c.redirect(redirectUrl.toString())
       }
 
-      return c.redirect(fallback_url || "/")
+      return c.redirect(safeRedirectUrl)
     }
   )

@@ -1,8 +1,20 @@
 import { Hono } from "hono"
 import { validator as zValidator } from "hono-openapi"
 import { z } from "zod"
-import { publicEnv } from "@/env.public"
+import { privateEnv } from "@/env.private"
 import { sendEmail } from "./email-client"
+
+function isLoopbackRequest(c: any): boolean {
+  const ip =
+    (c.req as any).ip ||
+    (c.req.raw as any)?.remoteAddress ||
+    (c.req.raw as any)?.socket?.remoteAddress
+
+  if (typeof ip !== "string") return false
+
+  const normalizedIp = ip.replace(/^::ffff:/, "")
+  return normalizedIp === "127.0.0.1" || normalizedIp === "::1" || normalizedIp === "localhost"
+}
 
 export function renderTestEmail(email: string): string {
   return `
@@ -21,7 +33,7 @@ export function renderTestEmail(email: string): string {
 
 // Only for Hono
 export const testEmailRouter = new Hono()
-if (publicEnv.NODE_ENV === "development") {
+if (privateEnv.NODE_ENV === "development") {
   testEmailRouter.get(
     "/",
     zValidator(
@@ -31,6 +43,10 @@ if (publicEnv.NODE_ENV === "development") {
       })
     ),
     async (c) => {
+      if (!isLoopbackRequest(c)) {
+        return c.notFound()
+      }
+
       const validQuery = c.req.valid("query")
 
       await sendEmail({

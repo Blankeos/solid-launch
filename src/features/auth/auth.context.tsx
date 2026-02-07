@@ -82,7 +82,7 @@ export const AuthContextProvider: FlowComponent = (props) => {
   const postLoginRedirectUrl = usePostLoginRedirectUrl()
 
   const logout = createMutation<undefined, { success: boolean }>(async () => {
-    const response = await honoClient.auth.logout.$get()
+    const response = await honoClient.auth.logout.$post()
     const result = await response.json()
 
     if (result.success) {

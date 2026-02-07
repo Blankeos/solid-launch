@@ -316,13 +316,14 @@ export class OrganizationDAO {
     return invitation
   }
 
-  async acceptInvitation(id: string, userId: string) {
+  async acceptInvitation(params: { invitationId: string; userId: string; email: string }) {
     return await db.transaction().execute(async (trx) => {
       // Get invitation and validate
       const invitation = await trx
         .selectFrom("organization_invitation")
         .selectAll()
-        .where("id", "=", id)
+        .where("id", "=", params.invitationId)
+        .where("email", "=", params.email)
         .where("accepted_at", "is", null)
         .where("rejected_at", "is", null)
         .where("expires_at", ">", new Date().toISOString())
@@ -337,7 +338,7 @@ export class OrganizationDAO {
         .insertInto("organization_member")
         .values({
           organization_id: invitation.organization_id,
-          user_id: userId,
+          user_id: params.userId,
           role: invitation.role,
         })
         .returningAll()
@@ -347,7 +348,7 @@ export class OrganizationDAO {
       await trx
         .updateTable("organization_invitation")
         .set({ accepted_at: new Date().toISOString() })
-        .where("id", "=", id)
+        .where("id", "=", params.invitationId)
         .execute()
 
       return member

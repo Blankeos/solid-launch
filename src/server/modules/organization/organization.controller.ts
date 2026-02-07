@@ -174,13 +174,12 @@ export const organizationController = new Hono<{
   // Accept invitation
   .post(
     "/invite/:invitationId/accept",
-
     zValidator("param", z.object({ invitationId: z.string() })),
     describeRoute({}),
     async (c) => {
       const { invitationId } = c.req.valid("param")
       const user = c.var.user
-      await orgService.acceptInvitation(invitationId, user.id)
+      await orgService.acceptInvitation(invitationId, user.id, user.email)
       return c.json({ success: true })
     }
   )

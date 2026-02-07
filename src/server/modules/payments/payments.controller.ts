@@ -6,6 +6,27 @@ import { publicEnv } from "@/env.public"
 import { dodoClient } from "@/server/lib/payments-client"
 import { authMiddleware, requireAuthMiddleware } from "../auth/auth.middleware"
 
+function getSafeCheckoutReturnUrl(rawReferer?: string): URL {
+  const fallbackUrl = new URL(publicEnv.PUBLIC_BASE_URL)
+
+  if (!rawReferer) return fallbackUrl
+
+  try {
+    const refererUrl = new URL(rawReferer)
+    if (refererUrl.origin === fallbackUrl.origin) return refererUrl
+  } catch {
+    // Ignore invalid or untrusted referer values.
+  }
+
+  return fallbackUrl
+}
+
+function withErrorParam(url: URL, message: string): string {
+  const nextUrl = new URL(url.toString())
+  nextUrl.searchParams.set("error", message)
+  return nextUrl.toString()
+}
+
 export const paymentsController = new Hono()
   .use(describeRoute({ tags: ["Payments"] }))
   // Checkout
@@ -21,13 +42,12 @@ export const paymentsController = new Hono()
       })
     ),
     async (c) => {
-      const referer = c.req.header("referer") || publicEnv.PUBLIC_BASE_URL
+      const checkoutReturnUrl = getSafeCheckoutReturnUrl(c.req.header("referer"))
 
       const user = c.var.user
 
       try {
         const validParam = c.req.valid("param")
-        console.log("[/checkout/:variantId] variantId:", validParam.variantId)
 
         const session = await dodoClient.createCheckoutSession({
           productId: validParam.variantId,
@@ -40,7 +60,10 @@ export const paymentsController = new Hono()
 
         if (!url) {
           return c.redirect(
-            `${referer}?error=We could not create a valid checkout link. Please try again.`
+            withErrorParam(
+              checkoutReturnUrl,
+              "We could not create a valid checkout link. Please try again."
+            )
           )
         }
 
@@ -48,7 +71,10 @@ export const paymentsController = new Hono()
       } catch (error) {
         console.error("Error creating checkout:", error)
         return c.redirect(
-          `${referer}?error=Something went wrong while setting up your payment. Please try again.`
+          withErrorParam(
+            checkoutReturnUrl,
+            "Something went wrong while setting up your payment. Please try again."
+          )
         )
       }
     }
@@ -65,7 +91,10 @@ export const paymentsController = new Hono()
         "webhook-timestamp": c.req.header("webhook-timestamp") || "",
       }
 
-      const webhookSecret = privateEnv.DODO_PAYMENTS_WEBHOOK_SECRET || ""
+      const webhookSecret = privateEnv.DODO_PAYMENTS_WEBHOOK_SECRET
+      if (!webhookSecret) {
+        throw new Error("DODO_PAYMENTS_WEBHOOK_SECRET is not configured")
+      }
 
       // Using standardwebhooks library for verification
       const { Webhook } = require("standardwebhooks")
@@ -76,24 +105,24 @@ export const paymentsController = new Hono()
 
       // Parse the body after verification
       const payload = JSON.parse(body)
-      console.log("Webhook payload:", payload)
+      console.log("Webhook event type:", payload.type)
 
       // Handle different event types
       switch (payload.type) {
         case "payment.succeeded":
-          console.log("Payment succeeded:", payload.data)
+          console.log("Payment succeeded")
           // TODO: Handle successful payment (e.g., activate license, send email)
           break
         case "payment.failed":
-          console.log("Payment failed:", payload.data)
+          console.log("Payment failed")
           // TODO: Handle failed payment (e.g., notify user)
           break
         case "subscription.created":
-          console.log("Subscription created:", payload.data)
+          console.log("Subscription created")
           // TODO: Handle new subscription
           break
         case "subscription.cancelled":
-          console.log("Subscription cancelled:", payload.data)
+          console.log("Subscription cancelled")
           // TODO: Handle cancelled subscription
           break
         default:

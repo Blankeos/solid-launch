@@ -16,6 +16,23 @@ export interface RateLimitOptions {
   message?: string
 }
 
+function getRequestIP(c: any): string {
+  const ip =
+    (c.req as any).ip ||
+    (c.env as any)?.remoteAddr ||
+    (c.req.raw as any)?.remoteAddress ||
+    (c.req.raw as any)?.socket?.remoteAddress
+
+  if (typeof ip === "string" && ip.length > 0) {
+    return ip
+      .split(",")[0]
+      .trim()
+      .replace(/^::ffff:/, "")
+  }
+
+  return "unknown"
+}
+
 /**
  * NOTE: in localhost, keyGenerator doesn't exist.
  */
@@ -42,14 +59,7 @@ export function rateLimit(options: RateLimitOptions = {}) {
         const user = (c as any).get("user")
         if (user?.id) return `user:${user.id}`
 
-        const ip =
-          c.req.header("CF-Connecting-IP") ||
-          c.req.header("X-Real-IP") ||
-          c.req.header("X-Forwarded-For")?.split(",")[0]?.trim() ||
-          (c.req as any).ip ||
-          "unknown"
-
-        return ip
+        return getRequestIP(c)
       }),
   })
 }

@@ -13,7 +13,6 @@ import { ApiError } from "@/server/lib/error"
 import { verifyCodeVerifier } from "@/server/lib/pkce"
 import { AuthDAO } from "@/server/modules/auth/auth.dao"
 import { assertDTO } from "@/server/utils/assert-dto"
-import { AUTH_CONFIG } from "./auth.config"
 import type { InternalSessionDTO, InternalUserDTO, UserMetaClientInputDTO } from "./auth.dto"
 import { getOAuthRedirectUrl, jsonDecode, verifyPassword } from "./auth.utilities"
 
@@ -139,8 +138,6 @@ export class AuthService {
       identifier: user.id,
       purpose: "email_verification",
     })
-    if (process.env.NODE_ENV !== "production")
-      console.debug("📧 [emailVerificationSend] Token", token)
 
     try {
       const html = renderMagicLinkEmail({ token: token })
@@ -178,7 +175,6 @@ export class AuthService {
       identifier: user.id,
       purpose: "reset_password",
     })
-    if (process.env.NODE_ENV !== "production") console.debug("🔐 [forgotPasswordSend] Token", token)
 
     try {
       const html = renderForgotPasswordEmail({ token: token })
@@ -509,7 +505,6 @@ export class AuthService {
       identifier: params.email,
       metadata: { email: params.email },
     })
-    if (process.env.NODE_ENV !== "production") console.debug("🪙 [emailOtpSend] Token", token)
 
     try {
       const html = renderOtpEmail({ email: params.email, otp: token })
@@ -527,13 +522,6 @@ export class AuthService {
       identifier: params.email,
       metadata: { email: params.email },
     })
-    if (process.env.NODE_ENV !== "production") {
-      console.debug(
-        "🪙 [magiclinkOtpSend] Token",
-        token,
-        AUTH_CONFIG.redirectUrls.magicLinkVerify(token)
-      )
-    }
 
     try {
       const html = renderMagicLinkEmail({ token: token })

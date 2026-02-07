@@ -7,12 +7,27 @@ import { getRoute } from "@/route-tree.gen"
  */
 export function usePostLoginRedirectUrl() {
   const pageContext = usePageContext()
+  const defaultRedirectUrl = getRoute("/dashboard")
 
   // ===========================================================================
   // Make sure to edit me ✍️
   // ===========================================================================
-  const postLoginRedirectUrl = () =>
-    decodeURIComponent(pageContext.urlParsed.search.to ?? getRoute("/dashboard"))
+  const postLoginRedirectUrl = () => {
+    const rawTo = pageContext.urlParsed.search.to
+    if (!rawTo) return defaultRedirectUrl
+
+    try {
+      const decodedTo = decodeURIComponent(rawTo)
+
+      if (!decodedTo.startsWith("/") || decodedTo.startsWith("//")) {
+        return defaultRedirectUrl
+      }
+
+      return decodedTo
+    } catch {
+      return defaultRedirectUrl
+    }
+  }
 
   return postLoginRedirectUrl
 }
