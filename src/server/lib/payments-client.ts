@@ -69,13 +69,6 @@ class DodoClient {
         payload.billing_address = params.billing_address
       }
 
-      console.log(
-        "[create checkout] productId",
-        params.productId,
-        "|",
-        privateEnv.DODO_PAYMENTS_API_KEY
-      )
-
       const session = await this.dodo.checkoutSessions.create({
         ...payload,
       })

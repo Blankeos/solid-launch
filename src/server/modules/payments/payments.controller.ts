@@ -65,7 +65,7 @@ export const paymentsController = new Hono()
         "webhook-timestamp": c.req.header("webhook-timestamp") || "",
       }
 
-      const webhookSecret = privateEnv.DODO_PAYMENTS_WEBOOK_SECRET || ""
+      const webhookSecret = privateEnv.DODO_PAYMENTS_WEBHOOK_SECRET || ""
 
       // Using standardwebhooks library for verification
       const { Webhook } = require("standardwebhooks")

@@ -139,7 +139,8 @@ export class AuthService {
       identifier: user.id,
       purpose: "email_verification",
     })
-    console.debug("📧 [emailVerificationSend] Token", token)
+    if (process.env.NODE_ENV !== "production")
+      console.debug("📧 [emailVerificationSend] Token", token)
 
     try {
       const html = renderMagicLinkEmail({ token: token })
@@ -177,7 +178,7 @@ export class AuthService {
       identifier: user.id,
       purpose: "reset_password",
     })
-    console.debug("🔐 [forgotPasswordSend] Token", token)
+    if (process.env.NODE_ENV !== "production") console.debug("🔐 [forgotPasswordSend] Token", token)
 
     try {
       const html = renderForgotPasswordEmail({ token: token })
@@ -508,7 +509,7 @@ export class AuthService {
       identifier: params.email,
       metadata: { email: params.email },
     })
-    console.debug("🪙 [emailOtpSend] Token", token)
+    if (process.env.NODE_ENV !== "production") console.debug("🪙 [emailOtpSend] Token", token)
 
     try {
       const html = renderOtpEmail({ email: params.email, otp: token })
@@ -526,11 +527,13 @@ export class AuthService {
       identifier: params.email,
       metadata: { email: params.email },
     })
-    console.debug(
-      "🪙 [magiclinkOtpSend] Token",
-      token,
-      AUTH_CONFIG.redirectUrls.magicLinkVerify(token)
-    )
+    if (process.env.NODE_ENV !== "production") {
+      console.debug(
+        "🪙 [magiclinkOtpSend] Token",
+        token,
+        AUTH_CONFIG.redirectUrls.magicLinkVerify(token)
+      )
+    }
 
     try {
       const html = renderMagicLinkEmail({ token: token })
