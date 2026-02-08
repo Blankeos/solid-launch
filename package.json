@@ -87,9 +87,6 @@
     "vite-plugin-solid-svg": "^0.8.1",
     "vite-tsconfig-paths": "^6.0.5"
   },
-  "trustedDependencies": [
-    "iconmate"
-  ],
   "patchedDependencies": {
     "zeptomail@7.0.0": "patches/zeptomail@7.0.0.patch"
   }

@@ -21,11 +21,11 @@ We use a bunch under `src/components/ui` for Shadcn (the standard location), if 
 
 4. Adding Icons
 
-Powered by iconmate (i also wrote). NOTE: Edit this based on the setup.
+Powered by iconmate, a useful CLI for adding icons. Do `iconmate --help` for more info. For agentic use:
 
-Adding icons via command: `iconmate add --folder=src/assets/icons --preset=svg --icon=<an iconify name i.e. mdi:heart>`
-
-Or if you want the TUI, just use `iconmate` (but AI won't utilize this)
+- `bun iconmate add` - to add icons to the project into src/assets/icons
+- `bun iconmate iconify` - for commands to search for icons from iconify (essentially iconify API as a CLI).
+- For humans, if you want the TUI, use `iconmate`
 
 5. Creating backend modules.
 
