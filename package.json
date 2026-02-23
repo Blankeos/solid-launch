@@ -82,9 +82,12 @@
     "rollup-plugin-dts": "^6.3.0",
     "tailwindcss": "^4.2.0",
     "typescript": "^5.9.3",
-    "vite": "npm:rolldown-vite@latest",
+    "vite": "8.0.0-beta.0",
     "vite-plugin-solid": "^2.11.10",
     "vite-plugin-solid-svg": "^0.8.1",
     "vite-tsconfig-paths": "^6.1.1"
+  },
+  "overrides": {
+    "vite": "8.0.0-beta.0"
   }
 }
