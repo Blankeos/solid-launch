@@ -6,6 +6,6 @@ import config from "vike-solid/config"
 export default {
   extends: [config, vikePhoton],
   photon: {
-    server: "src/server/server.ts",
+    server: "../server/server.ts",
   },
 } satisfies Config
