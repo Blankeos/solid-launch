@@ -502,7 +502,7 @@ export default function ComponentsPage() {
               Content of tooltip
               <img
                 alt="content of tooltip"
-                src="https://cdn.myanimelist.net/r/200x268/images/characters/16/586614.jpg?s=449698e15fb4c6cdb353d71a267c7d04"
+                src="https://static.wikia.nocookie.net/bluelock/images/3/39/Yoichi_Isagi.png/revision/latest?cb=20251221132614"
                 class="h-10 w-10 rounded-full bg-white object-cover object-center"
               />
             </div>
