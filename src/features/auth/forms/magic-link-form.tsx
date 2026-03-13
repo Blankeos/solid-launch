@@ -26,12 +26,18 @@ export function MagicLinkForm() {
   }
 
   return (
-    <div class="flex w-full max-w-xs flex-col gap-y-3">
+    <form
+      class="flex w-full max-w-xs flex-col gap-y-3"
+      onSubmit={(e) => {
+        e.preventDefault()
+        handleMagicLinkSend()
+      }}
+    >
       <TextFieldComp label="Email" value={email()} onChange={setEmail} />
       <Show
         when={hasSent()}
         fallback={
-          <Button onClick={handleMagicLinkSend} loading={magicLinkSend.loading()}>
+          <Button type="submit" loading={magicLinkSend.loading()}>
             Send Magic Link
           </Button>
         }
@@ -40,6 +46,6 @@ export function MagicLinkForm() {
           Please check your email. The magic link is valid for 2 minutes.
         </p>
       </Show>
-    </div>
+    </form>
   )
 }

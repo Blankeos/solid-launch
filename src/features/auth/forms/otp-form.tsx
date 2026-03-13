@@ -45,21 +45,31 @@ export function OTPForm() {
   }
 
   return (
-    <div class="flex w-full max-w-xs flex-col gap-y-3">
+    <form
+      class="flex w-full max-w-xs flex-col gap-y-3"
+      onSubmit={(e) => {
+        e.preventDefault()
+        if (hasSent()) {
+          handleOTPVerify()
+        } else {
+          handleOTPSend()
+        }
+      }}
+    >
       <TextFieldComp label="Email" value={email()} onChange={setEmail} />
       <Show
         when={hasSent()}
         fallback={
-          <Button onClick={handleOTPSend} loading={otpSend.loading()}>
+          <Button type="submit" loading={otpSend.loading()}>
             Send OTP
           </Button>
         }
       >
         <TextFieldComp label="OTP Code" value={code()} onChange={setCode} placeholder="123456" />
-        <Button onClick={handleOTPVerify} loading={otpVerify.loading()}>
+        <Button type="submit" loading={otpVerify.loading()}>
           Verify OTP
         </Button>
       </Show>
-    </div>
+    </form>
   )
 }
