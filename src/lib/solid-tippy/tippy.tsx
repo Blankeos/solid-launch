@@ -215,7 +215,7 @@ export function Tippy(props: CustomTippyOptions & { children: JSX.Element }) {
   // Create a signal to hold the DOM element for the tooltip content.
   const [contentContainer, setContentContainer] = createSignal<HTMLDivElement>()
 
-  useTippy(trigger, {
+  const getInstance = useTippy(trigger, {
     // Pass reactive getters for Tippy options to `useTippy`.
     // This ensures that changes to these props update the tippy instance.
     get disabled() {
@@ -241,15 +241,22 @@ export function Tippy(props: CustomTippyOptions & { children: JSX.Element }) {
     },
   })
 
+  // SolidJS updates content inside the container element in-place (fine-grained
+  // reactivity), so local.content reference never changes. Use a MutationObserver
+  // to detect DOM mutations and force Popper to recompute size/arrow position.
+  createEffect(() => {
+    const container = contentContainer()
+    if (!container) return
+    const observer = new MutationObserver(() => {
+      getInstance()?.popperInstance?.update()
+    })
+    observer.observe(container, { childList: true, subtree: true, characterData: true })
+    onCleanup(() => observer.disconnect())
+  })
+
   return (
     <>
       {resolvedChildren()}
-      {/*
-        This container holds the tooltip content. It's hidden from view and its
-        only purpose is to provide a DOM element for Tippy.js to manage. This
-        pattern ensures that Solid's reactivity is preserved for the content,
-        and it's compatible with server-side rendering and hydration.
-      */}
       <div style={{ display: "none" }}>
         <div ref={setContentContainer}>{local.content}</div>
       </div>
