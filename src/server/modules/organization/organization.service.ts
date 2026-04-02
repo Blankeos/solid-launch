@@ -1,3 +1,4 @@
+import { publicEnv } from "@/env.public"
 import { sendEmail } from "@/server/lib/emails"
 import { renderOrgInvitationEmail } from "@/server/lib/emails/org-invitation.email"
 import { ApiError } from "@/server/lib/error"
@@ -181,13 +182,21 @@ export class OrganizationService {
       expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days
     })
 
-    // Fetch the organization details
+    // Fetch the organization and inviter details for the email
     const organization = await this.orgDAO.getOrganizationById(orgId)
     if (!organization) {
       throw ApiError.NotFound("Organization not found")
     }
 
-    const html = renderOrgInvitationEmail({ inviteLink: "", inviterName: "", orgName: "" })
+    const inviter = await this.authDAO.getUserByUserId(invitedByUserId)
+    const inviterName = inviter?.email ?? "A team member"
+    const inviteLink = `${publicEnv.PUBLIC_BASE_URL.replace(/\/$/, "")}/accept-invitation/${invitation.id}`
+
+    const html = renderOrgInvitationEmail({
+      inviteLink,
+      inviterName,
+      orgName: organization.name,
+    })
     await sendEmail({
       html,
       subject: `You're invited to join ${organization.name}`,
