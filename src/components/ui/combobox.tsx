@@ -185,15 +185,15 @@ const ComboboxContent = <T extends ValidComponent = "div">(
 
 export {
   Combobox,
-  ComboboxItem,
-  ComboboxItemLabel,
-  ComboboxItemIndicator,
-  ComboboxSectionType as ComboboxSection,
-  ComboboxControl,
-  ComboboxTrigger,
-  ComboboxInput,
-  ComboboxHiddenSelect,
   ComboboxContent,
+  ComboboxControl,
+  ComboboxHiddenSelect,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxItemIndicator,
+  ComboboxItemLabel,
+  ComboboxSectionType as ComboboxSection,
+  ComboboxTrigger,
 }
 
 // ---

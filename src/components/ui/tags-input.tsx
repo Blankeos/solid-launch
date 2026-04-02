@@ -145,7 +145,6 @@ const TagsInputClearTrigger = <T extends ValidComponent = "button">(
 }
 
 export {
-  TagsInputRoot as TagsInput,
   TagsInputClearTrigger,
   TagsInputControl,
   TagsInputInput,
@@ -153,6 +152,7 @@ export {
   TagsInputItemPreview,
   TagsInputItemText,
   TagsInputLabel,
+  TagsInputRoot as TagsInput,
 }
 
 // ---
