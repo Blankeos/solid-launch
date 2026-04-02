@@ -277,26 +277,6 @@ export const AuthContextProvider: FlowComponent = (props) => {
 
       if (result.user) {
         setUser(result.user)
-        setLoading(false)
-      } else {
-        setUser(null)
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        toast.error(`Could not fetch the user: ${error.message}`)
-      }
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const refresh = createMutation<undefined, UserResponseDTO | null>(async () => {
-    try {
-      const response = await honoClient.auth.$get()
-      const result = await response.json()
-
-      if (result.user) {
-        setUser(result.user)
         return result.user
       } else {
         setUser(null)
@@ -304,11 +284,15 @@ export const AuthContextProvider: FlowComponent = (props) => {
       }
     } catch (error) {
       if (error instanceof Error) {
-        toast.error(`Could not refresh the user: ${error.message}`)
+        toast.error(`Could not fetch the user: ${error.message}`)
       }
       throw error
+    } finally {
+      setLoading(false)
     }
-  })
+  }
+
+  const refresh = createMutation<undefined, UserResponseDTO | null>(_fetchCurrentUser)
 
   // Gets the current user at the start of the app.
   onMount(async () => {
