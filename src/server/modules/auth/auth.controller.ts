@@ -1,5 +1,5 @@
 import { Hono } from "hono"
-import { getCookie } from "hono/cookie"
+import { getCookie, setCookie } from "hono/cookie"
 import { describeRoute, validator as zValidator } from "hono-openapi"
 import { z } from "zod"
 import { authMiddleware, requireAuthMiddleware } from "./auth.middleware"
@@ -223,21 +223,14 @@ export const authController = new Hono<{
     async (c) => {
       const { redirect_url, client_code_challenge } = c.req.valid("query")
 
-      const {
-        stateCookie,
-        codeVerifierCookie,
-        redirectUrlCookie,
-        pkceChallengeCookie,
-        authorizationUrl,
-      } = await authService.googleLogin({
+      const { cookies, authorizationUrl } = await authService.googleLogin({
         redirectUrl: redirect_url,
         clientCodeChallenge: client_code_challenge,
       })
 
-      c.header("Set-Cookie", stateCookie, { append: true })
-      c.header("Set-Cookie", codeVerifierCookie, { append: true })
-      c.header("Set-Cookie", redirectUrlCookie, { append: true })
-      if (pkceChallengeCookie) c.header("Set-Cookie", pkceChallengeCookie, { append: true })
+      for (const cookie of cookies) {
+        setCookie(c, cookie.name, cookie.value, cookie.options)
+      }
 
       return c.redirect(authorizationUrl)
     }
@@ -284,15 +277,14 @@ export const authController = new Hono<{
     async (c) => {
       const { redirect_url, client_code_challenge } = c.req.valid("query")
 
-      const { stateCookie, redirectUrlCookie, authorizationUrl, pkceChallengeCookie } =
-        await authService.githubLogin({
-          redirectUrl: redirect_url,
-          clientCodeChallenge: client_code_challenge,
-        })
+      const { cookies, authorizationUrl } = await authService.githubLogin({
+        redirectUrl: redirect_url,
+        clientCodeChallenge: client_code_challenge,
+      })
 
-      c.header("Set-Cookie", stateCookie, { append: true })
-      c.header("Set-Cookie", redirectUrlCookie, { append: true })
-      if (pkceChallengeCookie) c.header("Set-Cookie", pkceChallengeCookie, { append: true })
+      for (const cookie of cookies) {
+        setCookie(c, cookie.name, cookie.value, cookie.options)
+      }
 
       return c.redirect(authorizationUrl)
     }

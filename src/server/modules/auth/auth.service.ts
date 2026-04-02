@@ -1,4 +1,5 @@
 import { generateCodeVerifier, generateState, OAuth2RequestError } from "arctic"
+import type { CookieOptions } from "hono/utils/cookie"
 import z from "zod"
 import { privateEnv } from "@/env.private"
 import { publicEnv } from "@/env.public"
@@ -17,6 +18,25 @@ import type { InternalSessionDTO, InternalUserDTO, UserMetaClientInputDTO } from
 import { getOAuthRedirectUrl, jsonDecode, verifyPassword } from "./auth.utilities"
 
 type UserSessionResponse = Promise<{ user: InternalUserDTO; session: InternalSessionDTO }>
+
+/** 10 minutes -- OAuth state cookies are single-use and short-lived */
+const OAUTH_COOKIE_MAX_AGE = 10 * 60
+
+type OAuthCookie = { name: string; value: string; options: CookieOptions }
+
+function oauthCookie(name: string, value: string): OAuthCookie {
+  return {
+    name,
+    value,
+    options: {
+      httpOnly: true,
+      sameSite: "Lax",
+      maxAge: OAUTH_COOKIE_MAX_AGE,
+      path: "/",
+      secure: privateEnv.NODE_ENV === "production",
+    },
+  }
+}
 
 /**
  * Note: OAuth Callbacks should not throw errors
@@ -56,14 +76,6 @@ export class AuthService {
   async emailLogin(params: { email: string; password: string }): UserSessionResponse {
     const { email, password } = params
 
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      throw ApiError.BadRequest("Invalid email")
-    }
-
-    if (!password || password.length < 6 || password.length > 255) {
-      throw ApiError.BadRequest("Invalid password")
-    }
-
     const existingUser = await this.authDAO.getUserByEmail(email)
 
     if (!existingUser) {
@@ -90,14 +102,6 @@ export class AuthService {
 
   async emailRegister(params: { email: string; password: string }): UserSessionResponse {
     const { email, password } = params
-
-    if (!password || password.length < 6 || password.length > 255) {
-      throw ApiError.BadRequest("Invalid password")
-    }
-
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      throw ApiError.BadRequest("Invalid email")
-    }
 
     const existingEmail = await this.authDAO.getUserByEmail(email)
 
@@ -214,16 +218,17 @@ export class AuthService {
 
     const normalizedRedirectUrl = getOAuthRedirectUrl(params?.redirectUrl)
 
-    const stateCookie = `github_oauth_state=${state}; HttpOnly; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}; Path=/; ${privateEnv.NODE_ENV === "production" ? "Secure;" : ""}`
-    const redirectUrlCookie = `github_oauth_redirect_url=${normalizedRedirectUrl}; HttpOnly; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}; Path=/; ${privateEnv.NODE_ENV === "production" ? "Secure;" : ""}`
-    const pkceChallengeCookie = params.clientCodeChallenge
-      ? `github_oauth_client_code_challenge=${params.clientCodeChallenge}; HttpOnly; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}; Path=/; ${privateEnv.NODE_ENV === "production" ? "Secure;" : ""}`
-      : undefined
+    const cookies: OAuthCookie[] = [
+      oauthCookie("github_oauth_state", state),
+      oauthCookie("github_oauth_redirect_url", normalizedRedirectUrl),
+    ]
+
+    if (params.clientCodeChallenge) {
+      cookies.push(oauthCookie("github_oauth_client_code_challenge", params.clientCodeChallenge))
+    }
 
     return {
-      stateCookie,
-      redirectUrlCookie,
-      pkceChallengeCookie,
+      cookies,
       authorizationUrl: authUrl.toString(),
     }
   }
@@ -345,20 +350,20 @@ export class AuthService {
 
     const normalizedRedirectUrl = getOAuthRedirectUrl(params?.redirectUrl)
 
-    const stateCookie = `google_oauth_state=${state}; HttpOnly; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}; Path=/; ${privateEnv.NODE_ENV === "production" ? "Secure;" : ""}`
-    const codeVerifierCookie = `google_oauth_codeverifier=${codeVerifier}; HttpOnly; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}; Path=/; ${privateEnv.NODE_ENV === "production" ? "Secure;" : ""}`
-    const redirectUrlCookie = `google_oauth_redirect_url=${normalizedRedirectUrl}; HttpOnly; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}; Path=/; ${privateEnv.NODE_ENV === "production" ? "Secure;" : ""}`
-    const pkceChallengeCookie = params.clientCodeChallenge
-      ? `google_oauth_client_code_challenge=${params.clientCodeChallenge}; HttpOnly; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}; Path=/; ${privateEnv.NODE_ENV === "production" ? "Secure;" : ""}`
-      : undefined
+    const cookies: OAuthCookie[] = [
+      oauthCookie("google_oauth_state", state),
+      oauthCookie("google_oauth_codeverifier", codeVerifier),
+      oauthCookie("google_oauth_redirect_url", normalizedRedirectUrl),
+    ]
+
+    if (params.clientCodeChallenge) {
+      cookies.push(oauthCookie("google_oauth_client_code_challenge", params.clientCodeChallenge))
+    }
 
     authUrl.searchParams.append("prompt", "select_account")
 
     return {
-      stateCookie,
-      codeVerifierCookie,
-      redirectUrlCookie,
-      pkceChallengeCookie,
+      cookies,
       authorizationUrl: authUrl.toString(),
     }
   }
@@ -593,7 +598,7 @@ export class AuthService {
       throw ApiError.BadRequest("Token or code for login is either invalid or expired")
     }
 
-    const resolvedMetadata = jsonDecode(metadata as any) as { email: string } // LAZY but maybe zod this
+    const resolvedMetadata = assertDTO(jsonDecode(metadata as any), z.object({ email: z.string() }))
 
     const user = await this.authDAO.getOrCreateUserFromEmail(resolvedMetadata.email)
     if (!user) {
