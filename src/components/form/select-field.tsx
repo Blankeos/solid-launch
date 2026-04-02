@@ -1,35 +1,27 @@
-import { createField, type DeepKeys, type FieldApi } from "@tanstack/solid-form"
 import { Label } from "@/components/ui/label"
 import { SelectComp, type SelectOption } from "@/components/ui/select"
+import { useFieldContext } from "./form"
 
-interface SelectFieldProps<TParentData, TName extends DeepKeys<TParentData>> {
-  form: FieldApi<TParentData, TName>
+export function SelectField(props: {
   label?: string
   placeholder?: string
   options: SelectOption[]
   required?: boolean
-}
-
-export function SelectField<TParentData, TName extends DeepKeys<TParentData>>(
-  props: SelectFieldProps<TParentData, TName>
-) {
-  const field = createField(() => ({
-    ...props.form,
-    name: props.form.name,
-  }))
+}) {
+  const field = useFieldContext<SelectOption | null>()
 
   return (
     <div class="flex flex-col gap-2">
       {props.label && (
-        <Label for={props.form.name as string}>
+        <Label for={field().name as string}>
           {props.label}
           {props.required && <span class="text-red-500"> *</span>}
         </Label>
       )}
       <SelectComp
-        name={props.form.name as string}
-        value={field().state.value as string}
-        onChange={(value) => field().setValue(value)}
+        name={field().name as string}
+        value={field().state.value}
+        onChange={(value) => field().handleChange(value)}
         onBlur={field().handleBlur}
         required={props.required}
         options={props.options}
@@ -38,8 +30,12 @@ export function SelectField<TParentData, TName extends DeepKeys<TParentData>>(
           class: "w-full",
         }}
       />
-      {field().state.meta.errors.length > 0 && (
-        <p class="text-red-500 text-sm">{field().state.meta.errors.join(", ")}</p>
+      {field().state.meta.errors && field().state.meta.errors.length > 0 && (
+        <p class="text-red-500 text-sm">
+          {field()
+            .state.meta.errors.map((error: any) => error.message || error)
+            .join(", ")}
+        </p>
       )}
     </div>
   )

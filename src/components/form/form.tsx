@@ -1,4 +1,7 @@
 import { createFormHook, createFormHookContexts } from "@tanstack/solid-form"
+import { CheckboxField } from "./checkbox-field"
+import { RadioGroupField } from "./radio-group-field"
+import { SelectField } from "./select-field"
 import { TextField } from "./text-field"
 
 // ===========================================================================
@@ -13,9 +16,9 @@ export const { fieldContext, useFieldContext, formContext, useFormContext } =
 export const { useAppForm, withForm } = createFormHook({
   fieldComponents: {
     TextField,
-    // CheckboxField,
-    // RadioGroupField,
-    // SelectField,
+    CheckboxField,
+    RadioGroupField,
+    SelectField,
   },
   formComponents: {},
   fieldContext,

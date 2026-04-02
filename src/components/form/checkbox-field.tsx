@@ -1,25 +1,14 @@
-import { createField, type DeepKeys, type FieldApi } from "@tanstack/solid-form"
 import { CheckboxComp } from "@/components/ui/checkbox"
+import { useFieldContext } from "./form"
 
-interface CheckboxFieldProps<TParentData, TName extends DeepKeys<TParentData>> {
-  form: FieldApi<TParentData, TName>
-  label?: string
-  required?: boolean
-}
-
-export function CheckboxField<TParentData, TName extends DeepKeys<TParentData>>(
-  props: CheckboxFieldProps<TParentData, TName>
-) {
-  const field = createField(() => ({
-    ...props.form,
-    name: props.form.name,
-  }))
+export function CheckboxField(props: { label?: string; required?: boolean }) {
+  const field = useFieldContext<boolean>()
 
   return (
     <CheckboxComp
-      id={props.form.name as string}
-      checked={field().state.value as boolean}
-      onChange={(checked) => field().setValue(checked)}
+      id={field().name as string}
+      checked={field().state.value}
+      onChange={(checked) => field().handleChange(checked)}
       onBlur={field().handleBlur}
       required={props.required}
       label={props.label}
