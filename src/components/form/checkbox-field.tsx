@@ -1,5 +1,5 @@
 import { CheckboxComp } from "@/components/ui/checkbox"
-import { useFieldContext } from "./form"
+import { useFieldContext } from "./context"
 
 export function CheckboxField(props: { label?: string; required?: boolean }) {
   const field = useFieldContext<boolean>()

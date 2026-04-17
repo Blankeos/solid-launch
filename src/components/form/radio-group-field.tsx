@@ -1,6 +1,6 @@
 import { Label } from "@/components/ui/label"
 import { RadioGroupComp, type RadioGroupOption } from "@/components/ui/radio-group"
-import { useFieldContext } from "./form"
+import { useFieldContext } from "./context"
 
 export function RadioGroupField(props: {
   label?: string
