@@ -74,7 +74,7 @@ I'll assume you don't want to change anything with this setup after cloning so l
 1. Get template
 
 ```sh
-npx degit https://github.com/blankeos/solid-launch <your-app-name>
+npx gitpick blankeos/solid-launch <your-app-name>
 cd <your-app-name>
 ```
 
@@ -236,6 +236,10 @@ apps I make aren't too business-logic-heavy.
 - **`<module>.controller.ts`** - pretty much a group of http endpoints. I can put the DTOs/Validations for each endpoint here without context-switching.
 - **`services`** - these are even smaller pieces of logic that can be used inside each endpoint. It's not necessary to use if the app isn't too big, but it helps.
 - **`_app.ts`** - The root trpc router where the `AppRouter` type is exported.
+
+### Updating
+
+You're eventually going to make projects with this boilerplate, the code will for sure drift especially framework code (because most of it is not library code). Luckily, I made it easy to make patch your boilerplate up (w/ AI).
 
 ### Deployment
 
