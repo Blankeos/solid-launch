@@ -1,6 +1,6 @@
 import { Hono } from "hono"
 import { getCookie, setCookie } from "hono/cookie"
-import { describeRoute, validator as zValidator } from "hono-openapi"
+import { describeRoute } from "hono-openapi"
 import { z } from "zod"
 import { authMiddleware, requireAuthMiddleware } from "./auth.middleware"
 import { AuthService } from "./auth.service"
@@ -21,6 +21,7 @@ import {
   rateLimit,
 } from "@/server/lib/rate-limit"
 import { s3Client } from "@/server/lib/s3"
+import { zValidator } from "@/server/lib/validate"
 import { AuthDAO } from "@/server/modules/auth/auth.dao"
 import { AUTH_CONFIG } from "./auth.config"
 import { getUserResponseDTO, userMetaClientInputDTO } from "./auth.dto"

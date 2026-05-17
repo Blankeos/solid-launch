@@ -1,6 +1,7 @@
 import { Hono } from "hono"
-import { describeRoute, validator as zValidator } from "hono-openapi"
+import { describeRoute } from "hono-openapi"
 import { z } from "zod"
+import { zValidator } from "@/server/lib/validate"
 import { authMiddleware, requireAuthMiddleware } from "../auth/auth.middleware"
 import type { CreateOrganizationDTO } from "./organization.dto"
 import { organizationMiddleware } from "./organization.middleware"

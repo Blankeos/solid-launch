@@ -115,7 +115,11 @@ export const AUTH_CONFIG = createAuthConfig({
     organizationInvitation: () => "",
   },
   oauthRedirectUrls: {
-    allowed: ["/**"],
+    allowed: [
+      "/**",
+      // Make sure to add this for deeplinks.
+      "flutterlaunch:///oauth_callback",
+    ],
     default: "/",
   },
 })

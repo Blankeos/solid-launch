@@ -1,9 +1,10 @@
 import { Hono } from "hono"
-import { describeRoute, validator as zValidator } from "hono-openapi"
+import { describeRoute } from "hono-openapi"
 import { z } from "zod"
 import { privateEnv } from "@/env.private"
 import { publicEnv } from "@/env.public"
 import { dodoClient } from "@/server/lib/payments-client"
+import { zValidator } from "@/server/lib/validate"
 import { authMiddleware, requireAuthMiddleware } from "../auth/auth.middleware"
 
 function getSafeCheckoutReturnUrl(rawReferer?: string): URL {
