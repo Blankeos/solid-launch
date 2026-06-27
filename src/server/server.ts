@@ -1,6 +1,7 @@
-import { apply, serve } from "@photonjs/hono"
 import { enhance } from "@universal-middleware/core"
+import vike from "@vikejs/hono"
 import { Hono } from "hono"
+import type { Server } from "vike/types"
 import { privateEnv } from "@/env.private"
 import { appRouter } from "./_app"
 import type { ApiErrorResponse } from "./lib/error"
@@ -70,7 +71,7 @@ if (privateEnv.NODE_ENV === "development") {
 }
 
 // Vike
-apply(app, [
+vike(app, [
   enhance(
     async (_request, context, runtime) => {
       if (runtime.adapter !== "hono") throw new Error('Expected runtime.adapter to be "hono"')
@@ -118,4 +119,9 @@ app.onError((error, c) => {
   return c.json(errorResponse, status)
 })
 
-export default serve(app, { port: privateEnv.PORT })
+export default {
+  fetch: app.fetch,
+  prod: {
+    port: privateEnv.PORT,
+  },
+} satisfies Server

@@ -4,10 +4,10 @@ import vike from "vike/plugin"
 import vikeSolid from "vike-solid/vite"
 import { defineConfig } from "vite"
 import solidSvg from "vite-plugin-solid-svg" // Custom Icons (SVG)
-import tsConfigPaths from "vite-tsconfig-paths"
 
 export default defineConfig({
-  plugins: [tsConfigPaths(), vike(), vikeSolid(), vikeRoutegen(), solidSvg(), tailwindcss()],
+  plugins: [vike(), vikeSolid(), vikeRoutegen(), solidSvg(), tailwindcss()],
+  resolve: { tsconfigPaths: true },
   server: {
     port: 3000,
     allowedHosts: [
